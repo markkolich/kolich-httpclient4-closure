@@ -1,10 +1,19 @@
 # kolich-http-client
 
-A convenient Java based wrapper around the Apache Commons HttpClient 4.x library.
+A convenient Java wrapper around the Apache Commons HttpClient 4.x library.
 
-As is, using HttpClient is often cumbersome and bulky for your typical everyday `GET`, `POST`, `PUT` and `DELETE` operations.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any) and close/free the connection back into the connection pool.  In *most* cases, you want to avoid the boiler plate overhead and just freakin' send HTTP requests without worrying about the internal wiring of HttpClient
+As is, using HttpClient is often cumbersome and bulky for typical `GET`, `POST`, `PUT` and `DELETE` operations.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any) and close/free the connection back into the connection pool.
 
-The intent of this library is to let you do that.
+In most scenarios, the typical HttpClient usage pattern almost always involves ...
+
+1. Creating a new `HttpGet`, `HttpPost`, `HttpPut`, or `HttpDelete` instance specific to the operation.
+2. Setting an request body ("entity") to be sent with the request, if any.
+3. Actually sending the request.
+4. Checking the HTTP response status code.  If successful, do something.  If not successful, do something else.
+5. Reading a response entity, if any.  If one exists, convert it to a `String` so you can do something with it.
+6. Freeing the response and releasing the connection back into the underlying thread-safe connection pool.
+
+In *most* cases, you want to avoid all of this boiler plate and just freakin' send HTTP requests without worrying about the internal wiring of HttpClient.  The intent of this library is to let you do that.
 
 ## Latest Version
 
