@@ -1,8 +1,10 @@
 # kolich-http-client
 
-This project provides a convenient Java based wrapper around the Apache Commons HttpClient 4.x library.
+A convenient Java based wrapper around the Apache Commons HttpClient 4.x library.
 
-As is, using the HttpClient 4 library is often cumbersome and bulky for your typical everyday `GET`, `POST`, `PUT` and `DELETE` operations.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any) and close/free the connection back into the connection pool.  In *most* cases, you want to avoid the boiler plate overhead and just freakin' send HTTP requests without worrying about the internal wiring of HttpClient.  The intent of this library is to let you do that.
+As is, using HttpClient is often cumbersome and bulky for your typical everyday `GET`, `POST`, `PUT` and `DELETE` operations.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any) and close/free the connection back into the connection pool.  In *most* cases, you want to avoid the boiler plate overhead and just freakin' send HTTP requests without worrying about the internal wiring of HttpClient
+
+The intent of this library is to let you do that.
 
 ## Latest Version
 
