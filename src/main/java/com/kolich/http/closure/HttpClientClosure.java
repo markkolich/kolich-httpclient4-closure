@@ -30,14 +30,12 @@ import static com.kolich.http.HttpConnectorResponse.consumeQuietly;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -45,6 +43,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 
 import com.kolich.http.exceptions.HttpConnectorException;
 
@@ -56,7 +56,7 @@ public abstract class HttpClientClosure<F,S> {
 		client_ = client;
 	}
 	
-	public HttpResponseEither<F,S> get(final String url) {
+	public final HttpResponseEither<F,S> get(final String url) {
 		try {
 			return get(new URL(url));
 		} catch (MalformedURLException e) {
@@ -64,7 +64,7 @@ public abstract class HttpClientClosure<F,S> {
 		}
 	}
 	
-	public HttpResponseEither<F,S> get(final URL url) {
+	public final HttpResponseEither<F,S> get(final URL url) {
 		try {
 			return get(new HttpGet(url.toURI()));
 		} catch (URISyntaxException e) {
@@ -72,11 +72,17 @@ public abstract class HttpClientClosure<F,S> {
 		}
 	}
 	
-	public HttpResponseEither<F,S> get(final HttpGet get) {
-		return request(get);
+	public final HttpResponseEither<F,S> get(final HttpGet get) {
+		return get(get, null);
 	}
 	
-	public HttpResponseEither<F,S> post(final String url) {
+	public final HttpResponseEither<F,S> get(final HttpGet get,
+		final HttpContext context) {
+		return request(get, (context == null) ?
+			new BasicHttpContext() : context);
+	}
+	
+	public final HttpResponseEither<F,S> post(final String url) {
 		try {
 			return post(new URL(url));
 		} catch (MalformedURLException e) {
@@ -84,7 +90,7 @@ public abstract class HttpClientClosure<F,S> {
 		}
 	}
 	
-	public HttpResponseEither<F,S> post(final URL url) {
+	public final HttpResponseEither<F,S> post(final URL url) {
 		try {
 			return post(new HttpPost(url.toURI()), null, null);
 		} catch (URISyntaxException e) {
@@ -92,16 +98,22 @@ public abstract class HttpClientClosure<F,S> {
 		}
 	}
 	
-	public HttpResponseEither<F,S> post(final HttpPost post, final byte[] body,
-		final String contentType) {
+	public final HttpResponseEither<F,S> post(final HttpPost post,
+		final byte[] body, final String contentType) {
 		return post(post,
 			(body != null) ? new ByteArrayInputStream(body) : null,
 			(body != null) ? (long)body.length : -1L,
 			contentType);
 	}
 	
-	public HttpResponseEither<F,S> post(final HttpPost post,
+	public final HttpResponseEither<F,S> post(final HttpPost post,
 		final InputStream is, final long length, final String contentType) {
+		return post(post, is, length, contentType, null);
+	}
+	
+	public final HttpResponseEither<F,S> post(final HttpPost post,
+		final InputStream is, final long length, final String contentType,
+		final HttpContext context) {
 		if(is != null) {
 			final InputStreamEntity entity = new InputStreamEntity(is, length);			
 			if(contentType != null) {
@@ -109,10 +121,11 @@ public abstract class HttpClientClosure<F,S> {
 			}
 			post.setEntity(entity);
 		}
-		return request(post);
+		return request(post, (context == null) ?
+			new BasicHttpContext() : context);
 	}
 	
-	public HttpResponseEither<F,S> put(final String url) {
+	public final HttpResponseEither<F,S> put(final String url) {
 		try {
 			return put(new URL(url));
 		} catch (MalformedURLException e) {
@@ -120,28 +133,35 @@ public abstract class HttpClientClosure<F,S> {
 		}
 	}
 	
-	public HttpResponseEither<F,S> put(final URL url) {
+	public final HttpResponseEither<F,S> put(final URL url) {
 		try {
-			return put(new HttpPut(url.toURI()), null, null);
+			return put(new HttpPut(url.toURI()), null);
 		} catch (URISyntaxException e) {
 			throw new HttpConnectorException(e);
 		}
 	}
 	
-	public HttpResponseEither<F,S> put(final HttpPut put, final byte[] body) {
-		return put(put, body, null);
+	public final HttpResponseEither<F,S> put(final HttpPut put,
+		final byte[] body) {
+		return put(put, body, null, new BasicHttpContext());
 	}
 	
-	public HttpResponseEither<F,S> put(final HttpPut put, final byte[] body,
-		final String contentType) {
+	public final HttpResponseEither<F,S> put(final HttpPut put,
+		final byte[] body, final String contentType, final HttpContext context) {
 		return put(put,
 			(body != null) ? new ByteArrayInputStream(body) : null,
 			(body != null) ? (long)body.length : -1L,
 			contentType);
 	}
 	
-	public HttpResponseEither<F,S> put(final HttpPut put, final InputStream is,
-		final long length, final String contentType) {
+	public final HttpResponseEither<F,S> put(final HttpPut put,
+		final InputStream is, final long length, final String contentType) {
+		return put(put, is, length, contentType, null);
+	}
+	
+	public final HttpResponseEither<F,S> put(final HttpPut put,
+		final InputStream is, final long length, final String contentType,
+		final HttpContext context) {
 		if(is != null) {
 			final InputStreamEntity entity = new InputStreamEntity(is, length);			
 			if(contentType != null) {
@@ -149,10 +169,11 @@ public abstract class HttpClientClosure<F,S> {
 			}
 			put.setEntity(entity);
 		}
-		return request(put);
+		return request(put, (context == null) ?
+			new BasicHttpContext() : context);
 	}
 	
-	public HttpResponseEither<F,S> delete(final String url) {
+	public final HttpResponseEither<F,S> delete(final String url) {
 		try {
 			return delete(new URL(url));
 		} catch (MalformedURLException e) {
@@ -160,7 +181,7 @@ public abstract class HttpClientClosure<F,S> {
 		}
 	}
 	
-	public HttpResponseEither<F,S> delete(final URL url) {
+	public final HttpResponseEither<F,S> delete(final URL url) {
 		try {
 			return delete(new HttpDelete(url.toURI()));
 		} catch (URISyntaxException e) {
@@ -168,16 +189,25 @@ public abstract class HttpClientClosure<F,S> {
 		}
 	}
 	
-	public HttpResponseEither<F,S> delete(final HttpDelete get) {
-		return request(get);
+	public final HttpResponseEither<F,S> delete(final HttpDelete delete) {
+		return delete(delete, null);
 	}
 	
-	public HttpResponseEither<F,S> request(final HttpRequestBase request) {
-		return doit(request);
+	public final HttpResponseEither<F,S> delete(final HttpDelete delete,
+		final HttpContext context) {
+		return request(delete, (context == null) ?
+			new BasicHttpContext() : context);
 	}
 	
-	private final HttpResponseEither<F,S> doit(final HttpRequestBase request) {		
-		final HttpResponseEither<HttpFailure,HttpSuccess> response = execute(request);
+	public HttpResponseEither<F,S> request(final HttpRequestBase request,
+		final HttpContext context) {
+		return doit(request, context);
+	}
+	
+	private final HttpResponseEither<F,S> doit(final HttpRequestBase request,
+		final HttpContext context) {		
+		final HttpResponseEither<HttpFailure,HttpSuccess> response =
+			execute(request, context);
 		try {
 			if(response.success()) {
 				return Right.right(success(((Right<HttpFailure,HttpSuccess>)
@@ -191,36 +221,42 @@ public abstract class HttpClientClosure<F,S> {
 		} finally {
 			if(response.success()) {
 				consumeQuietly(((Right<HttpFailure,HttpSuccess>)response)
-					.right_.response_);
+					.right_.getResponse());
 			} else {
 				consumeQuietly(((Left<HttpFailure,HttpSuccess>)response)
-					.left_.response_);
+					.left_.getResponse());
 			}
 		}
 	}
 	
 	private final HttpResponseEither<HttpFailure,HttpSuccess> execute(
-		final HttpRequestBase request) {
+		final HttpRequestBase request, final HttpContext context) {
 		HttpResponse response = null;
-		int status = -1;
 		try {
-			before(request);
-			response = client_.execute(request);
-			status = response.getStatusLine().getStatusCode();
-			if(status < SC_BAD_REQUEST) {
-				return Right.right(new HttpSuccess(response, status));
+			// Before the request is "executed" give the consumer an entry
+			// point into the raw request object to tweak as necessary first.
+			// Usually things like "signing" the request or modifying the
+			// destination host are done here.
+			before(request, context);
+			// Actually execute the request, get a response.
+			response = client_.execute(request, context);
+			// Check if the response was "successful".  The definition of
+			// success is arbitrary based on what's defined in the check()
+			// method.  The default success check is simply checking the
+			// HTTP status code and if it's less than 400 (Bad Request) then
+			// it's considered "good".  If the user wants evaluate this
+			// response against some custom criteria, they should override
+			// this check() method.
+			if(check(response)) {
+				return Right.right(new HttpSuccess(response));
 			} else {
-				return Left.left(new HttpFailure(null, response, status));
+				return Left.left(new HttpFailure(null, response));
 			}
-		} catch (ClientProtocolException e) {
-			request.abort();
-			return Left.left(new HttpFailure(e, response, status));
-		} catch (IOException e) {
-			request.abort();
-			return Left.left(new HttpFailure(e, response, status));
 		} catch (Exception e) {
+			// Something went wrong with the request, abort it,
+			// return failure.
 			request.abort();
-			return Left.left(new HttpFailure(e, response, status));
+			return Left.left(new HttpFailure(e, response));
 		}
 	}
 
@@ -231,14 +267,28 @@ public abstract class HttpClientClosure<F,S> {
 	 * @param request
 	 * @throws Exception
 	 */
-	public void before(final HttpRequestBase request) throws Exception {
+	public void before(final HttpRequestBase request, final HttpContext context)
+		throws Exception {
 		// Default, do nothing.
 	}
 	
 	/**
-	 * Called only if the request is successful.  Success is defined as
-	 * no exceptions occured as a result of executing the request and the
-	 * resulting response HTTP status code is &lt; 400.
+	 * Called immediately after request execution has completed.  Checks if
+	 * the response was "successful".  The definition of success is arbitrary
+	 * based on what's defined in this method.  The default success check is
+	 * simply checking the HTTP status code and if it's less than 400
+	 * (Bad Request) then it's considered "good".  If the user wants evaluate
+	 * this response against some custom criteria, they should override
+	 * this method and implement their own logic in their extending class.
+	 * @param response
+	 * @return
+	 */
+	public boolean check(final HttpResponse response) throws Exception {
+		return (response.getStatusLine().getStatusCode() < SC_BAD_REQUEST);
+	}
+	
+	/**
+	 * Called only if the request is successful.
 	 * @param success
 	 * @return
 	 * @throws Exception
@@ -246,36 +296,44 @@ public abstract class HttpClientClosure<F,S> {
 	public abstract S success(final HttpSuccess success) throws Exception;
 	
 	/**
-	 * Called only if the request is unsuccessful.
+	 * Called only if the request is unsuccessful.  The default behavior,
+	 * as implemented here, is to simply return null if the request failed.
+	 * Consumers should override this default behavior if they need to extract
+	 * more granular information about the failure, like an {@link Exception}
+	 * or status code.
 	 * @param failure
-	 * @return
+	 * @return null by default, override this if you want to return something else
 	 * @throws Exception
 	 */
 	public F failure(final HttpFailure failure) throws Exception {
-		return null; // Default, return null.
+		return null; // Default, return null on failure.
 	}
 	
 	public static abstract class HttpClientClosureResponse {
-		public final HttpResponse response_;
-		public final int status_;
-		public HttpClientClosureResponse(HttpResponse response, int status) {
+		private final HttpResponse response_;
+		public HttpClientClosureResponse(HttpResponse response) {
 			response_ = response;
-			status_ = status;
+		}
+		public final HttpResponse getResponse() {
+			return response_;
 		}
 	}
 	public static final class HttpFailure extends HttpClientClosureResponse {		
-		public final Exception cause_;
-		public HttpFailure(Exception cause, HttpResponse response, int status) {
-			super(response, status);
+		private final Exception cause_;
+		public HttpFailure(Exception cause, HttpResponse response) {
+			super(response);
 			cause_ = cause;
 		}
 		public HttpFailure(HttpResponse response) {
-			this(null, response, -1);
+			this(null, response);
+		}
+		public Exception getCause() {
+			return cause_;
 		}
 	}
 	public static final class HttpSuccess extends HttpClientClosureResponse {
-		public HttpSuccess(HttpResponse response, int status) {
-			super(response,status);
+		public HttpSuccess(HttpResponse response) {
+			super(response);
 		}
 	}
 	
