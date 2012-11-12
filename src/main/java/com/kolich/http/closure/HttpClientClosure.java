@@ -73,7 +73,7 @@ public abstract class HttpClientClosure<F,S> {
 	}
 	
 	public HttpResponseEither<F,S> get(final HttpGet get) {
-		return doit(get);
+		return request(get);
 	}
 	
 	public HttpResponseEither<F,S> post(final String url) {
@@ -109,7 +109,7 @@ public abstract class HttpClientClosure<F,S> {
 			}
 			post.setEntity(entity);
 		}
-		return doit(post);
+		return request(post);
 	}
 	
 	public HttpResponseEither<F,S> put(final String url) {
@@ -149,7 +149,7 @@ public abstract class HttpClientClosure<F,S> {
 			}
 			put.setEntity(entity);
 		}
-		return doit(put);
+		return request(put);
 	}
 	
 	public HttpResponseEither<F,S> delete(final String url) {
@@ -169,7 +169,7 @@ public abstract class HttpClientClosure<F,S> {
 	}
 	
 	public HttpResponseEither<F,S> delete(final HttpDelete get) {
-		return doit(get);
+		return request(get);
 	}
 	
 	public HttpResponseEither<F,S> request(final HttpRequestBase request) {
@@ -206,7 +206,7 @@ public abstract class HttpClientClosure<F,S> {
 		try {
 			before(request);
 			response = client_.execute(request);
-			status = response.getStatusLine().getStatusCode(); 
+			status = response.getStatusLine().getStatusCode();
 			if(status < SC_BAD_REQUEST) {
 				return Right.right(new HttpSuccess(response, status));
 			} else {
@@ -224,10 +224,33 @@ public abstract class HttpClientClosure<F,S> {
 		}
 	}
 
+	/**
+	 * Called before the request is executed.  The final {@link HttpRequestBase}
+	 * is passed as the only argument such that the consumer can tweak or
+	 * modify the outgoing request as needed before execution.
+	 * @param request
+	 * @throws Exception
+	 */
 	public void before(final HttpRequestBase request) throws Exception {
 		// Default, do nothing.
-	}	
+	}
+	
+	/**
+	 * Called only if the request is successful.  Success is defined as
+	 * no exceptions occured as a result of executing the request and the
+	 * resulting response HTTP status code is &lt; 400.
+	 * @param success
+	 * @return
+	 * @throws Exception
+	 */
 	public abstract S success(final HttpSuccess success) throws Exception;
+	
+	/**
+	 * Called only if the request is unsuccessful.
+	 * @param failure
+	 * @return
+	 * @throws Exception
+	 */
 	public F failure(final HttpFailure failure) throws Exception {
 		return null; // Default, return null.
 	}

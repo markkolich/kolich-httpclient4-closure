@@ -1,5 +1,5 @@
 import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceNoProxySelector;
+import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.util.EntityUtils;
@@ -11,7 +11,7 @@ public class Testing {
 	
 	public static void main(String[] args) {
 		
-		final HttpClient client = getNewInstanceNoProxySelector("foobar");
+		final HttpClient client = getNewInstanceWithProxySelector("foobar");
 		
 		final HttpResponseEither<Integer,String> result = new HttpClientClosure<Integer,String>(client) {
 			@Override
@@ -25,7 +25,7 @@ public class Testing {
 		}.put("http://google.com");
 		
 		if(result.success()) {
-			System.out.println("worked!!");
+			System.out.println(result.right());
 		} else {
 			System.out.println(result.left());
 		}
@@ -37,6 +37,20 @@ public class Testing {
 			System.out.println(sResult.right());
 		} else {
 			System.out.println(sResult.left());
+		}
+		
+		final HttpResponseEither<Exception,String> eResult = new HttpClientClosure<Exception,String>(client) {
+			@Override
+			public String success(final HttpSuccess success) throws Exception {
+				return EntityUtils.toString(success.response_.getEntity(), UTF_8);
+			}
+			@Override
+			public Exception failure(final HttpFailure failure) {
+				return failure.cause_;
+			}
+		}.put("http://lskdjflksdfjslkf.vmwaresdfsdf.com");
+		if(!eResult.success()) {
+			System.out.println(eResult.left());
 		}
 		
 		/*

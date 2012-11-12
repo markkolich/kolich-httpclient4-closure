@@ -65,14 +65,14 @@ public final class KolichDefaultHttpClient {
 	/**
 	 * Determines the timeout in milliseconds until a connection is
 	 * established.  A timeout value of zero is interpreted as an
-	 * infinite timeout. 
+	 * infinite timeout.
 	 */
 	private int connectionTimeoutMs_ = DEFAULT_CONNECTION_TIMEOUT_MS;
 	
 	/**
 	 * Defines the socket timeout (SO_TIMEOUT) in milliseconds, which
 	 * is the timeout for waiting for data.  A timeout value of zero
-	 * is interpreted as an infinite timeout. 
+	 * is interpreted as an infinite timeout.
 	 */
 	private int socketTimoutMs_ = DEFAULT_SOCKET_TIMEOUT_MS;
 		
@@ -186,20 +186,24 @@ public final class KolichDefaultHttpClient {
 		return getNewInstance(true, null);
 	}
 	
-	public void setMaxTotalConnections(int maxTotalConnections) {
+	public KolichDefaultHttpClient setMaxTotalConnections(int maxTotalConnections) {
 		maxTotalConnections_ = maxTotalConnections;
+		return this;
 	}
 	
-	public void setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
+	public KolichDefaultHttpClient setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
 		maxConnectionsPerRoute_ = maxConnectionsPerRoute;
+		return this;
 	}
 	
-	public void setConnectionTimeoutMs(int connectionTimeoutMs) {
+	public KolichDefaultHttpClient setConnectionTimeoutMs(int connectionTimeoutMs) {
 		connectionTimeoutMs_ = connectionTimeoutMs;
+		return this;
 	}
 	
-	public void setSocketTimeoutMs(int socketTimoutMs) {
+	public KolichDefaultHttpClient setSocketTimeoutMs(int socketTimoutMs) {
 		socketTimoutMs_ = socketTimoutMs;
+		return this;
 	}
 		
 	/**
