@@ -5,6 +5,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.util.EntityUtils;
 
 import com.kolich.http.closure.HttpClientClosure;
+import com.kolich.http.closure.HttpClientClosure.HttpResponseEither;
 
 public class Testing {
 	
@@ -12,16 +13,33 @@ public class Testing {
 		
 		final HttpClient client = getNewInstanceNoProxySelector("foobar");
 		
-		/*
-		final String result = new HttpClientClosure<String>(client) {
+		final HttpResponseEither<Integer,String> result = new HttpClientClosure<Integer,String>(client) {
 			@Override
-			public String success(final HttpResponse response) throws Exception {
-				return EntityUtils.toString(response.getEntity(), UTF_8);
+			public String success(final HttpSuccess success) throws Exception {
+				return EntityUtils.toString(success.response_.getEntity(), UTF_8);
 			}
-		}.get("http://google.com");
-		*/
+			@Override
+			public Integer failure(final HttpFailure failure) {
+				return failure.status_;
+			}
+		}.put("http://google.com");
 		
-		final String sResult = new HttpClientClosureExpectString(client).put("http://mark.koli.ch");
+		if(result.success()) {
+			System.out.println("worked!!");
+		} else {
+			System.out.println(result.left());
+		}
+		
+		final HttpResponseEither<Void,String> sResult =
+			new HttpClientClosureExpectString(client)
+				.delete("http://mark.koli.ch");
+		if(sResult.success()) {
+			System.out.println(sResult.right());
+		} else {
+			System.out.println(sResult.left());
+		}
+		
+		/*
 		final String pResult = new HttpClientClosureExpectString(client) {
 			@Override
 			public String success(final HttpSuccess success) throws Exception {
@@ -29,17 +47,18 @@ public class Testing {
 				return super.success(success);
 			}
 		}.get("http://google.com");
+		*/
 		
 		//final byte[] bResult = new HttpClientClosureBytes(client).get("http://temp.koli.ch");
 		
-		System.out.println(sResult);
+		
 		//System.out.println(pResult);
 		
 		//System.out.println(Arrays.toString(bResult));
 		
 	}
 	
-	public static class HttpClientClosureExpectString extends HttpClientClosure<String> {
+	public static class HttpClientClosureExpectString extends HttpClientClosure<Void,String> {
 		public HttpClientClosureExpectString(final HttpClient client) {
 			super(client);
 		}
@@ -49,7 +68,7 @@ public class Testing {
 		}
 	}
 	
-	public static class HttpClientClosureExpectBytes extends HttpClientClosure<byte[]> {
+	public static class HttpClientClosureExpectBytes extends HttpClientClosure<Void,byte[]> {
 		public HttpClientClosureExpectBytes(final HttpClient client) {
 			super(client);
 		}
@@ -58,5 +77,5 @@ public class Testing {
 			return EntityUtils.toByteArray(success.response_.getEntity());
 		}
 	}
-
+	
 }

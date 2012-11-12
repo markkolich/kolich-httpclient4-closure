@@ -48,7 +48,7 @@ import org.apache.http.entity.InputStreamEntity;
 
 import com.kolich.http.exceptions.HttpConnectorException;
 
-public abstract class HttpClientClosure<T> {
+public abstract class HttpClientClosure<F,S> {
 				
 	private final HttpClient client_;
 	
@@ -56,7 +56,7 @@ public abstract class HttpClientClosure<T> {
 		client_ = client;
 	}
 	
-	public T get(final String url) {
+	public HttpResponseEither<F,S> get(final String url) {
 		try {
 			return get(new URL(url));
 		} catch (MalformedURLException e) {
@@ -64,7 +64,7 @@ public abstract class HttpClientClosure<T> {
 		}
 	}
 	
-	public T get(final URL url) {
+	public HttpResponseEither<F,S> get(final URL url) {
 		try {
 			return get(new HttpGet(url.toURI()));
 		} catch (URISyntaxException e) {
@@ -72,11 +72,11 @@ public abstract class HttpClientClosure<T> {
 		}
 	}
 	
-	public T get(final HttpGet get) {
+	public HttpResponseEither<F,S> get(final HttpGet get) {
 		return doit(get);
 	}
 	
-	public T post(final String url) {
+	public HttpResponseEither<F,S> post(final String url) {
 		try {
 			return post(new URL(url));
 		} catch (MalformedURLException e) {
@@ -84,7 +84,7 @@ public abstract class HttpClientClosure<T> {
 		}
 	}
 	
-	public T post(final URL url) {
+	public HttpResponseEither<F,S> post(final URL url) {
 		try {
 			return post(new HttpPost(url.toURI()), null, null);
 		} catch (URISyntaxException e) {
@@ -92,20 +92,16 @@ public abstract class HttpClientClosure<T> {
 		}
 	}
 	
-	public T post(final HttpPost post, final byte[] body,
+	public HttpResponseEither<F,S> post(final HttpPost post, final byte[] body,
 		final String contentType) {
 		return post(post,
-			(body != null) ?
-				new ByteArrayInputStream(body) :
-				null,
-			(body != null) ?
-				(long)body.length :
-				-1L,
+			(body != null) ? new ByteArrayInputStream(body) : null,
+			(body != null) ? (long)body.length : -1L,
 			contentType);
 	}
 	
-	public T post(final HttpPost post, final InputStream is, final long length,
-		final String contentType) {
+	public HttpResponseEither<F,S> post(final HttpPost post,
+		final InputStream is, final long length, final String contentType) {
 		if(is != null) {
 			final InputStreamEntity entity = new InputStreamEntity(is, length);			
 			if(contentType != null) {
@@ -116,7 +112,7 @@ public abstract class HttpClientClosure<T> {
 		return doit(post);
 	}
 	
-	public T put(final String url) {
+	public HttpResponseEither<F,S> put(final String url) {
 		try {
 			return put(new URL(url));
 		} catch (MalformedURLException e) {
@@ -124,7 +120,7 @@ public abstract class HttpClientClosure<T> {
 		}
 	}
 	
-	public T put(final URL url) {
+	public HttpResponseEither<F,S> put(final URL url) {
 		try {
 			return put(new HttpPut(url.toURI()), null, null);
 		} catch (URISyntaxException e) {
@@ -132,20 +128,20 @@ public abstract class HttpClientClosure<T> {
 		}
 	}
 	
-	public T put(final HttpPut put, final byte[] body,
+	public HttpResponseEither<F,S> put(final HttpPut put, final byte[] body) {
+		return put(put, body, null);
+	}
+	
+	public HttpResponseEither<F,S> put(final HttpPut put, final byte[] body,
 		final String contentType) {
 		return put(put,
-			(body != null) ?
-				new ByteArrayInputStream(body) :
-				null,
-			(body != null) ?
-				(long)body.length :
-				-1L,
+			(body != null) ? new ByteArrayInputStream(body) : null,
+			(body != null) ? (long)body.length : -1L,
 			contentType);
 	}
 	
-	public T put(final HttpPut put, final InputStream is, final long length,
-		final String contentType) {
+	public HttpResponseEither<F,S> put(final HttpPut put, final InputStream is,
+		final long length, final String contentType) {
 		if(is != null) {
 			final InputStreamEntity entity = new InputStreamEntity(is, length);			
 			if(contentType != null) {
@@ -156,7 +152,7 @@ public abstract class HttpClientClosure<T> {
 		return doit(put);
 	}
 	
-	public T delete(final String url) {
+	public HttpResponseEither<F,S> delete(final String url) {
 		try {
 			return delete(new URL(url));
 		} catch (MalformedURLException e) {
@@ -164,7 +160,7 @@ public abstract class HttpClientClosure<T> {
 		}
 	}
 	
-	public T delete(final URL url) {
+	public HttpResponseEither<F,S> delete(final URL url) {
 		try {
 			return delete(new HttpDelete(url.toURI()));
 		} catch (URISyntaxException e) {
@@ -172,23 +168,33 @@ public abstract class HttpClientClosure<T> {
 		}
 	}
 	
-	public T delete(final HttpDelete get) {
+	public HttpResponseEither<F,S> delete(final HttpDelete get) {
 		return doit(get);
 	}
 	
-	private final T doit(final HttpRequestBase request) {		
-		final HttpResponseEither<HttpFailure,HttpSuccess> resp = execute(request);
+	public HttpResponseEither<F,S> request(final HttpRequestBase request) {
+		return doit(request);
+	}
+	
+	private final HttpResponseEither<F,S> doit(final HttpRequestBase request) {		
+		final HttpResponseEither<HttpFailure,HttpSuccess> response = execute(request);
 		try {
-			return (resp.success()) ?
-				success(((Right<HttpFailure,HttpSuccess>)resp).right_) :
-				failure(((Left<HttpFailure,HttpSuccess>)resp).left_);
+			if(response.success()) {
+				return Right.right(success(((Right<HttpFailure,HttpSuccess>)
+					response).right_));
+			} else {
+				return Left.left(failure(((Left<HttpFailure,HttpSuccess>)
+					response).left_));
+			}
 		} catch (Exception e) {
 			throw new HttpConnectorException(e);
 		} finally {
-			if(resp.success()) {
-				consumeQuietly(((Right<HttpFailure,HttpSuccess>)resp).right_.response_);
+			if(response.success()) {
+				consumeQuietly(((Right<HttpFailure,HttpSuccess>)response)
+					.right_.response_);
 			} else {
-				consumeQuietly(((Left<HttpFailure,HttpSuccess>)resp).left_.response_);
+				consumeQuietly(((Left<HttpFailure,HttpSuccess>)response)
+					.left_.response_);
 			}
 		}
 	}
@@ -217,67 +223,86 @@ public abstract class HttpClientClosure<T> {
 			return Left.left(new HttpFailure(e, response, status));
 		}
 	}
-			
+
 	public void before(final HttpRequestBase request) throws Exception {
 		// Default, do nothing.
-	}
-	
-	public abstract T success(final HttpSuccess success) throws Exception;	
-	public T failure(final HttpFailure failure) throws Exception {
+	}	
+	public abstract S success(final HttpSuccess success) throws Exception;
+	public F failure(final HttpFailure failure) throws Exception {
 		return null; // Default, return null.
 	}
 	
-	public static final class HttpFailure {
+	public static abstract class HttpClientClosureResponse {
 		public final HttpResponse response_;
-		public final Exception cause_;
 		public final int status_;
-		public HttpFailure(Exception cause, HttpResponse response, int status) {
-			cause_ = cause;
+		public HttpClientClosureResponse(HttpResponse response, int status) {
 			response_ = response;
 			status_ = status;
+		}
+	}
+	public static final class HttpFailure extends HttpClientClosureResponse {		
+		public final Exception cause_;
+		public HttpFailure(Exception cause, HttpResponse response, int status) {
+			super(response, status);
+			cause_ = cause;
 		}
 		public HttpFailure(HttpResponse response) {
 			this(null, response, -1);
 		}
 	}
-	public static final class HttpSuccess {
-		public final HttpResponse response_;
-		public final int status_;
+	public static final class HttpSuccess extends HttpClientClosureResponse {
 		public HttpSuccess(HttpResponse response, int status) {
-			response_ = response;
-			status_ = status;
+			super(response,status);
 		}
 	}
 	
-	private static abstract class HttpResponseEither<A,B> {
+	public interface HttpResponseEither<F,S> {
 		public abstract boolean success();
+		public abstract F left();
+		public abstract S right();
 	}
-			
-	private static final class Left<A,B> extends HttpResponseEither<A,B> {
-		public final A left_;
-		private Left(final A left) {
+	
+	private static final class Left<F,S> implements HttpResponseEither<F,S> {
+		public final F left_;
+		private Left(final F left) {
 			left_ = left;
 		}
 		@Override
 		public boolean success() {
 			return false;
+		}		
+		@Override
+		public F left() {
+			return left_;
 		}
-		public static final <A,B> HttpResponseEither<A,B> left(final A left) {
-			return new Left<A,B>(left);
+		@Override
+		public S right() {
+			return null;
+		}
+		private static final <F,S> HttpResponseEither<F,S> left(final F left) {
+			return new Left<F,S>(left);
 		}
 	}
 
-	private static final class Right<A,B> extends HttpResponseEither<A,B> {
-		public final B right_;
-		private Right(final B right) {
+	private static final class Right<F,S> implements HttpResponseEither<F,S> {
+		public final S right_;
+		private Right(final S right) {
 			right_ = right;
 		}
 		@Override
 		public boolean success() {
 			return true;
 		}
-		public static final <A,B> HttpResponseEither<A,B> right(final B right) {
-			return new Right<A,B>(right);
+		@Override
+		public F left() {
+			return null;
+		}
+		@Override
+		public S right() {
+			return right_;
+		}
+		private static final <F,S> HttpResponseEither<F,S> right(final S right) {
+			return new Right<F,S>(right);
 		}
 	}
 	
