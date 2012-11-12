@@ -39,6 +39,7 @@ import java.net.URL;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -154,17 +155,26 @@ public abstract class HttpClientClosure<T> {
 		}
 		return doit(put);
 	}
-		
-	/*
 	
 	public T delete(final String url) {
-		
+		try {
+			return delete(new URL(url));
+		} catch (MalformedURLException e) {
+			throw new HttpConnectorException(e);
+		}
 	}
 	
-	public T delete(final HttpDelete delete) {
-		
+	public T delete(final URL url) {
+		try {
+			return delete(new HttpDelete(url.toURI()));
+		} catch (URISyntaxException e) {
+			throw new HttpConnectorException(e);
+		}
 	}
-	*/
+	
+	public T delete(final HttpDelete get) {
+		return doit(get);
+	}
 	
 	private final T doit(final HttpRequestBase request) {		
 		final HttpResponseEither<HttpFailure,HttpSuccess> resp = execute(request);

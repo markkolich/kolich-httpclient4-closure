@@ -21,26 +21,26 @@ public class Testing {
 		}.get("http://google.com");
 		*/
 		
-		final String sResult = new HttpClientClosureString(client).post("http://localhost:8080/api/");
-		final String pResult = new HttpClientClosureString(client) {
+		final String sResult = new HttpClientClosureExpectString(client).put("http://mark.koli.ch");
+		final String pResult = new HttpClientClosureExpectString(client) {
 			@Override
 			public String success(final HttpSuccess success) throws Exception {
 				System.out.println(success.status_);
 				return super.success(success);
 			}
-		}.put("http://localhost:8080/api");
+		}.get("http://google.com");
 		
 		//final byte[] bResult = new HttpClientClosureBytes(client).get("http://temp.koli.ch");
 		
 		System.out.println(sResult);
-		System.out.println(pResult);
+		//System.out.println(pResult);
 		
 		//System.out.println(Arrays.toString(bResult));
 		
 	}
 	
-	public static class HttpClientClosureString extends HttpClientClosure<String> {
-		public HttpClientClosureString(final HttpClient client) {
+	public static class HttpClientClosureExpectString extends HttpClientClosure<String> {
+		public HttpClientClosureExpectString(final HttpClient client) {
 			super(client);
 		}
 		@Override
@@ -49,8 +49,8 @@ public class Testing {
 		}
 	}
 	
-	public static class HttpClientClosureBytes extends HttpClientClosure<byte[]> {
-		public HttpClientClosureBytes(final HttpClient client) {
+	public static class HttpClientClosureExpectBytes extends HttpClientClosure<byte[]> {
+		public HttpClientClosureExpectBytes(final HttpClient client) {
 			super(client);
 		}
 		@Override
