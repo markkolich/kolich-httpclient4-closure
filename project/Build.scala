@@ -66,11 +66,11 @@ object HttpClient extends Build {
   import Dependencies._
   import Resolvers._
 
-  private val aName = "kolich-http-client"
+  private val aName = "kolich-httpclient-closure"
   private val aVer = "0.0.2"
   private val aOrg = "com.kolich"
 
-  lazy val httpClient: Project = Project(
+  lazy val httpClientClosure: Project = Project(
     aName,
     new File("."),
     settings = Defaults.defaultSettings ++ Seq(resolvers := depResolvers) ++ Seq(
