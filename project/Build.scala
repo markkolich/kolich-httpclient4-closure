@@ -53,9 +53,18 @@ object Dependencies {
 
 }
 
+object Resolvers {
+
+  private val kolichRepo = "Kolich repo" at "http://markkolich.github.com/repo"
+
+  val depResolvers = Seq(kolichRepo)
+
+}
+
 object HttpClient extends Build {
 
   import Dependencies._
+  import Resolvers._
 
   private val aName = "kolich-http-client"
   private val aVer = "0.0.1"
@@ -64,7 +73,7 @@ object HttpClient extends Build {
   lazy val httpClient: Project = Project(
     aName,
     new File("."),
-    settings = Defaults.defaultSettings ++ Seq(
+    settings = Defaults.defaultSettings ++ Seq(resolvers := depResolvers) ++ Seq(
       version := aVer,
       organization := aOrg,
       scalaVersion := "2.9.2",
