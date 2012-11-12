@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.closure;
+package com.kolich.http;
 
 import static com.kolich.http.HttpConnectorResponse.consumeQuietly;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
@@ -46,7 +46,7 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
-import com.kolich.http.exceptions.HttpConnectorException;
+import com.kolich.http.exceptions.HttpClientClosureException;
 
 public abstract class HttpClientClosure<F,S> {
 				
@@ -60,7 +60,7 @@ public abstract class HttpClientClosure<F,S> {
 		try {
 			return get(new URL(url));
 		} catch (MalformedURLException e) {
-			throw new HttpConnectorException(e);
+			throw new HttpClientClosureException(e);
 		}
 	}
 	
@@ -68,7 +68,7 @@ public abstract class HttpClientClosure<F,S> {
 		try {
 			return get(new HttpGet(url.toURI()));
 		} catch (URISyntaxException e) {
-			throw new HttpConnectorException(e);
+			throw new HttpClientClosureException(e);
 		}
 	}
 	
@@ -86,7 +86,7 @@ public abstract class HttpClientClosure<F,S> {
 		try {
 			return post(new URL(url));
 		} catch (MalformedURLException e) {
-			throw new HttpConnectorException(e);
+			throw new HttpClientClosureException(e);
 		}
 	}
 	
@@ -94,7 +94,7 @@ public abstract class HttpClientClosure<F,S> {
 		try {
 			return post(new HttpPost(url.toURI()), null, null);
 		} catch (URISyntaxException e) {
-			throw new HttpConnectorException(e);
+			throw new HttpClientClosureException(e);
 		}
 	}
 	
@@ -129,7 +129,7 @@ public abstract class HttpClientClosure<F,S> {
 		try {
 			return put(new URL(url));
 		} catch (MalformedURLException e) {
-			throw new HttpConnectorException(e);
+			throw new HttpClientClosureException(e);
 		}
 	}
 	
@@ -137,7 +137,7 @@ public abstract class HttpClientClosure<F,S> {
 		try {
 			return put(new HttpPut(url.toURI()), null);
 		} catch (URISyntaxException e) {
-			throw new HttpConnectorException(e);
+			throw new HttpClientClosureException(e);
 		}
 	}
 	
@@ -177,7 +177,7 @@ public abstract class HttpClientClosure<F,S> {
 		try {
 			return delete(new URL(url));
 		} catch (MalformedURLException e) {
-			throw new HttpConnectorException(e);
+			throw new HttpClientClosureException(e);
 		}
 	}
 	
@@ -185,7 +185,7 @@ public abstract class HttpClientClosure<F,S> {
 		try {
 			return delete(new HttpDelete(url.toURI()));
 		} catch (URISyntaxException e) {
-			throw new HttpConnectorException(e);
+			throw new HttpClientClosureException(e);
 		}
 	}
 	
@@ -211,13 +211,13 @@ public abstract class HttpClientClosure<F,S> {
 		try {
 			if(response.success()) {
 				return Right.right(success(((Right<HttpFailure,HttpSuccess>)
-					response).right_));
+					response).right_, context));
 			} else {
 				return Left.left(failure(((Left<HttpFailure,HttpSuccess>)
-					response).left_));
+					response).left_, context));
 			}
 		} catch (Exception e) {
-			throw new HttpConnectorException(e);
+			throw new HttpClientClosureException(e);
 		} finally {
 			if(response.success()) {
 				consumeQuietly(((Right<HttpFailure,HttpSuccess>)response)
@@ -247,7 +247,7 @@ public abstract class HttpClientClosure<F,S> {
 			// it's considered "good".  If the user wants evaluate this
 			// response against some custom criteria, they should override
 			// this check() method.
-			if(check(response)) {
+			if(check(response, context)) {
 				return Right.right(new HttpSuccess(response));
 			} else {
 				return Left.left(new HttpFailure(null, response));
@@ -269,6 +269,9 @@ public abstract class HttpClientClosure<F,S> {
 	 */
 	public void before(final HttpRequestBase request, final HttpContext context)
 		throws Exception {
+		before(request);
+	}
+	public void before(final HttpRequestBase request) throws Exception {
 		// Default, do nothing.
 	}
 	
@@ -281,20 +284,23 @@ public abstract class HttpClientClosure<F,S> {
 	 * this response against some custom criteria, they should override
 	 * this method and implement their own logic in their extending class.
 	 * @param response
+	 * @param context
 	 * @return
 	 */
-	public boolean check(final HttpResponse response) throws Exception {
+	public boolean check(final HttpResponse response, final HttpContext context)
+		throws Exception {
 		return (response.getStatusLine().getStatusCode() < SC_BAD_REQUEST);
 	}
-	
+		
 	/**
 	 * Called only if the request is successful.
 	 * @param success
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract S success(final HttpSuccess success) throws Exception;
-	
+	public abstract S success(final HttpSuccess success, final HttpContext context)
+		throws Exception;
+		
 	/**
 	 * Called only if the request is unsuccessful.  The default behavior,
 	 * as implemented here, is to simply return null if the request failed.
@@ -305,6 +311,10 @@ public abstract class HttpClientClosure<F,S> {
 	 * @return null by default, override this if you want to return something else
 	 * @throws Exception
 	 */
+	public F failure(final HttpFailure failure, final HttpContext context)
+		throws Exception {
+		return failure(failure);
+	}
 	public F failure(final HttpFailure failure) throws Exception {
 		return null; // Default, return null on failure.
 	}

@@ -29,30 +29,30 @@ package com.kolich.http.exceptions;
 import com.kolich.common.KolichCommonException;
 import com.kolich.http.HttpConnectorResponse;
 
-public final class HttpConnectorException extends KolichCommonException {
+public final class HttpClientClosureException extends KolichCommonException {
 
 	private static final long serialVersionUID = -8194826635345323997L;
 	
 	private HttpConnectorResponse response_;
 	
-	public HttpConnectorException(String message, Throwable cause) {
+	public HttpClientClosureException(String message, Throwable cause) {
 		super(message, cause);
 	}
 	
-	public HttpConnectorException(Throwable cause) {
+	public HttpClientClosureException(Throwable cause) {
 		super(cause);
 	}
 	
-	public HttpConnectorException(String message) {
+	public HttpClientClosureException(String message) {
 		super(message);
 	}
 	
-	public HttpConnectorException(HttpConnectorResponse response, Throwable cause) {
+	public HttpClientClosureException(HttpConnectorResponse response, Throwable cause) {
 		this(cause);
 		response_ = response;
 	}
 	
-	public HttpConnectorException(HttpConnectorResponse response, String message) {
+	public HttpClientClosureException(HttpConnectorResponse response, String message) {
 		this(message);
 		response_ = response;
 	}

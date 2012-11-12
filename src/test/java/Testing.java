@@ -7,10 +7,11 @@ import java.io.OutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.closure.HttpClientClosure;
-import com.kolich.http.closure.HttpClientClosure.HttpResponseEither;
+import com.kolich.http.HttpClientClosure;
+import com.kolich.http.HttpClientClosure.HttpResponseEither;
 
 public class Testing {
 	
@@ -20,11 +21,11 @@ public class Testing {
 		
 		final HttpResponseEither<Integer,String> result = new HttpClientClosure<Integer,String>(client) {
 			@Override
-			public String success(final HttpSuccess success) throws Exception {
+			public String success(final HttpSuccess success, final HttpContext context) throws Exception {
 				return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
 			}
 			@Override
-			public Integer failure(final HttpFailure failure) {
+			public Integer failure(final HttpFailure failure, final HttpContext context) {
 				return failure.getResponse().getStatusLine().getStatusCode();
 			}
 		}.get("http://google.com");		
@@ -45,11 +46,11 @@ public class Testing {
 		
 		final HttpResponseEither<Exception,String> eResult = new HttpClientClosure<Exception,String>(client) {
 			@Override
-			public String success(final HttpSuccess success) throws Exception {
+			public String success(final HttpSuccess success, final HttpContext context) throws Exception {
 				return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
 			}
 			@Override
-			public Exception failure(final HttpFailure failure) {
+			public Exception failure(final HttpFailure failure, final HttpContext context) {
 				return failure.getCause();
 			}
 		}.put("http://lskdjflksdfjslkf.vmwaresdfsdf.com");
@@ -60,11 +61,11 @@ public class Testing {
 		// Custom check for "success".
 		final HttpResponseEither<Exception,String> cResult = new HttpClientClosure<Exception,String>(client) {
 			@Override
-			public boolean check(final HttpResponse response) {
+			public boolean check(final HttpResponse response, final HttpContext context) {
 				return (response.getStatusLine().getStatusCode() == 405);
 			}
 			@Override
-			public String success(final HttpSuccess success) throws Exception {
+			public String success(final HttpSuccess success, final HttpContext context) throws Exception {
 				return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
 			}
 		}.put("http://google.com");
@@ -74,7 +75,7 @@ public class Testing {
 		
 		final HttpResponseEither<Exception,OutputStream> bResult = new HttpClientClosure<Exception,OutputStream>(client) {
 			@Override
-			public OutputStream success(final HttpSuccess success) throws Exception {
+			public OutputStream success(final HttpSuccess success, final HttpContext context) throws Exception {
 				final OutputStream os = new ByteArrayOutputStream();
 				IOUtils.copy(success.getResponse().getEntity().getContent(), os);
 				return os;
@@ -91,7 +92,7 @@ public class Testing {
 		final OutputStream os = new ByteArrayOutputStream();
 		final HttpResponseEither<Exception,Integer> stResult = new HttpClientClosure<Exception,Integer>(client) {
 			@Override
-			public Integer success(final HttpSuccess success) throws Exception {
+			public Integer success(final HttpSuccess success, final HttpContext context) throws Exception {
 				return IOUtils.copy(success.getResponse().getEntity().getContent(), os);
 			}
 			/*
@@ -112,7 +113,7 @@ public class Testing {
 			super(client);
 		}
 		@Override
-		public String success(final HttpSuccess success) throws Exception {
+		public String success(final HttpSuccess success, final HttpContext context) throws Exception {
 			return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
 		}
 	}
@@ -122,7 +123,7 @@ public class Testing {
 			super(client);
 		}
 		@Override
-		public byte[] success(final HttpSuccess success) throws Exception {
+		public byte[] success(final HttpSuccess success, final HttpContext context) throws Exception {
 			return EntityUtils.toByteArray(success.getResponse().getEntity());
 		}
 	}

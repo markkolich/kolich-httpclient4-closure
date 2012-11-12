@@ -47,7 +47,7 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
-import com.kolich.http.exceptions.HttpConnectorException;
+import com.kolich.http.exceptions.HttpClientClosureException;
 
 public final class HttpConnector {
 	
@@ -98,7 +98,7 @@ public final class HttpConnector {
 				entity, context);
 		} catch (Exception e) {
 			method.abort();
-			throw new HttpConnectorException(new HttpConnectorResponse(url,
+			throw new HttpClientClosureException(new HttpConnectorResponse(url,
 				statusCode, headers, entity, context), e);
 		} finally {
 			closeExpiredConnections();
@@ -133,7 +133,7 @@ public final class HttpConnector {
 		try {
 			return doGet(new URL(url));
 		} catch (MalformedURLException e) {
-			throw new HttpConnectorException("Malformed URL: " + url, e);
+			throw new HttpClientClosureException("Malformed URL: " + url, e);
 		}
 	}
 	
@@ -179,7 +179,7 @@ public final class HttpConnector {
 		try {
 			return doPost(new URL(url), body, contentType);
 		} catch (MalformedURLException e) {
-			throw new HttpConnectorException("Oops, malformed URL: " + url, e);
+			throw new HttpClientClosureException("Oops, malformed URL: " + url, e);
 		}
 	}
 	
@@ -225,7 +225,7 @@ public final class HttpConnector {
 		try {
 			return doPut(new URL(url), body, contentType);
 		} catch (MalformedURLException e) {
-			throw new HttpConnectorException("Oops, malformed URL: " + url, e);
+			throw new HttpClientClosureException("Oops, malformed URL: " + url, e);
 		}
 	}
 	
@@ -257,7 +257,7 @@ public final class HttpConnector {
 		try {
 			return doDelete(new URL(url));
 		} catch (MalformedURLException e) {
-			throw new HttpConnectorException("Oops, malformed URL: " + url, e);
+			throw new HttpClientClosureException("Oops, malformed URL: " + url, e);
 		}
 	}
 	
