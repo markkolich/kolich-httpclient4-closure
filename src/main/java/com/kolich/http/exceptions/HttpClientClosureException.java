@@ -27,14 +27,11 @@
 package com.kolich.http.exceptions;
 
 import com.kolich.common.KolichCommonException;
-import com.kolich.http.HttpConnectorResponse;
 
 public final class HttpClientClosureException extends KolichCommonException {
 
 	private static final long serialVersionUID = -8194826635345323997L;
-	
-	private HttpConnectorResponse response_;
-	
+		
 	public HttpClientClosureException(String message, Throwable cause) {
 		super(message, cause);
 	}
@@ -45,25 +42,6 @@ public final class HttpClientClosureException extends KolichCommonException {
 	
 	public HttpClientClosureException(String message) {
 		super(message);
-	}
-	
-	public HttpClientClosureException(HttpConnectorResponse response, Throwable cause) {
-		this(cause);
-		response_ = response;
-	}
-	
-	public HttpClientClosureException(HttpConnectorResponse response, String message) {
-		this(message);
-		response_ = response;
-	}
-	
-	/**
-	 * Returns the {@link HttpConnectorResponse} associated with this
-	 * exception case, if any. May be null.
-	 * @return
-	 */
-	public HttpConnectorResponse getResponse() {
-		return response_;
 	}
 	
 }
