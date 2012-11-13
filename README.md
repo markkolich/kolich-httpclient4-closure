@@ -51,7 +51,7 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.
 
 ## Usage
 
-Technically speaking, this library does not use "closures" (Lambda expressions) but rather a well defined pattern with **anonymous classes** to let you make HTTP requests using HttpClient 4.x.
+Technically speaking, this library does not use "closures" (Lambda expressions) but rather a well defined pattern with **anonymous classes**.
 
 ### Functional Concepts
 
@@ -82,11 +82,14 @@ To extract the return value of type `F` on failure, call `left` on the result.
 final Exception cause = result.left();
 ```
 
+Note that if you call `right` on a request that failed, expect a `null` return value.  Similarly, if you call `left` on a request that succeeded, also expect a `null` return value.
+
 A few other things to keep in mind:
 
 * This library automatically releases/frees all connection resources when a request has finished, either successfully or unsuccessfully.  You don't have to worry about closing any internal entity streams, that's done for you.
 * All return types are developer-defined based on how you parameterize your `HttpResponseEither<F,S>`.  It's up to you to write a `success` method which converts an `HttpSuccess` object to your desired success type `S`.
-* The default definition of success is any request that 1) completes without `Exception` and 2) receives an HTTP status code that is less than (`&lt;`) 400 Bad Request.  You can eaisly override this default behavior by implementing a custom `check` method as needed.
+* The default definition of "success" is any request that 1) completes without `Exception` and 2) receives an HTTP status code that is less than (`<`) 400 Bad Request.  You can easily override this default behavior by implementing a custom `check` method as needed.
+* If you need to manipulate the request immeaditely before execution, you should override the `before` method.  This lets you do things like sign the request, or add the right authentication headers (if needed) before execution.
 
 ### Get an HttpClient
 
@@ -106,7 +109,7 @@ final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelecto
 
 By default, the `KolichHttpClientFactory` always returns an `HttpClient` instance backed by a **thread-safe** `PoolingClientConnectionManager`.
 
-### Get an HttpClient for Spring Beans
+### HttpClient Factory for Beans
 
 You can use the `KolichHttpClientFactory` class to also instantiate an `HttpClient` for your beans:
 
@@ -122,18 +125,34 @@ You can use the `KolichHttpClientFactory` class to also instantiate an `HttpClie
 </bean>
 ```
 
-### Request Examples
+### Examples
 
-### GET
+#### HEAD
 
-Make a `GET` request expecting either a `String` back on success, or an `Exception` on failure &mdash; this is represented by the `HttpResponseEither<Exception,String>` return type.
+Send a `HEAD` request and expect back an array of HTTP response headers on success.  Drop any failures on the floor.
+
+```java
+final HttpResponseEither<Void,Header[]> result =
+  new HttpClient4Closure<Void,Header[]>(client) {
+  @Override
+  public Header[] success(final HttpSuccess success) {
+    return success.getResponse().getAllHeaders();
+  }
+}.head("http://example.com");
+
+final Header[] headers = result.right();
+```
+
+#### GET
+
+Send a `GET` request expecting either a `String` back on success, or an `Exception` on failure &mdash; this is represented by the `HttpResponseEither<Exception,String>` return type.
 
 ```java
 final HttpResponseEither<Exception,String> result =
   new HttpClient4Closure<Exception,String>(client) {
   @Override
   public String success(final HttpSuccess success) throws Exception {
-    return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
+    return EntityUtils.toString(success.getResponse().getEntity(), "UTF-8");
   }
   @Override
   public Exception failure(final HttpFailure failure, final HttpContext context) {
@@ -142,19 +161,136 @@ final HttpResponseEither<Exception,String> result =
 }.get("http://example.com");
 ```
 
-Or, make a `GET` request still expecting a `String` on success, but drop any failures on the floor &mdash; expect a `null` back for success type `S` if anything went wrong.
+Or, send a `GET` request still expecting a `String` on success, but drop any failures on the floor &mdash; expect a `null` return value in place of success type `S` if anything went wrong.
 
 ```java
 final HttpResponseEither<Void,String> result =
   new HttpClient4Closure<Void,String>(client) {
   @Override
   public String success(final HttpSuccess success) throws Exception {
-    return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
+    return EntityUtils.toString(success.getResponse().getEntity(), "UTF-8");
   }
-}.get(new HttpGet("http://foobar.example.com/baz"));
+}.get(new HttpGet("http://skdfjlsdf.example.com")); // Obvious 404
 
-if(result.right() == null) {
-  // Failed miserably.
+System.out.println(result.right()); // Prints "null"
+```
+
+Send a `GET` request and stream the result on success to an existing and open `OutputStream`.
+
+```java
+import org.apache.commons.io.IOUtils;
+
+final OutputStream os = ...; // Existing and open output stream
+
+final HttpResponseEither<Void,Long> result =
+  new HttpClient4Closure<Void,Long>(client) {
+  @Override
+  public Long success(final HttpSuccess success) throws Exception {
+    return IOUtils.copyLarge(
+      success.getResponse().getEntity().getContent(),
+      os);
+  }
+}.get("http://api.example.com/path/to/big/resource");
+
+// Success result is the number of bytes copied.
+System.out.println("I copied " + result.right() + " total bytes.");
+```
+
+#### POST
+
+Send a `POST` request but manipulate the `HttpBaseRequest` object before execution by overriding the `before` method.  Expect a `String` on success, and an `Integer` on failure.
+
+```java
+final HttpResponseEither<Integer,String> result =
+  new HttpClient4Closure<Integer,String>(client) {
+  @Override
+  public void before(final HttpRequestBase request) {
+    request.addHeader("Authorization", "super-secret-password!");
+  }
+  @Override
+  public String success(final HttpSuccess success) throws Exception {
+    return EntityUtils.toString(success.getResponse().getEntity(), "UTF-8");
+  }
+  @Override
+  public Integer failure(final HttpFailure failure, final HttpContext context) {
+    // Return the HTTP status code if anything went wrong.
+    return failure.getStatusCode();
+  }
+}.post("http://api.example.com");
+```
+
+Or, send a `POST` with some form variables, ignoring failures, and convert a successful response to some custom entity using Google's <a href="http://code.google.com/p/google-gson/">GSON</a> toolkit.
+
+```java
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+final HttpPost request = new HttpPost("http://api.example.com");
+// Set a POST-body on the request.
+final List<NameValuePair> params = new ArrayList<NameValuePair>();
+params.add(new BasicNameValuePair("foo", "bar"));
+params.add(new BasicNameValuePair("cat", "dog"));
+request.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+
+final HttpResponseEither<Void,MyClazz> result =
+  new HttpClient4Closure<Void,MyClazz>(client) {
+  @Override
+  public MyClazz success(final HttpSuccess success) throws Exception {
+    // Expects JSON from the server in response to the POST.
+    return new GsonBuilder().create().fromJson(
+      EntityUtils.toString(success.getResponse().getEntity(), "UTF-8"),
+      MyClazz.class);
+  }
+}.post(request);
+
+final MyClazz entity = result.right(); // Kewl
+```
+
+#### PUT
+
+Send a `PUT` request with an existing and open `InputStream` from another source.  Expect an `Integer` back on success and nothing on failure.
+
+```java
+final InputStream is = ...; // Existing and open input stream
+
+final HttpResponseEither<Void,Integer> result =
+  new HttpClient4Closure<Void,Integer>(client) {
+  @Override
+  public void before(final HttpRequestBase request) {
+    ((HttpPut)request).setEntity(new InputStreamEntity(is, contentLength));
+  }
+  @Override
+  public String success(final HttpSuccess success) throws Exception {
+    return success.getStatusCode();
+  }
+}.put("http://api.example.com/upload");
+```
+
+#### DELETE
+
+Send a `DELETE` request with a custom `success` check &mdash; in this example, the server returns a `410 Gone` when the resource is deleted successfully but we don't want a 410 response to indicate failure. 
+
+```java
+final HttpResponseEither<Integer,Void> result =
+  new HttpClient4Closure<Integer,Void>(client) {
+  @Override
+  public boolean check(final HttpResponse response, final HttpContext context) {
+    // Success is 410, any other status code is failure.
+    return (response.getStatusLine().getStatusCode() == 410);
+  }
+  @Override
+  public Void success(final HttpSuccess success) throws Exception {
+    return null; // Meh, for Void
+  }
+  @Override
+  public Integer failure(final HttpFailure failure, final HttpContext context) {
+    // Return the HTTP status code if anything went "wrong".
+    return failure.getStatusCode();
+  }
+}.delete("http://api.example.com/go/away");
+
+if(result.success()) {
+  // History.
 }
 ```
 

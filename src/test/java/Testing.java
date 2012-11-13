@@ -5,8 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
@@ -21,18 +23,32 @@ public class Testing {
 		
 		final HttpResponseEither<Integer,String> result = new HttpClient4Closure<Integer,String>(client) {
 			@Override
+			public void before(final HttpRequestBase request) {
+				request.addHeader("Authorization", "super-secret-password");
+			}
+			@Override
 			public String success(final HttpSuccess success) throws Exception {
 				return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
 			}
 			@Override
 			public Integer failure(final HttpFailure failure, final HttpContext context) {
-				return failure.getResponse().getStatusLine().getStatusCode();
+				return failure.getStatusCode();
 			}
 		}.get("http://google.com");
 		if(result.success()) {
 			System.out.println(result.right());
 		} else {
 			System.out.println(result.left());
+		}
+		
+		final HttpResponseEither<Void,Header[]> hResult = new HttpClient4Closure<Void,Header[]>(client) {
+			@Override
+			public Header[] success(final HttpSuccess success) throws Exception {
+				return success.getResponse().getAllHeaders();
+			}
+		}.head("http://example.com");
+		if(hResult.success()) {
+			System.out.println("Fetched " + hResult.right().length + " request headers.");
 		}
 		
 		final HttpResponseEither<Void,String> sResult =
