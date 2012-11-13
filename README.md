@@ -53,11 +53,44 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.
 
 Technically speaking, this library does not use "closures" (Lambda expressions) but rather a well defined pattern with **anonymous classes** to let you make HTTP requests using HttpClient 4.x.
 
-Some internal concepts, like the `HttpResponseEither<F,S>`, was borrowed directly from the Functional Programming world, specifically Scala.  In this case, `HttpResponseEither<F,S>` uses Java generics such that this library can return *either* a left type `F` indicating failure, or a right type `S` indicating success.  It's up to you, the developer, to define what these types are &mdash; the definition of a "successful" return type varies from application to application, and developer to developer.  You'll see more of this later.
+### Functional Concepts
+
+Some concepts in this library, like the `HttpResponseEither<F,S>`, were borrowed directly from the Functional Programming world, namely Scala.  In this case, `HttpResponseEither<F,S>` uses Java generics such that this library can return *either* a left type `F` indicating failure, or a right type `S` indicating success.  It's up to you, the developer, to define what these types are &mdash; the definition of a "successful" return type varies from application to application, and developer to developer.
+
+When you "get back" an `HttpResponseEither<F,S>` you can check for success by calling the `success` method on the result.
+
+```java
+final HttpResponseEither<Exception,String> result =
+  new HttpClient4Closure<Exception,String>(client) {
+    // ...
+  }.get("http://example.com");
+
+if(result.success()) {
+  // It worked!
+}
+```
+
+To extract the return value of type `S` on success, call `right` on the result.
+
+```java
+final String s = result.right();
+```
+
+To extract the return value of type `F` on failure, call `left` on the result.
+
+```java
+final Exception cause = result.left();
+```
+
+A few other things to keep in mind:
+
+* This library automatically releases/frees all connection resources when a request has finished, either successfully or unsuccessfully.  You don't have to worry about closing any internal entity streams, that's done for you.
+* All return types are developer-defined based on how you parameterize your `HttpResponseEither<F,S>`.  It's up to you to write a `success` method which converts an `HttpSuccess` object to your desired success type `S`.
+* The default definition of success is any request that 1) completes without `Exception` and 2) receives an HTTP status code that is less than (`&lt;`) 400 Bad Request.  You can eaisly override this default behavior by implementing a custom `check` method as needed.
 
 ### Get an HttpClient
 
-Before you can make HTTP requests using `kolich-httpclient4-closure` you need an `HttpClient` instance.  You can use my `KolichDefaultHttpClient` packaged with this library to build a pre-configured `HttpClient` as desired.
+Before you can make HTTP requests using `kolich-httpclient4-closure` you need an `HttpClient` instance.  You can use my `KolichDefaultHttpClient` helper class packaged with this library to build a pre-configured `HttpClient` as desired.
 
 ```java
 import com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory;
@@ -65,17 +98,17 @@ import com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory;
 final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector();
 ```
 
-Or, pass a `String` to set the HTTP `User-Agent` on the new `HttpClient` instance:
+Or, pass a `String` to the factory method to set the HTTP `User-Agent` on your new `HttpClient` instance.
 
 ```java
 final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector("IE6");
 ```
 
-By default, the `KolichHttpClientFactory` **always** returns an `HttpClient` instance backed by a thread-safe `PoolingClientConnectionManager`.
+By default, the `KolichHttpClientFactory` always returns an `HttpClient` instance backed by a **thread-safe** `PoolingClientConnectionManager`.
 
-#### HttpClient & Spring Beans
+### Get an HttpClient for Spring Beans
 
-You can use the `KolichHttpClientFactory` to also instantiate an `HttpClient` for your beans:
+You can use the `KolichHttpClientFactory` class to also instantiate an `HttpClient` for your beans:
 
 ```xml
 <bean id="SomeFooBarBean" class="com.foo.bar.SomeBean">
@@ -89,11 +122,47 @@ You can use the `KolichHttpClientFactory` to also instantiate an `HttpClient` fo
 </bean>
 ```
 
+### Request Examples
+
+### GET
+
+Make a `GET` request expecting either a `String` back on success, or an `Exception` on failure &mdash; this is represented by the `HttpResponseEither<Exception,String>` return type.
+
+```java
+final HttpResponseEither<Exception,String> result =
+  new HttpClient4Closure<Exception,String>(client) {
+  @Override
+  public String success(final HttpSuccess success) throws Exception {
+    return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
+  }
+  @Override
+  public Exception failure(final HttpFailure failure, final HttpContext context) {
+    return failure.getCause();
+  }
+}.get("http://example.com");
+```
+
+Or, make a `GET` request still expecting a `String` on success, but drop any failures on the floor &mdash; expect a `null` back for success type `S` if anything went wrong.
+
+```java
+final HttpResponseEither<Void,String> result =
+  new HttpClient4Closure<Void,String>(client) {
+  @Override
+  public String success(final HttpSuccess success) throws Exception {
+    return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
+  }
+}.get(new HttpGet("http://foobar.example.com/baz"));
+
+if(result.right() == null) {
+  // Failed miserably.
+}
+```
+
 ## Building
 
 This Java library and its dependencies are built and managed using <a href="https://github.com/harrah/xsbt">SBT 0.12.1</a>.
 
-To clone and build kolich-httpclient4-closure, you must have <a href="http://www.scala-sbt.org/release/docs/Getting-Started/Setup">SBT 0.12.1 installed and configured on your computer</a>.
+To clone and build `kolich-httpclient4-closure`, you must have <a href="http://www.scala-sbt.org/release/docs/Getting-Started/Setup">SBT 0.12.1 installed and configured on your computer</a>.
 
 The kolich-httpclient4-closure SBT <a href="https://github.com/markkolich/kolich-httpclient4-closure/blob/master/project/Build.scala">Build.scala</a> file is highly customized to build and package this Java artifact.  It's written to manage all dependencies and versioning.
 
