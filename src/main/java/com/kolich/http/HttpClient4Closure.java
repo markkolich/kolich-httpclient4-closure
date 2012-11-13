@@ -384,6 +384,13 @@ public abstract class HttpClient4Closure<F,S> {
 		public final HttpResponse getResponse() {
 			return response_;
 		}
+		public final int getStatusCode() {
+			return (response_ != null) ?
+				// If the response is non-null, extract the resulting status.
+				response_.getStatusLine().getStatusCode() :
+				// Might be -1 if the response is unset or null.
+				-1;
+		}
 	}
 	public static final class HttpFailure extends HttpClientClosureResponse {		
 		private final Exception cause_;
