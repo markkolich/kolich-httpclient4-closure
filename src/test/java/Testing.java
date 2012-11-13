@@ -21,7 +21,7 @@ public class Testing {
 		
 		final HttpResponseEither<Integer,String> result = new HttpClient4Closure<Integer,String>(client) {
 			@Override
-			public String success(final HttpSuccess success, final HttpContext context) throws Exception {
+			public String success(final HttpSuccess success) throws Exception {
 				return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
 			}
 			@Override
@@ -46,7 +46,7 @@ public class Testing {
 		
 		final HttpResponseEither<Exception,String> eResult = new HttpClient4Closure<Exception,String>(client) {
 			@Override
-			public String success(final HttpSuccess success, final HttpContext context) throws Exception {
+			public String success(final HttpSuccess success) throws Exception {
 				return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
 			}
 			@Override
@@ -65,7 +65,7 @@ public class Testing {
 				return (response.getStatusLine().getStatusCode() == 405);
 			}
 			@Override
-			public String success(final HttpSuccess success, final HttpContext context) throws Exception {
+			public String success(final HttpSuccess success) throws Exception {
 				return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
 			}
 		}.put("http://google.com");
@@ -75,7 +75,7 @@ public class Testing {
 		
 		final HttpResponseEither<Exception,OutputStream> bResult = new HttpClient4Closure<Exception,OutputStream>(client) {
 			@Override
-			public OutputStream success(final HttpSuccess success, final HttpContext context) throws Exception {
+			public OutputStream success(final HttpSuccess success) throws Exception {
 				final OutputStream os = new ByteArrayOutputStream();
 				IOUtils.copy(success.getResponse().getEntity().getContent(), os);
 				return os;
@@ -92,7 +92,7 @@ public class Testing {
 		final OutputStream os = new ByteArrayOutputStream();
 		final HttpResponseEither<Exception,Integer> stResult = new HttpClient4Closure<Exception,Integer>(client) {
 			@Override
-			public Integer success(final HttpSuccess success, final HttpContext context) throws Exception {
+			public Integer success(final HttpSuccess success) throws Exception {
 				return IOUtils.copy(success.getResponse().getEntity().getContent(), os);
 			}
 			/*
@@ -113,7 +113,7 @@ public class Testing {
 			super(client);
 		}
 		@Override
-		public String success(final HttpSuccess success, final HttpContext context) throws Exception {
+		public String success(final HttpSuccess success) throws Exception {
 			return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
 		}
 	}
@@ -123,7 +123,7 @@ public class Testing {
 			super(client);
 		}
 		@Override
-		public byte[] success(final HttpSuccess success, final HttpContext context) throws Exception {
+		public byte[] success(final HttpSuccess success) throws Exception {
 			return EntityUtils.toByteArray(success.getResponse().getEntity());
 		}
 	}

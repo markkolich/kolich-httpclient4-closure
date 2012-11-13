@@ -40,6 +40,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -55,6 +56,32 @@ public abstract class HttpClient4Closure<F,S> {
 	
 	public HttpClient4Closure(final HttpClient client) {
 		client_ = client;
+	}
+	
+	public final HttpResponseEither<F,S> head(final String url) {
+		try {
+			return head(new URL(url));
+		} catch (MalformedURLException e) {
+			throw new HttpClientClosureException(e);
+		}
+	}
+	
+	public final HttpResponseEither<F,S> head(final URL url) {
+		try {
+			return head(new HttpHead(url.toURI()));
+		} catch (URISyntaxException e) {
+			throw new HttpClientClosureException(e);
+		}
+	}
+	
+	public final HttpResponseEither<F,S> head(final HttpHead head) {
+		return head(head, null);
+	}
+	
+	public final HttpResponseEither<F,S> head(final HttpHead head,
+		final HttpContext context) {
+		return request(head, (context == null) ?
+			new BasicHttpContext() : context);
 	}
 	
 	public final HttpResponseEither<F,S> get(final String url) {
@@ -307,8 +334,11 @@ public abstract class HttpClient4Closure<F,S> {
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract S success(final HttpSuccess success, final HttpContext context)
-		throws Exception;
+	public S success(final HttpSuccess success, final HttpContext context)
+		throws Exception {
+		return success(success);
+	}
+	public abstract S success(final HttpSuccess success) throws Exception;	
 		
 	/**
 	 * Called only if the request is unsuccessful.  The default behavior,
