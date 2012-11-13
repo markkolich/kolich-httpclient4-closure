@@ -4,7 +4,7 @@ A convenient Java wrapper around the Apache Commons HttpClient 4.x library.
 
 As is, using HttpClient is often cumbersome and bulky for typical `HEAD`, `GET`, `POST`, `PUT` and `DELETE` operations.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any) and close/free the connection back into the connection pool.
 
-In most scenarios, the typical HttpClient usage pattern almost always involves:
+In *most* implementations, the typical HttpClient usage pattern almost always involves:
 
 1. Creating a new `HttpHead`, `HttpGet`, `HttpPost`, `HttpPut`, or `HttpDelete` instance specific to the operation.
 2. Setting an request body ("entity") to be sent with the request, if any.
@@ -13,7 +13,9 @@ In most scenarios, the typical HttpClient usage pattern almost always involves:
 5. Reading a response entity, if any.  If one exists, convert it to a `String` so you can do something with it.
 6. Freeing the response and releasing the connection back into the underlying thread-safe connection pool.
 
-In *most* cases, you want to avoid all of this boiler plate and just freakin' send HTTP requests without worrying about the internal wiring of HttpClient.  The intent of this library is to let you do that in a cleaner, repeatable and understandable way. 
+The intent of this library is to let you do all of this in a cleaner, repeatable and understandable way.
+
+Many would argue that this library simply trades one set of "boiler plate" for another.  True.  However, the patterns used here are much easier to grasp and they help you prevent obvious mistakes &mdash; like forgetting to close an `InputStream` when you're done with a response, which almost always manifests itself as a nasty leak under a heavy load.
 
 ## Latest Version
 
