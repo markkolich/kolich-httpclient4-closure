@@ -49,11 +49,11 @@ import org.apache.http.protocol.HttpContext;
 
 import com.kolich.http.exceptions.HttpClientClosureException;
 
-public abstract class HttpClientClosure<F,S> {
+public abstract class HttpClient4Closure<F,S> {
 				
 	private final HttpClient client_;
 	
-	public HttpClientClosure(final HttpClient client) {
+	public HttpClient4Closure(final HttpClient client) {
 		client_ = client;
 	}
 	

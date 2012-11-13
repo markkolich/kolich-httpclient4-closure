@@ -39,8 +39,6 @@ object Dependencies {
 
   private val slf4j = "org.slf4j" % "slf4j-api" % "1.7.2" % "compile"
   
-  private val guava = "com.google.guava" % "guava" % "13.0" % "compile"
-
   private val httpClient = "org.apache.httpcomponents" % "httpclient" % "4.2.2" % "compile"
 
   val deps = Seq(
@@ -48,7 +46,6 @@ object Dependencies {
     kolichCommon,
     // External.
     slf4j,
-    guava,
     httpClient)
 
 }
@@ -66,7 +63,7 @@ object HttpClient extends Build {
   import Dependencies._
   import Resolvers._
 
-  private val aName = "kolich-httpclient-closure"
+  private val aName = "kolich-httpclient4-closure"
   private val aVer = "0.0.2"
   private val aOrg = "com.kolich"
 

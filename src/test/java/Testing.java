@@ -10,8 +10,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.HttpClientClosure;
-import com.kolich.http.HttpClientClosure.HttpResponseEither;
+import com.kolich.http.HttpClient4Closure;
+import com.kolich.http.HttpClient4Closure.HttpResponseEither;
 
 public class Testing {
 	
@@ -19,7 +19,7 @@ public class Testing {
 		
 		final HttpClient client = getNewInstanceWithProxySelector("foobar");
 		
-		final HttpResponseEither<Integer,String> result = new HttpClientClosure<Integer,String>(client) {
+		final HttpResponseEither<Integer,String> result = new HttpClient4Closure<Integer,String>(client) {
 			@Override
 			public String success(final HttpSuccess success, final HttpContext context) throws Exception {
 				return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
@@ -44,7 +44,7 @@ public class Testing {
 			System.out.println(sResult.left());
 		}
 		
-		final HttpResponseEither<Exception,String> eResult = new HttpClientClosure<Exception,String>(client) {
+		final HttpResponseEither<Exception,String> eResult = new HttpClient4Closure<Exception,String>(client) {
 			@Override
 			public String success(final HttpSuccess success, final HttpContext context) throws Exception {
 				return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
@@ -59,7 +59,7 @@ public class Testing {
 		}
 		
 		// Custom check for "success".
-		final HttpResponseEither<Exception,String> cResult = new HttpClientClosure<Exception,String>(client) {
+		final HttpResponseEither<Exception,String> cResult = new HttpClient4Closure<Exception,String>(client) {
 			@Override
 			public boolean check(final HttpResponse response, final HttpContext context) {
 				return (response.getStatusLine().getStatusCode() == 405);
@@ -73,7 +73,7 @@ public class Testing {
 			System.out.println(eResult.right());
 		}
 		
-		final HttpResponseEither<Exception,OutputStream> bResult = new HttpClientClosure<Exception,OutputStream>(client) {
+		final HttpResponseEither<Exception,OutputStream> bResult = new HttpClient4Closure<Exception,OutputStream>(client) {
 			@Override
 			public OutputStream success(final HttpSuccess success, final HttpContext context) throws Exception {
 				final OutputStream os = new ByteArrayOutputStream();
@@ -90,7 +90,7 @@ public class Testing {
 		}
 		
 		final OutputStream os = new ByteArrayOutputStream();
-		final HttpResponseEither<Exception,Integer> stResult = new HttpClientClosure<Exception,Integer>(client) {
+		final HttpResponseEither<Exception,Integer> stResult = new HttpClient4Closure<Exception,Integer>(client) {
 			@Override
 			public Integer success(final HttpSuccess success, final HttpContext context) throws Exception {
 				return IOUtils.copy(success.getResponse().getEntity().getContent(), os);
@@ -108,7 +108,7 @@ public class Testing {
 				
 	}
 	
-	public static class HttpClientClosureExpectString extends HttpClientClosure<Void,String> {
+	public static class HttpClientClosureExpectString extends HttpClient4Closure<Void,String> {
 		public HttpClientClosureExpectString(final HttpClient client) {
 			super(client);
 		}
@@ -118,7 +118,7 @@ public class Testing {
 		}
 	}
 	
-	public static class HttpClientClosureExpectBytes extends HttpClientClosure<Void,byte[]> {
+	public static class HttpClientClosureExpectBytes extends HttpClient4Closure<Void,byte[]> {
 		public HttpClientClosureExpectBytes(final HttpClient client) {
 			super(client);
 		}
