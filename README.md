@@ -55,7 +55,7 @@ Technically speaking, this library does not use "closures" (Lambda expressions) 
 
 ### Functional Concepts
 
-Some concepts in this library, like the `HttpResponseEither<F,S>`, were borrowed directly from the Functional Programming world, namely Scala.  In this case, `HttpResponseEither<F,S>` uses Java generics such that this library can return *either* a left type `F` indicating failure, or a right type `S` indicating success.  It's up to you, the developer, to define what these types are &mdash; the definition of a "successful" return type varies from application to application, and developer to developer.
+Some concepts in this library, like the `HttpResponseEither<F,S>`, were borrowed directly from the Functional Programming world, namely Scala.  In this case, `HttpResponseEither<F,S>` uses Java generics so that this library can return *either* a left type `F` indicating failure, or a right type `S` indicating success.  It's up to you, the developer, to define what these types are &mdash; the definition of a "successful" return type varies from application to application, and developer to developer.
 
 When you "get back" an `HttpResponseEither<F,S>` you can check for success by calling the `success` method on the result.
 
@@ -89,11 +89,11 @@ A few other things to keep in mind:
 * This library automatically releases/frees all connection resources when a request has finished, either successfully or unsuccessfully.  You don't have to worry about closing any internal entity streams, that's done for you.
 * All return types are developer-defined based on how you parameterize your `HttpResponseEither<F,S>`.  It's up to you to write a `success` method which converts an `HttpSuccess` object to your desired success type `S`.
 * The default definition of "success" is any request that 1) completes without `Exception` and 2) receives an HTTP status code that is less than (`<`) 400 Bad Request.  You can easily override this default behavior by implementing a custom `check` method as needed.
-* If you need to manipulate the request immeaditely before execution, you should override the `before` method.  This lets you do things like sign the request, or add the right authentication headers (if needed) before execution.
+* If you need to manipulate the request immediately before execution, you should override the `before` method.  This lets you do things like sign the request, or add the right authentication headers before the request is sent.
 
 ### Get an HttpClient
 
-Before you can make HTTP requests using `kolich-httpclient4-closure` you need an `HttpClient` instance.  You can use my `KolichDefaultHttpClient` helper class packaged with this library to build a pre-configured `HttpClient` as desired.
+Before you can make HTTP requests, you need an `HttpClient` instance.  You can use your own `HttpClient` (as instantiated elsewhere by another method), or you can use my `KolichDefaultHttpClient` factory class packaged with this library to snag a pre-configured `HttpClient`.
 
 ```java
 import com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory;
@@ -104,24 +104,25 @@ final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelecto
 Or, pass a `String` to the factory method to set the HTTP `User-Agent` on your new `HttpClient` instance.
 
 ```java
-final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector("IE6");
+final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector("IE6, whoa");
 ```
 
-By default, the `KolichHttpClientFactory` always returns an `HttpClient` instance backed by a **thread-safe** `PoolingClientConnectionManager`.
+By default, the `KolichHttpClientFactory` always returns an `HttpClient` instance backed by a **thread-safe** `PoolingClientConnectionManager`.  There's currently no support for passing your own connection manager to my `KolichHttpClientFactory` &mdash; if you need to use your own connection manager, it's safest to just build your own `HttpClient` instance elsewhere. 
 
 ### HttpClient Factory for Beans
 
-You can use the `KolichHttpClientFactory` class to also instantiate an `HttpClient` for your beans:
+You can use the `KolichHttpClientFactory` to also instantiate an `HttpClient` for your beans:
 
 ```xml
+<bean id="YourHttpClient"
+  class="com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory"
+  factory-method="getNewInstanceWithProxySelector">
+  <!-- Set a custom User-Agent string too, if you want. -->
+  <constructor-arg><value>IE6, seriously?</value></constructor-arg>
+</bean>
+
 <bean id="SomeFooBarBean" class="com.foo.bar.SomeBean">
-  <constructor-arg>
-    <bean class="com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory"
-      factory-method="getNewInstanceWithProxySelector">
-      <!-- User-agent -->
-      <constructor-arg><value>IE6</value></constructor-arg>
-    </bean>
-  </constructor-arg>			    	
+  <property name="httpClient" ref="YourHttpClient" />			    	
 </bean>
 ```
 
@@ -129,7 +130,7 @@ You can use the `KolichHttpClientFactory` class to also instantiate an `HttpClie
 
 #### HEAD
 
-Send a `HEAD` request and expect back an array of HTTP response headers on success.  Drop any failures on the floor.
+Send a `HEAD` request and expect back an array of HTTP response headers on success.  Drop any failures on the floor &mdash; expect a `null` return value in place of success type `S` if anything went wrong.
 
 ```java
 final HttpResponseEither<Void,Header[]> result =
@@ -264,6 +265,10 @@ final HttpResponseEither<Void,Integer> result =
     return success.getStatusCode();
   }
 }.put("http://api.example.com/upload");
+
+if(result.success()) {
+  System.out.println("PUT resulted in a " + result.right() + " status.");
+}
 ```
 
 #### DELETE
@@ -290,7 +295,7 @@ final HttpResponseEither<Integer,Void> result =
 }.delete("http://api.example.com/go/away");
 
 if(result.success()) {
-  // History.
+  // Got 401 Gone response from server, resource is "history".
 }
 ```
 
@@ -298,7 +303,7 @@ if(result.success()) {
 
 This Java library and its dependencies are built and managed using <a href="https://github.com/harrah/xsbt">SBT 0.12.1</a>.
 
-To clone and build `kolich-httpclient4-closure`, you must have <a href="http://www.scala-sbt.org/release/docs/Getting-Started/Setup">SBT 0.12.1 installed and configured on your computer</a>.
+To clone and build kolich-httpclient4-closure, you must have <a href="http://www.scala-sbt.org/release/docs/Getting-Started/Setup">SBT 0.12.1 installed and configured on your computer</a>.
 
 The kolich-httpclient4-closure SBT <a href="https://github.com/markkolich/kolich-httpclient4-closure/blob/master/project/Build.scala">Build.scala</a> file is highly customized to build and package this Java artifact.  It's written to manage all dependencies and versioning.
 
