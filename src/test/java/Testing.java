@@ -28,7 +28,7 @@ public class Testing {
 			public Integer failure(final HttpFailure failure, final HttpContext context) {
 				return failure.getResponse().getStatusLine().getStatusCode();
 			}
-		}.get("http://google.com");		
+		}.get("http://google.com");
 		if(result.success()) {
 			System.out.println(result.right());
 		} else {

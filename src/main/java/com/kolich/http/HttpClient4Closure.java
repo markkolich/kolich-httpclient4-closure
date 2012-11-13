@@ -99,6 +99,10 @@ public abstract class HttpClient4Closure<F,S> {
 		}
 	}
 	
+	public final HttpResponseEither<F,S> post(final HttpPost post) {
+		return post(post, null, null);
+	}
+	
 	public final HttpResponseEither<F,S> post(final HttpPost post,
 		final byte[] body, final String contentType) {
 		return post(post,
@@ -140,6 +144,10 @@ public abstract class HttpClient4Closure<F,S> {
 		} catch (URISyntaxException e) {
 			throw new HttpClientClosureException(e);
 		}
+	}
+	
+	public final HttpResponseEither<F,S> put(final HttpPut put) {
+		return put(put, null);
 	}
 	
 	public final HttpResponseEither<F,S> put(final HttpPut put,
