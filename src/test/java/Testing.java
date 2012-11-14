@@ -161,14 +161,14 @@ public class Testing {
 				return failure.getStatusCode();
 			}
 		}.get("http://google.com");
-		if(mmmmm.success()) {
-			for(final Cookie c : mmmmm.right()) {
+		final List<Cookie> cookies;
+		if((cookies = mmmmm.right()) != null) {
+			for(final Cookie c : cookies) {
 				System.out.println(c.getName() + " -> " + c.getValue());
 			}
 		} else {
 			System.out.println("Failed miserably: " + mmmmm.left());
 		}
-		
 		
 	}
 	
