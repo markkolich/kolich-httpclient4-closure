@@ -247,10 +247,10 @@ public abstract class HttpClient4Closure<F,S> {
 		try {
 			if(response.success()) {
 				return Right.right(success(((Right<HttpFailure,HttpSuccess>)
-					response).right_, context));
+					response).right_));
 			} else {
 				return Left.left(failure(((Left<HttpFailure,HttpSuccess>)
-					response).left_, context));
+					response).left_));
 			}
 		} catch (Exception e) {
 			throw new HttpClientClosureException(e);
@@ -284,15 +284,15 @@ public abstract class HttpClient4Closure<F,S> {
 			// response against some custom criteria, they should override
 			// this check() method.
 			if(check(response, context)) {
-				return Right.right(new HttpSuccess(response));
+				return Right.right(new HttpSuccess(response, context));
 			} else {
-				return Left.left(new HttpFailure(null, response));
+				return Left.left(new HttpFailure(null, response, context));
 			}
 		} catch (Exception e) {
 			// Something went wrong with the request, abort it,
 			// return failure.
 			request.abort();
-			return Left.left(new HttpFailure(e, response));
+			return Left.left(new HttpFailure(e, response, context));
 		}
 	}
 
@@ -317,7 +317,7 @@ public abstract class HttpClient4Closure<F,S> {
 	 * based on what's defined in this method.  The default success check is
 	 * simply checking the HTTP status code and if it's less than 400
 	 * (Bad Request) then it's considered "good".  If the user wants evaluate
-	 * this response against some custom criteria, they should override
+	 * a response against some custom criteria, they should override
 	 * this method and implement their own logic in their extending class.
 	 * @param response
 	 * @param context
@@ -325,21 +325,25 @@ public abstract class HttpClient4Closure<F,S> {
 	 */
 	public boolean check(final HttpResponse response, final HttpContext context)
 		throws Exception {
+		return check(response);
+	}
+	public boolean check(final HttpResponse response) throws Exception {
 		return (response.getStatusLine().getStatusCode() < SC_BAD_REQUEST);
 	}
 		
 	/**
-	 * Called only if the request is successful.
+	 * Called only if the request is successful.  Success is defined by
+	 * the boolean state that the {@link #check} method returns.  If
+	 * {@link #check} returns true, the request is considered to be
+	 * successful. If it returns false, the request failed.  
 	 * @param success
+	 * @param context
 	 * @return
 	 * @throws Exception
 	 */
-	public S success(final HttpSuccess success, final HttpContext context)
-		throws Exception {
-		return success(success);
-	}
-	public abstract S success(final HttpSuccess success) throws Exception;	
-		
+	public abstract S success(final HttpSuccess success)
+		throws Exception;
+
 	/**
 	 * Called only if the request is unsuccessful.  The default behavior,
 	 * as implemented here, is to simply return null if the request failed.
@@ -350,10 +354,6 @@ public abstract class HttpClient4Closure<F,S> {
 	 * @return null by default, override this if you want to return something else
 	 * @throws Exception
 	 */
-	public F failure(final HttpFailure failure, final HttpContext context)
-		throws Exception {
-		return failure(failure);
-	}
 	public F failure(final HttpFailure failure) throws Exception {
 		return null; // Default, return null on failure.
 	}
@@ -378,11 +378,17 @@ public abstract class HttpClient4Closure<F,S> {
 	
 	public static abstract class HttpClientClosureResponse {
 		private final HttpResponse response_;
-		public HttpClientClosureResponse(HttpResponse response) {
+		private final HttpContext context_;
+		public HttpClientClosureResponse(HttpResponse response,
+			HttpContext context) {
 			response_ = response;
+			context_ = context;
 		}
 		public final HttpResponse getResponse() {
 			return response_;
+		}
+		public final HttpContext getContext() {
+			return context_;
 		}
 		public final int getStatusCode() {
 			return (response_ != null) ?
@@ -394,20 +400,21 @@ public abstract class HttpClient4Closure<F,S> {
 	}
 	public static final class HttpFailure extends HttpClientClosureResponse {		
 		private final Exception cause_;
-		public HttpFailure(Exception cause, HttpResponse response) {
-			super(response);
+		public HttpFailure(Exception cause, HttpResponse response,
+			HttpContext context) {
+			super(response, context);
 			cause_ = cause;
 		}
-		public HttpFailure(HttpResponse response) {
-			this(null, response);
+		public HttpFailure(HttpResponse response, HttpContext context) {
+			this(null, response, context);
 		}
 		public Exception getCause() {
 			return cause_;
 		}
 	}
 	public static final class HttpSuccess extends HttpClientClosureResponse {
-		public HttpSuccess(HttpResponse response) {
-			super(response);
+		public HttpSuccess(HttpResponse response, HttpContext context) {
+			super(response, context);
 		}
 	}
 	
