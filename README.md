@@ -262,7 +262,7 @@ final HttpResponseEither<Void,Integer> result =
     ((HttpPut)request).setEntity(new InputStreamEntity(is, contentLength));
   }
   @Override
-  public String success(final HttpSuccess success) throws Exception {
+  public Integer success(final HttpSuccess success) throws Exception {
     return success.getStatusCode();
   }
 }.put("http://api.example.com/upload");
