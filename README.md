@@ -128,6 +128,28 @@ You can use the `KolichHttpClientFactory` to also instantiate an `HttpClient` fo
 </bean>
 ```
 
+### Full Web-Proxy Support
+
+Some environments require outgoing HTTP/HTTPS connections to use a web-proxy.
+
+Fortunately, `HttpClient` integrates nicely with `java.net.ProxySelector` which makes it possible to automatically detect proxy settings across platforms.
+
+That said, you can easily create a proxy-aware `HttpClient` instance using the right factory method from `KolichHttpClientFactory`.
+
+```java
+import com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory;
+
+final HttpClient lovesProxies = KolichHttpClientFactory.getNewInstanceWithProxySelector();
+
+final HttpClient hatesProxies = KolichHttpClientFactory.getNewInstanceNoProxySelector();
+```
+
+When using the `getNewInstanceWithProxySelector()` factory method, the underlying `HttpClient` will automatically use the JVM's `java.net.ProxySelector` to discover what web-proxy to use when establishing outgoing HTTP connections.  On all platforms, you can manually tell the JVM default `java.net.ProxySelector` what web-proxy to use by setting the `http.proxyHost` and `http.proxyPort` VM arguments for vanilla HTTP connections.  For outgoing HTTPS connections, use `https.proxyHost` and `https.proxyPort`.
+
+```bash
+java -Dhttp.proxyHost=proxy.example.com -Dhttp.proxyPort=3128
+```
+
 ### Examples
 
 #### HEAD

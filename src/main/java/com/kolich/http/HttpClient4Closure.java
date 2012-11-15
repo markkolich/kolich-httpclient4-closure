@@ -48,7 +48,7 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
-import com.kolich.http.exceptions.HttpClientClosureException;
+import com.kolich.http.exceptions.HttpClient4ClosureException;
 
 public abstract class HttpClient4Closure<F,S> {
 				
@@ -62,7 +62,7 @@ public abstract class HttpClient4Closure<F,S> {
 		try {
 			return head(new URL(url));
 		} catch (MalformedURLException e) {
-			throw new HttpClientClosureException(e);
+			throw new HttpClient4ClosureException(e);
 		}
 	}
 	
@@ -70,7 +70,7 @@ public abstract class HttpClient4Closure<F,S> {
 		try {
 			return head(new HttpHead(url.toURI()));
 		} catch (URISyntaxException e) {
-			throw new HttpClientClosureException(e);
+			throw new HttpClient4ClosureException(e);
 		}
 	}
 	
@@ -88,7 +88,7 @@ public abstract class HttpClient4Closure<F,S> {
 		try {
 			return get(new URL(url));
 		} catch (MalformedURLException e) {
-			throw new HttpClientClosureException(e);
+			throw new HttpClient4ClosureException(e);
 		}
 	}
 	
@@ -96,7 +96,7 @@ public abstract class HttpClient4Closure<F,S> {
 		try {
 			return get(new HttpGet(url.toURI()));
 		} catch (URISyntaxException e) {
-			throw new HttpClientClosureException(e);
+			throw new HttpClient4ClosureException(e);
 		}
 	}
 	
@@ -114,7 +114,7 @@ public abstract class HttpClient4Closure<F,S> {
 		try {
 			return post(new URL(url));
 		} catch (MalformedURLException e) {
-			throw new HttpClientClosureException(e);
+			throw new HttpClient4ClosureException(e);
 		}
 	}
 	
@@ -122,7 +122,7 @@ public abstract class HttpClient4Closure<F,S> {
 		try {
 			return post(new HttpPost(url.toURI()), null, null);
 		} catch (URISyntaxException e) {
-			throw new HttpClientClosureException(e);
+			throw new HttpClient4ClosureException(e);
 		}
 	}
 	
@@ -161,7 +161,7 @@ public abstract class HttpClient4Closure<F,S> {
 		try {
 			return put(new URL(url));
 		} catch (MalformedURLException e) {
-			throw new HttpClientClosureException(e);
+			throw new HttpClient4ClosureException(e);
 		}
 	}
 	
@@ -169,7 +169,7 @@ public abstract class HttpClient4Closure<F,S> {
 		try {
 			return put(new HttpPut(url.toURI()), null);
 		} catch (URISyntaxException e) {
-			throw new HttpClientClosureException(e);
+			throw new HttpClient4ClosureException(e);
 		}
 	}
 	
@@ -213,7 +213,7 @@ public abstract class HttpClient4Closure<F,S> {
 		try {
 			return delete(new URL(url));
 		} catch (MalformedURLException e) {
-			throw new HttpClientClosureException(e);
+			throw new HttpClient4ClosureException(e);
 		}
 	}
 	
@@ -221,7 +221,7 @@ public abstract class HttpClient4Closure<F,S> {
 		try {
 			return delete(new HttpDelete(url.toURI()));
 		} catch (URISyntaxException e) {
-			throw new HttpClientClosureException(e);
+			throw new HttpClient4ClosureException(e);
 		}
 	}
 	
@@ -253,7 +253,7 @@ public abstract class HttpClient4Closure<F,S> {
 					response).left_));
 			}
 		} catch (Exception e) {
-			throw new HttpClientClosureException(e);
+			throw new HttpClient4ClosureException(e);
 		} finally {
 			if(response.success()) {
 				consumeQuietly(((Right<HttpFailure,HttpSuccess>)response)

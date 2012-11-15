@@ -28,19 +28,19 @@ package com.kolich.http.exceptions;
 
 import com.kolich.common.KolichCommonException;
 
-public final class HttpClientClosureException extends KolichCommonException {
+public final class HttpClient4ClosureException extends KolichCommonException {
 
-	private static final long serialVersionUID = -8194826635345323997L;
-		
-	public HttpClientClosureException(String message, Throwable cause) {
+	private static final long serialVersionUID = 7587397932824406826L;
+
+	public HttpClient4ClosureException(String message, Throwable cause) {
 		super(message, cause);
 	}
 	
-	public HttpClientClosureException(Throwable cause) {
+	public HttpClient4ClosureException(Throwable cause) {
 		super(cause);
 	}
 	
-	public HttpClientClosureException(String message) {
+	public HttpClient4ClosureException(String message) {
 		super(message);
 	}
 	
