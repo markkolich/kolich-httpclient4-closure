@@ -19,7 +19,7 @@ Many would argue that this library simply trades one set of "boiler plate" for a
 
 ## Latest Version
 
-The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/0.0.2">0.0.2</a>.
+The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/0.0.3">0.0.3</a>.
 
 ## Resolvers
 
@@ -30,7 +30,7 @@ If you wish to use this artifact, you can easily add it to your existing Maven o
 ```scala
 resolvers += "Kolich repo" at "http://markkolich.github.com/repo"
 
-val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.0.2" % "compile"
+val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.0.3" % "compile"
 ```
 
 ### Maven
@@ -46,7 +46,7 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.
 <dependency>
   <groupId>com.kolich</groupId>
   <artifactId>kolich-httpclient4-closure</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -158,7 +158,7 @@ final HttpResponseEither<Exception,String> result =
     return EntityUtils.toString(success.getResponse().getEntity(), "UTF-8");
   }
   @Override
-  public Exception failure(final HttpFailure failure, final HttpContext context) {
+  public Exception failure(final HttpFailure failure) {
     return failure.getCause();
   }
 }.get("http://example.com");
@@ -215,7 +215,7 @@ final HttpResponseEither<Integer,String> result =
     return EntityUtils.toString(success.getResponse().getEntity(), "UTF-8");
   }
   @Override
-  public Integer failure(final HttpFailure failure, final HttpContext context) {
+  public Integer failure(final HttpFailure failure) {
     // Return the HTTP status code if anything went wrong.
     return failure.getStatusCode();
   }
@@ -225,7 +225,6 @@ final HttpResponseEither<Integer,String> result =
 Or, send a `POST` with some form variables, ignoring failures, and convert a successful response to some custom entity using Google's <a href="http://code.google.com/p/google-gson/">GSON</a> toolkit.
 
 ```java
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 final HttpPost request = new HttpPost("http://api.example.com");
@@ -290,7 +289,7 @@ final HttpResponseEither<Integer,Void> result =
     return null; // Meh, for Void
   }
   @Override
-  public Integer failure(final HttpFailure failure, final HttpContext context) {
+  public Integer failure(final HttpFailure failure) {
     // Return the HTTP status code if anything went "wrong".
     return failure.getStatusCode();
   }
@@ -318,15 +317,15 @@ Run SBT from within kolich-httpclient4-closure.
     #~> cd kolich-httpclient4-closure
     #~/kolich-httpclient4-closure> sbt
     ...
-    kolich-httpclient4-closure:0.0.2>
+    kolich-httpclient4-closure:0.0.3>
 
 You will see a `kolich-httpclient4-closure` SBT prompt once all dependencies are resolved and the project is loaded.
 
 In SBT, run `package` to compile and package the JAR.
 
-    kolich-httpclient4-closure:0.0.2> package
+    kolich-httpclient4-closure:0.0.3> package
     [info] Compiling 17 Java sources to ~/kolich-httpclient4-closure/target/classes...
-    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-0.0.2.jar ...
+    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-0.0.3.jar ...
     [info] Done packaging.
     [success] Total time: 4 s, completed
 
@@ -334,7 +333,7 @@ Note the resulting JAR is placed into the **kolich-httpclient4-closure/dist** di
 
 To create an Eclipse Java project for kolich-httpclient4-closure, run `eclipse` in SBT.
 
-    kolich-httpclient4-closure:0.0.2> eclipse
+    kolich-httpclient4-closure:0.0.3> eclipse
     ...
     [info] Successfully created Eclipse project files for project(s):
     [info] kolich-httpclient4-closure
