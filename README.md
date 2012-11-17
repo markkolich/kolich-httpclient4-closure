@@ -221,6 +221,42 @@ final HttpResponseEither<Void,Long> result =
 System.out.println("I copied " + result.right() + " total bytes.");
 ```
 
+Send a `GET` request and extract a `List<Cookie>` (list of `Cookie`'s) from the response, using the default `HttpContext` and a per-request `BasicCookieStore`.
+
+```java
+import static org.apache.http.client.protocol.ClientContext.COOKIE_STORE;
+import org.apache.http.client.CookieStore;
+import org.apache.http.impl.client.BasicCookieStore;
+
+final HttpResponseEither<Integer,List<Cookie>> mmmm =
+  new HttpClient4Closure<Integer,List<Cookie>>(client) {
+  @Override
+  public void before(final HttpRequestBase request, final HttpContext context) {
+    context.setAttribute(COOKIE_STORE, new BasicCookieStore());
+  }
+  @Override
+  public List<Cookie> success(final HttpSuccess success) {
+    // Extract a list of cookies from the request.
+    // Might be empty.
+    return ((CookieStore)success.getContext()
+      .getAttribute(COOKIE_STORE)).getCookies();
+  }
+  @Override
+  public Integer failure(final HttpFailure failure) {
+    return failure.getStatusCode();
+  }
+}.get("http://example.com");
+
+// Get the list of extracted cookies from the response
+// and print them out.  Mmmm, cookies.
+final List<Cookie> cookies;
+if((cookies = mmmm.right()) != null) {
+  for(final Cookie c : cookies) {
+    System.out.println(c.getName() + " -> " + c.getValue());
+  }
+}
+```
+
 #### POST
 
 Send a `POST` request but manipulate the `HttpBaseRequest` object before execution by overriding the `before` method.  Expect a `String` on success, and an `Integer` on failure.
