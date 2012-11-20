@@ -26,14 +26,13 @@
 
 package com.kolich.http;
 
+import static java.net.URI.create;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.util.EntityUtils.consume;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.URI;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -59,19 +58,11 @@ public abstract class HttpClient4Closure<F,S> {
 	}
 	
 	public final HttpResponseEither<F,S> head(final String url) {
-		try {
-			return head(new URL(url));
-		} catch (MalformedURLException e) {
-			throw new HttpClient4ClosureException(e);
-		}
+		return head(create(url));
 	}
 	
-	public final HttpResponseEither<F,S> head(final URL url) {
-		try {
-			return head(new HttpHead(url.toURI()));
-		} catch (URISyntaxException e) {
-			throw new HttpClient4ClosureException(e);
-		}
+	public final HttpResponseEither<F,S> head(final URI uri) {
+		return head(new HttpHead(uri));
 	}
 	
 	public final HttpResponseEither<F,S> head(final HttpHead head) {
@@ -80,24 +71,15 @@ public abstract class HttpClient4Closure<F,S> {
 	
 	public final HttpResponseEither<F,S> head(final HttpHead head,
 		final HttpContext context) {
-		return request(head, (context == null) ?
-			new BasicHttpContext() : context);
+		return request(head, context);
 	}
 	
 	public final HttpResponseEither<F,S> get(final String url) {
-		try {
-			return get(new URL(url));
-		} catch (MalformedURLException e) {
-			throw new HttpClient4ClosureException(e);
-		}
+		return get(create(url));
 	}
 	
-	public final HttpResponseEither<F,S> get(final URL url) {
-		try {
-			return get(new HttpGet(url.toURI()));
-		} catch (URISyntaxException e) {
-			throw new HttpClient4ClosureException(e);
-		}
+	public final HttpResponseEither<F,S> get(final URI uri) {
+		return get(new HttpGet(uri));
 	}
 	
 	public final HttpResponseEither<F,S> get(final HttpGet get) {
@@ -106,24 +88,15 @@ public abstract class HttpClient4Closure<F,S> {
 	
 	public final HttpResponseEither<F,S> get(final HttpGet get,
 		final HttpContext context) {
-		return request(get, (context == null) ?
-			new BasicHttpContext() : context);
+		return request(get, context);
 	}
 	
 	public final HttpResponseEither<F,S> post(final String url) {
-		try {
-			return post(new URL(url));
-		} catch (MalformedURLException e) {
-			throw new HttpClient4ClosureException(e);
-		}
+		return post(create(url));
 	}
 	
-	public final HttpResponseEither<F,S> post(final URL url) {
-		try {
-			return post(new HttpPost(url.toURI()), null, null);
-		} catch (URISyntaxException e) {
-			throw new HttpClient4ClosureException(e);
-		}
+	public final HttpResponseEither<F,S> post(final URI uri) {
+		return post(new HttpPost(uri), null, null);
 	}
 	
 	public final HttpResponseEither<F,S> post(final HttpPost post) {
@@ -134,7 +107,7 @@ public abstract class HttpClient4Closure<F,S> {
 		final byte[] body, final String contentType) {
 		return post(post,
 			(body != null) ? new ByteArrayInputStream(body) : null,
-			(body != null) ? (long)body.length : -1L,
+			(body != null) ? (long)body.length : 0L,
 			contentType);
 	}
 	
@@ -153,24 +126,15 @@ public abstract class HttpClient4Closure<F,S> {
 			}
 			post.setEntity(entity);
 		}
-		return request(post, (context == null) ?
-			new BasicHttpContext() : context);
+		return request(post, context);
 	}
 	
 	public final HttpResponseEither<F,S> put(final String url) {
-		try {
-			return put(new URL(url));
-		} catch (MalformedURLException e) {
-			throw new HttpClient4ClosureException(e);
-		}
+		return put(create(url));
 	}
 	
-	public final HttpResponseEither<F,S> put(final URL url) {
-		try {
-			return put(new HttpPut(url.toURI()), null);
-		} catch (URISyntaxException e) {
-			throw new HttpClient4ClosureException(e);
-		}
+	public final HttpResponseEither<F,S> put(final URI uri) {
+		return put(new HttpPut(uri), null);
 	}
 	
 	public final HttpResponseEither<F,S> put(final HttpPut put) {
@@ -186,7 +150,7 @@ public abstract class HttpClient4Closure<F,S> {
 		final byte[] body, final String contentType, final HttpContext context) {
 		return put(put,
 			(body != null) ? new ByteArrayInputStream(body) : null,
-			(body != null) ? (long)body.length : -1L,
+			(body != null) ? (long)body.length : 0L,
 			contentType);
 	}
 	
@@ -205,24 +169,15 @@ public abstract class HttpClient4Closure<F,S> {
 			}
 			put.setEntity(entity);
 		}
-		return request(put, (context == null) ?
-			new BasicHttpContext() : context);
+		return request(put, context);
 	}
 	
 	public final HttpResponseEither<F,S> delete(final String url) {
-		try {
-			return delete(new URL(url));
-		} catch (MalformedURLException e) {
-			throw new HttpClient4ClosureException(e);
-		}
+		return delete(create(url));
 	}
 	
-	public final HttpResponseEither<F,S> delete(final URL url) {
-		try {
-			return delete(new HttpDelete(url.toURI()));
-		} catch (URISyntaxException e) {
-			throw new HttpClient4ClosureException(e);
-		}
+	public final HttpResponseEither<F,S> delete(final URI uri) {
+		return delete(new HttpDelete(uri));
 	}
 	
 	public final HttpResponseEither<F,S> delete(final HttpDelete delete) {
@@ -231,13 +186,17 @@ public abstract class HttpClient4Closure<F,S> {
 	
 	public final HttpResponseEither<F,S> delete(final HttpDelete delete,
 		final HttpContext context) {
-		return request(delete, (context == null) ?
-			new BasicHttpContext() : context);
+		return request(delete);
 	}
 	
-	public HttpResponseEither<F,S> request(final HttpRequestBase request,
+	public final HttpResponseEither<F,S> request(final HttpRequestBase request) {
+		return request(request, null);
+	}
+	
+	public final HttpResponseEither<F,S> request(final HttpRequestBase request,
 		final HttpContext context) {
-		return doit(request, context);
+		return doit(request, (context == null) ?
+			new BasicHttpContext() : context);
 	}
 	
 	private final HttpResponseEither<F,S> doit(final HttpRequestBase request,
@@ -375,7 +334,7 @@ public abstract class HttpClient4Closure<F,S> {
 			consumeQuietly(response.getEntity());
 		}
 	}
-	
+		
 	public static abstract class HttpClientClosureResponse {
 		private final HttpResponse response_;
 		private final HttpContext context_;
@@ -419,9 +378,9 @@ public abstract class HttpClient4Closure<F,S> {
 	}
 	
 	public interface HttpResponseEither<F,S> {
-		public abstract boolean success();
-		public abstract F left();
-		public abstract S right();
+		public boolean success();
+		public F left();
+		public S right();
 	}
 	
 	private static final class Left<F,S> implements HttpResponseEither<F,S> {
