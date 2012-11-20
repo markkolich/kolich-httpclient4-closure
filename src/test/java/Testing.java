@@ -170,6 +170,20 @@ public class Testing {
 			System.out.println("Failed miserably: " + mmmmm.left());
 		}
 		
+		final HttpResponseEither<Void,Header[]> haResult =
+			new HttpClient4Closure<Void, Header[]>(client) {
+			@Override
+			public Header[] success(final HttpSuccess success) {
+				return success.getResponse().getAllHeaders();
+			}
+		}.head("http://java.com");
+		final Header[] headers = haResult.right();
+		if(headers != null) {
+			for(final Header h : headers) {
+				System.out.println(h.getName() + ": " + h.getValue());
+			}
+		}
+		
 	}
 	
 	public static class HttpClientClosureExpectString extends HttpClient4Closure<Void,String> {
