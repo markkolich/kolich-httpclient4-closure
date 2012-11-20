@@ -186,7 +186,7 @@ public abstract class HttpClient4Closure<F,S> {
 	
 	public final HttpResponseEither<F,S> delete(final HttpDelete delete,
 		final HttpContext context) {
-		return request(delete);
+		return request(delete, context);
 	}
 	
 	public final HttpResponseEither<F,S> request(final HttpRequestBase request) {
