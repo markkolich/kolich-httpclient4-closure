@@ -245,7 +245,7 @@ public abstract class HttpClient4Closure<F,S> {
 			if(check(response, context)) {
 				return Right.right(new HttpSuccess(response, context));
 			} else {
-				return Left.left(new HttpFailure(null, response, context));
+				return Left.left(new HttpFailure(response, context));
 			}
 		} catch (Exception e) {
 			// Something went wrong with the request, abort it,
