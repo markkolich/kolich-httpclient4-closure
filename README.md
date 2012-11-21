@@ -195,7 +195,7 @@ final HttpResponseEither<Void,String> result =
   public String success(final HttpSuccess success) throws Exception {
     return EntityUtils.toString(success.getResponse().getEntity(), "UTF-8");
   }
-}.get(new HttpGet("http://skdfjlsdf.example.com")); // Obvious 404
+}.get(new HttpGet("http://example.com/sdljflk8831sdflk")); // Obvious 404
 
 System.out.println(result.right()); // Prints "null"
 ```
