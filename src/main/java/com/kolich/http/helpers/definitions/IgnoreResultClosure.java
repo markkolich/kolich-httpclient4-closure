@@ -26,25 +26,30 @@
 
 package com.kolich.http.helpers.definitions;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceNoProxySelector;
 
 import org.apache.http.client.HttpClient;
 
 import com.kolich.http.HttpClient4Closure;
 
-public abstract class OrExceptionClosure<S> extends HttpClient4Closure<Exception,S> {
+public abstract class IgnoreResultClosure extends HttpClient4Closure<Void,Void> {
 
-	public OrExceptionClosure(final HttpClient client) {
+	public IgnoreResultClosure(final HttpClient client) {
 		super(client);
 	}
 	
-	public OrExceptionClosure() {
-		this(getNewInstanceWithProxySelector());
+	public IgnoreResultClosure() {
+		this(getNewInstanceNoProxySelector());
 	}
 	
 	@Override
-	public final Exception failure(final HttpFailure failure) {
-		return failure.getCause();
+	public final Void success(final HttpSuccess success) {
+		return null;
 	}
-
+	
+	@Override
+	public final Void failure(final HttpFailure failure) {
+		return null;
+	}
+	
 }

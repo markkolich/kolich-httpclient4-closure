@@ -24,27 +24,51 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers.definitions;
+package com.kolich.http.helpers;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.protocol.HttpContext;
 
-import com.kolich.http.HttpClient4Closure;
+import com.kolich.http.helpers.definitions.IgnoreResultClosure;
 
-public abstract class OrExceptionClosure<S> extends HttpClient4Closure<Exception,S> {
-
-	public OrExceptionClosure(final HttpClient client) {
+public class StatusCodeAndHeadersClosure extends IgnoreResultClosure {
+	
+	private transient int statusCode_ = -1;
+	private transient Header[] headers_ = null;
+	
+	public StatusCodeAndHeadersClosure(final HttpClient client) {
 		super(client);
 	}
 	
-	public OrExceptionClosure() {
+	public StatusCodeAndHeadersClosure() {
 		this(getNewInstanceWithProxySelector());
 	}
 	
 	@Override
-	public final Exception failure(final HttpFailure failure) {
-		return failure.getCause();
+	public final void after(final HttpResponse response, final HttpContext context) {
+		statusCode_ = response.getStatusLine().getStatusCode();
+		headers_ = response.getAllHeaders();
 	}
-
+	
+	public final int getStatusCode() {
+		return statusCode_;
+	}
+	
+	public final Header[] getHeaders() {
+		return headers_;
+	}
+	
+	public final List<Header> getHeaderList() {
+		checkNotNull(headers_, "Header list is null, no headers set.");
+		return Arrays.asList(headers_);
+	}
+	
 }

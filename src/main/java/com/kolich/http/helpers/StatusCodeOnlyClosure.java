@@ -24,27 +24,35 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers.definitions;
+package com.kolich.http.helpers;
 
 import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.protocol.HttpContext;
 
-import com.kolich.http.HttpClient4Closure;
+import com.kolich.http.helpers.definitions.IgnoreResultClosure;
 
-public abstract class OrExceptionClosure<S> extends HttpClient4Closure<Exception,S> {
-
-	public OrExceptionClosure(final HttpClient client) {
+public class StatusCodeOnlyClosure extends IgnoreResultClosure {
+	
+	private transient int statusCode_ = -1;
+	
+	public StatusCodeOnlyClosure(final HttpClient client) {
 		super(client);
 	}
 	
-	public OrExceptionClosure() {
+	public StatusCodeOnlyClosure() {
 		this(getNewInstanceWithProxySelector());
 	}
 	
 	@Override
-	public final Exception failure(final HttpFailure failure) {
-		return failure.getCause();
+	public final void after(final HttpResponse response, final HttpContext context) {
+		statusCode_ = response.getStatusLine().getStatusCode();
 	}
-
+	
+	public final int getStatusCode() {
+		return statusCode_;
+	}
+	
 }

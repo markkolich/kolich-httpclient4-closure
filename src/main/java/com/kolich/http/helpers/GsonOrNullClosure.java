@@ -24,27 +24,44 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers.definitions;
+package com.kolich.http.helpers;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
+import static com.kolich.common.entities.KolichCommonEntity.getDefaultGsonBuilder;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
-import org.apache.http.client.HttpClient;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
-import com.kolich.http.HttpClient4Closure;
+import org.apache.http.HttpEntity;
 
-public abstract class OrExceptionClosure<S> extends HttpClient4Closure<Exception,S> {
+import com.google.gson.Gson;
+import com.kolich.http.helpers.definitions.OrNullClosure;
 
-	public OrExceptionClosure(final HttpClient client) {
-		super(client);
+public class GsonOrNullClosure<S> extends OrNullClosure<S> {
+	
+	private final Gson gson_;
+	private final Class<S> clazz_;
+	
+	public GsonOrNullClosure(final Gson gson, final Class<S> clazz) {
+		gson_ = gson;
+		clazz_ = clazz;
 	}
 	
-	public OrExceptionClosure() {
-		this(getNewInstanceWithProxySelector());
+	public GsonOrNullClosure(final Class<S> clazz) {
+		this(getDefaultGsonBuilder().create(), clazz);
 	}
 	
 	@Override
-	public final Exception failure(final HttpFailure failure) {
-		return failure.getCause();
+	public final S success(final HttpSuccess success) throws Exception {
+		Reader r = null;
+		try {
+			final HttpEntity entity = success.getResponse().getEntity();
+			r = new InputStreamReader(entity.getContent(), UTF_8);
+			return gson_.fromJson(r, clazz_);
+		} finally {
+			closeQuietly(r);
+		}
 	}
-
+	
 }

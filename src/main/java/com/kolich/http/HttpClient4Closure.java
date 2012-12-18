@@ -47,8 +47,6 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
-import com.kolich.http.exceptions.HttpClient4ClosureException;
-
 public abstract class HttpClient4Closure<F,S> {
 				
 	private final HttpClient client_;
@@ -200,28 +198,35 @@ public abstract class HttpClient4Closure<F,S> {
 	}
 	
 	private final HttpResponseEither<F,S> doit(final HttpRequestBase request,
-		final HttpContext context) {		
+		final HttpContext context) {
+		HttpResponseEither<F,S> result = null;
+		// Any failures/exceptions encountered during request execution
+		// (in a call to execute) are wrapped up as a Left() and are delt
+		// with in the failure path below.
 		final HttpResponseEither<HttpFailure,HttpSuccess> response =
 			execute(request, context);
 		try {
 			if(response.success()) {
-				return Right.right(success(((Right<HttpFailure,HttpSuccess>)
+				result = Right.right(success(((Right<HttpFailure,HttpSuccess>)
 					response).right_));
 			} else {
-				return Left.left(failure(((Left<HttpFailure,HttpSuccess>)
+				result = Left.left(failure(((Left<HttpFailure,HttpSuccess>)
 					response).left_));
 			}
 		} catch (Exception e) {
-			throw new HttpClient4ClosureException(e);
+			// Wrap up any failures/exceptions that might have occurred
+			// while processing the response.
+			result = Left.left(failure(new HttpFailure(e)));
 		} finally {
 			if(response.success()) {
-				consumeQuietly(((Right<HttpFailure,HttpSuccess>)response)
-					.right_.getResponse());
+				consumeQuietly(((Right<HttpFailure,HttpSuccess>)
+					response).right_.getResponse());
 			} else {
-				consumeQuietly(((Left<HttpFailure,HttpSuccess>)response)
-					.left_.getResponse());
+				consumeQuietly(((Left<HttpFailure,HttpSuccess>)
+					response).left_.getResponse());
 			}
 		}
+		return result;
 	}
 	
 	private final HttpResponseEither<HttpFailure,HttpSuccess> execute(
@@ -235,6 +240,8 @@ public abstract class HttpClient4Closure<F,S> {
 			before(request, context);
 			// Actually execute the request, get a response.
 			response = client_.execute(request, context);
+			// Immediately after execution, only if the request was executed.
+			after(response, context);
 			// Check if the response was "successful".  The definition of
 			// success is arbitrary based on what's defined in the check()
 			// method.  The default success check is simply checking the
@@ -267,6 +274,20 @@ public abstract class HttpClient4Closure<F,S> {
 		before(request);
 	}
 	public void before(final HttpRequestBase request) throws Exception {
+		// Default, do nothing.
+	}
+	
+	/**
+	 * Called immeaditely after request execution, but before the response
+	 * is checked for "success" via {@link #check(HttpResponse)}.  Is only called
+	 * if there were no exceptions that would have resulted from
+	 * attempting to execute the request.
+	 * @param response
+	 * @param context
+	 * @throws Exception
+	 */
+	public void after(final HttpResponse response, final HttpContext context)
+		throws Exception {
 		// Default, do nothing.
 	}
 	
@@ -311,12 +332,11 @@ public abstract class HttpClient4Closure<F,S> {
 	 * or status code.
 	 * @param failure
 	 * @return null by default, override this if you want to return something else
-	 * @throws Exception
 	 */
-	public F failure(final HttpFailure failure) throws Exception {
+	public F failure(final HttpFailure failure) {
 		return null; // Default, return null on failure.
 	}
-	
+		
 	public static final void consumeQuietly(final HttpEntity entity) {
 		try {
 			consume(entity);
@@ -366,6 +386,9 @@ public abstract class HttpClient4Closure<F,S> {
 		}
 		public HttpFailure(HttpResponse response, HttpContext context) {
 			this(null, response, context);
+		}
+		public HttpFailure(Exception cause) {
+			this(cause, null, null);
 		}
 		public Exception getCause() {
 			return cause_;
