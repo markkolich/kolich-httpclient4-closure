@@ -26,15 +26,39 @@
 
 package com.kolich.http.helpers;
 
-import org.apache.http.util.EntityUtils;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.kolich.http.helpers.definitions.OrExceptionClosure;
+import java.util.Arrays;
+import java.util.List;
 
-public class ByteArrayOrExceptionClosure extends OrExceptionClosure<byte[]> {
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
+
+import com.kolich.http.helpers.definitions.IgnoreResultClosure;
+
+public class StatusCodeAndHeadersOnlyClosure extends IgnoreResultClosure {
+	
+	private transient int statusCode_ = -1;
+	private transient Header[] headers_ = null;
 	
 	@Override
-	public final byte[] success(final HttpSuccess success) throws Exception {
-		return EntityUtils.toByteArray(success.getResponse().getEntity());
+	public final void after(final HttpResponse response, final HttpContext context) {
+		statusCode_ = response.getStatusLine().getStatusCode();
+		headers_ = response.getAllHeaders();
+	}
+	
+	public final int getStatusCode() {
+		return statusCode_;
+	}
+	
+	public final Header[] getHeaders() {
+		return headers_;
+	}
+	
+	public final List<Header> getHeaderList() {
+		checkNotNull(headers_, "Header list is null, no headers set.");
+		return Arrays.asList(headers_);
 	}
 	
 }

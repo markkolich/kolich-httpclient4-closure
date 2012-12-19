@@ -26,46 +26,15 @@
 
 package com.kolich.http.helpers;
 
-import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
-import static com.kolich.common.entities.KolichCommonEntity.getDefaultGsonBuilder;
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import org.apache.http.util.EntityUtils;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
+import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.HttpClient;
-
-import com.google.gson.Gson;
-import com.kolich.http.helpers.definitions.OrNullClosure;
-
-public class GsonOrNullClosure<S> extends OrNullClosure<S> {
-	
-	private final Gson gson_;
-	private final Class<S> clazz_;
-	
-	public GsonOrNullClosure(final HttpClient client, final Gson gson,
-		final Class<S> clazz) {
-		super(client);
-		gson_ = gson;
-		clazz_ = clazz;
-	}
-	
-	public GsonOrNullClosure(final HttpClient client,
-		final Class<S> clazz) {
-		this(client, getDefaultGsonBuilder().create(), clazz);
-	}
+public class ByteArrayOrHttpFailureClosureClosure extends OrHttpFailureClosure<byte[]> {
 	
 	@Override
-	public final S success(final HttpSuccess success) throws Exception {
-		Reader r = null;
-		try {
-			final HttpEntity entity = success.getResponse().getEntity();
-			r = new InputStreamReader(entity.getContent(), UTF_8);
-			return gson_.fromJson(r, clazz_);
-		} finally {
-			closeQuietly(r);
-		}
+	public final byte[] success(final HttpSuccess success) throws Exception {
+		return EntityUtils.toByteArray(success.getResponse().getEntity());
 	}
 	
 }

@@ -26,42 +26,13 @@
 
 package com.kolich.http.helpers;
 
-import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
-import static com.kolich.common.entities.KolichCommonEntity.getDefaultGsonBuilder;
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
-
-import org.apache.http.HttpEntity;
-
-import com.google.gson.Gson;
-import com.kolich.http.helpers.definitions.OrExceptionClosure;
-
-public class GsonOrExceptionClosure<S> extends OrExceptionClosure<S> {
-	
-	private final Gson gson_;
-	private final Class<S> clazz_;
-	
-	public GsonOrExceptionClosure(final Gson gson, final Class<S> clazz) {
-		gson_ = gson;
-		clazz_ = clazz;
-	}
-	
-	public GsonOrExceptionClosure(final Class<S> clazz) {
-		this(getDefaultGsonBuilder().create(), clazz);
-	}
+public class StatusCodeOrHttpFailureClosure extends OrHttpFailureClosure<Integer> {
 	
 	@Override
-	public final S success(final HttpSuccess success) throws Exception {
-		Reader r = null;
-		try {
-			final HttpEntity entity = success.getResponse().getEntity();
-			r = new InputStreamReader(entity.getContent(), UTF_8);
-			return gson_.fromJson(r, clazz_);
-		} finally {
-			closeQuietly(r);
-		}
+	public final Integer success(final HttpSuccess success) throws Exception {
+		return success.getStatusCode();
 	}
-		
+	
 }

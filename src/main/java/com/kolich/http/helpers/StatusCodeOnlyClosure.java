@@ -26,10 +26,7 @@
 
 package com.kolich.http.helpers;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
-
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.protocol.HttpContext;
 
 import com.kolich.http.helpers.definitions.IgnoreResultClosure;
@@ -37,15 +34,7 @@ import com.kolich.http.helpers.definitions.IgnoreResultClosure;
 public class StatusCodeOnlyClosure extends IgnoreResultClosure {
 	
 	private transient int statusCode_ = -1;
-	
-	public StatusCodeOnlyClosure(final HttpClient client) {
-		super(client);
-	}
-	
-	public StatusCodeOnlyClosure() {
-		this(getNewInstanceWithProxySelector());
-	}
-	
+		
 	@Override
 	public final void after(final HttpResponse response, final HttpContext context) {
 		statusCode_ = response.getStatusLine().getStatusCode();

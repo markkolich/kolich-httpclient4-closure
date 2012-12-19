@@ -24,27 +24,19 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers.definitions;
+package com.kolich.http.helpers;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
 
-import org.apache.http.client.HttpClient;
+import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.HttpClient4Closure;
+import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 
-public abstract class OrExceptionClosure<S> extends HttpClient4Closure<Exception,S> {
-
-	public OrExceptionClosure(final HttpClient client) {
-		super(client);
-	}
-	
-	public OrExceptionClosure() {
-		this(getNewInstanceWithProxySelector());
-	}
+public class StringOrHttpFailureClosure extends OrHttpFailureClosure<String> {
 	
 	@Override
-	public final Exception failure(final HttpFailure failure) {
-		return failure.getCause();
+	public final String success(final HttpSuccess success) throws Exception {
+		return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
 	}
-
+	
 }
