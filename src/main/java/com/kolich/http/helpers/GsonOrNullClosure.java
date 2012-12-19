@@ -28,6 +28,7 @@ package com.kolich.http.helpers;
 
 import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
 import static com.kolich.common.entities.KolichCommonEntity.getDefaultGsonBuilder;
+import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import java.io.InputStreamReader;
@@ -54,6 +55,10 @@ public class GsonOrNullClosure<S> extends OrNullClosure<S> {
 	public GsonOrNullClosure(final HttpClient client,
 		final Class<S> clazz) {
 		this(client, getDefaultGsonBuilder().create(), clazz);
+	}
+	
+	public GsonOrNullClosure(final Class<S> clazz) {
+		this(getNewInstanceWithProxySelector(), clazz);
 	}
 	
 	@Override

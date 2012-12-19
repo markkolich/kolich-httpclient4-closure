@@ -26,11 +26,20 @@
 
 package com.kolich.http.helpers;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.util.EntityUtils;
 
 import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 
 public class ByteArrayOrHttpFailureClosureClosure extends OrHttpFailureClosure<byte[]> {
+	
+	public ByteArrayOrHttpFailureClosureClosure(final HttpClient client) {
+		super(client);
+	}
+	
+	public ByteArrayOrHttpFailureClosureClosure() {
+		super();
+	}
 	
 	@Override
 	public final byte[] success(final HttpSuccess success) throws Exception {

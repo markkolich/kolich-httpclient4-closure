@@ -26,11 +26,20 @@
 
 package com.kolich.http.helpers;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.util.EntityUtils;
 
 import com.kolich.http.helpers.definitions.OrNullClosure;
 
 public class ByteArrayOrNullClosure extends OrNullClosure<byte[]> {
+	
+	public ByteArrayOrNullClosure(final HttpClient client) {
+		super(client);
+	}
+	
+	public ByteArrayOrNullClosure() {
+		super();
+	}
 	
 	@Override
 	public final byte[] success(final HttpSuccess success) throws Exception {

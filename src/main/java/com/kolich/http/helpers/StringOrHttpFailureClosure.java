@@ -28,11 +28,20 @@ package com.kolich.http.helpers;
 
 import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.util.EntityUtils;
 
 import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 
 public class StringOrHttpFailureClosure extends OrHttpFailureClosure<String> {
+	
+	public StringOrHttpFailureClosure(final HttpClient client) {
+		super(client);
+	}
+	
+	public StringOrHttpFailureClosure() {
+		super();
+	}
 	
 	@Override
 	public final String success(final HttpSuccess success) throws Exception {

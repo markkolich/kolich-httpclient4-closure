@@ -26,13 +26,12 @@
 
 package com.kolich.http.helpers;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.protocol.HttpContext;
 
 import com.kolich.http.helpers.definitions.IgnoreResultClosure;
@@ -41,6 +40,14 @@ public class StatusCodeAndHeadersOnlyClosure extends IgnoreResultClosure {
 	
 	private transient int statusCode_ = -1;
 	private transient Header[] headers_ = null;
+	
+	public StatusCodeAndHeadersOnlyClosure(final HttpClient client) {
+		super(client);
+	}
+	
+	public StatusCodeAndHeadersOnlyClosure() {
+		super();
+	}
 	
 	@Override
 	public final void after(final HttpResponse response, final HttpContext context) {
@@ -57,8 +64,7 @@ public class StatusCodeAndHeadersOnlyClosure extends IgnoreResultClosure {
 	}
 	
 	public final List<Header> getHeaderList() {
-		checkNotNull(headers_, "Header list is null, no headers set.");
-		return Arrays.asList(headers_);
+		return (headers_ == null) ? null : Arrays.asList(headers_);
 	}
 	
 }

@@ -26,9 +26,19 @@
 
 package com.kolich.http.helpers;
 
+import org.apache.http.client.HttpClient;
+
 import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 
 public class StatusCodeOrHttpFailureClosure extends OrHttpFailureClosure<Integer> {
+	
+	public StatusCodeOrHttpFailureClosure(final HttpClient client) {
+		super(client);
+	}
+	
+	public StatusCodeOrHttpFailureClosure() {
+		super();
+	}
 	
 	@Override
 	public final Integer success(final HttpSuccess success) throws Exception {

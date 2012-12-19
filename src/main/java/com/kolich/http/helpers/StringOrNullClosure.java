@@ -28,11 +28,20 @@ package com.kolich.http.helpers;
 
 import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.util.EntityUtils;
 
 import com.kolich.http.helpers.definitions.OrNullClosure;
 
 public class StringOrNullClosure extends OrNullClosure<String> {
+	
+	public StringOrNullClosure(final HttpClient client) {
+		super(client);
+	}
+	
+	public StringOrNullClosure() {
+		super();
+	}
 		
 	@Override
 	public final String success(final HttpSuccess success) throws Exception {
