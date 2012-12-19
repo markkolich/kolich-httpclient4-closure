@@ -63,15 +63,5 @@ public class GsonOrExceptionClosure<S> extends OrExceptionClosure<S> {
 			closeQuietly(r);
 		}
 	}
-	
-	/*
-	public static void main(String[] args) {
-		final GsonOrExceptionClosure<String> s = new GsonOrExceptionClosure<String>(String.class);
-		final HttpResponseEither<Exception, String> r = s.get("http://sdlj9238472394lsdfsdf.com");
-		if(!r.success()) {
-			System.out.println(r.left());
-		}
-	}
-	*/
-	
+		
 }
