@@ -32,6 +32,9 @@ import org.apache.http.client.HttpClient;
 
 import com.kolich.http.HttpClient4Closure;
 
+/**
+ * Abstract closure to return null on failure.
+ */
 public abstract class OrNullClosure<S> extends HttpClient4Closure<Void,S> {
 
 	public OrNullClosure(final HttpClient client) {

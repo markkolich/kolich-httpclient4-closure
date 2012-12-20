@@ -36,16 +36,20 @@ import org.apache.http.protocol.HttpContext;
 
 import com.kolich.http.helpers.definitions.IgnoreResultClosure;
 
-public class StatusCodeAndHeadersOnlyClosure extends IgnoreResultClosure {
+/**
+ * Extracts the HTTP status code and list of response headers from the
+ * response, regardless if the request completed successfully or not.
+ */
+public class StatusCodeAndHeadersClosure extends IgnoreResultClosure {
 	
 	private transient int statusCode_ = -1;
 	private transient Header[] headers_ = null;
 	
-	public StatusCodeAndHeadersOnlyClosure(final HttpClient client) {
+	public StatusCodeAndHeadersClosure(final HttpClient client) {
 		super(client);
 	}
 	
-	public StatusCodeAndHeadersOnlyClosure() {
+	public StatusCodeAndHeadersClosure() {
 		super();
 	}
 	

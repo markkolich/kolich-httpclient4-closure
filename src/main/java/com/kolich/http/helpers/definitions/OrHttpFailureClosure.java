@@ -33,6 +33,9 @@ import org.apache.http.client.HttpClient;
 import com.kolich.http.HttpClient4Closure;
 import com.kolich.http.HttpClient4Closure.HttpFailure;
 
+/**
+ * Abstract closure to return a proper {@link HttpFailure} on failure.
+ */
 public abstract class OrHttpFailureClosure<S> extends HttpClient4Closure<HttpFailure,S> {
 
 	public OrHttpFailureClosure(final HttpClient client) {

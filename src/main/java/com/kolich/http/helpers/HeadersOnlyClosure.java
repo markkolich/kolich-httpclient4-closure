@@ -24,36 +24,46 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers.definitions;
+package com.kolich.http.helpers;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceNoProxySelector;
+import java.util.Arrays;
+import java.util.List;
 
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.protocol.HttpContext;
 
-import com.kolich.http.HttpClient4Closure;
+import com.kolich.http.helpers.definitions.IgnoreResultClosure;
 
 /**
- * This abstract closure is used when you don't care whether
- * the request completed successfully or not, just that it completed.
+ * Extracts the list of HTTP response headers from the response, regardless
+ * if the request completed successfully or not.
  */
-public abstract class IgnoreResultClosure extends HttpClient4Closure<Void,Void> {
-
-	public IgnoreResultClosure(final HttpClient client) {
+public class HeadersOnlyClosure extends IgnoreResultClosure {
+	
+	private transient Header[] headers_ = null;
+	
+	public HeadersOnlyClosure(final HttpClient client) {
 		super(client);
 	}
 	
-	public IgnoreResultClosure() {
-		this(getNewInstanceNoProxySelector());
+	public HeadersOnlyClosure() {
+		super();
 	}
 	
 	@Override
-	public final Void success(final HttpSuccess success) {
-		return null;
+	public final void after(final HttpResponse response,
+		final HttpContext context) {
+		headers_ = response.getAllHeaders();
 	}
 	
-	@Override
-	public final Void failure(final HttpFailure failure) {
-		return null;
+	public final Header[] getHeaders() {
+		return headers_;
+	}
+	
+	public final List<Header> getHeaderList() {
+		return (headers_ == null) ? null : Arrays.asList(headers_);
 	}
 	
 }

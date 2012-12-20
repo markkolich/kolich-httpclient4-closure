@@ -55,53 +55,53 @@ public abstract class HttpClient4Closure<F,S> {
 		client_ = client;
 	}
 	
-	public final HttpResponseEither<F,S> head(final String url) {
+	public HttpResponseEither<F,S> head(final String url) {
 		return head(create(url));
 	}
 	
-	public final HttpResponseEither<F,S> head(final URI uri) {
+	public HttpResponseEither<F,S> head(final URI uri) {
 		return head(new HttpHead(uri));
 	}
 	
-	public final HttpResponseEither<F,S> head(final HttpHead head) {
+	public HttpResponseEither<F,S> head(final HttpHead head) {
 		return head(head, null);
 	}
 	
-	public final HttpResponseEither<F,S> head(final HttpHead head,
+	public HttpResponseEither<F,S> head(final HttpHead head,
 		final HttpContext context) {
 		return request(head, context);
 	}
 	
-	public final HttpResponseEither<F,S> get(final String url) {
+	public HttpResponseEither<F,S> get(final String url) {
 		return get(create(url));
 	}
 	
-	public final HttpResponseEither<F,S> get(final URI uri) {
+	public HttpResponseEither<F,S> get(final URI uri) {
 		return get(new HttpGet(uri));
 	}
 	
-	public final HttpResponseEither<F,S> get(final HttpGet get) {
+	public HttpResponseEither<F,S> get(final HttpGet get) {
 		return get(get, null);
 	}
 	
-	public final HttpResponseEither<F,S> get(final HttpGet get,
+	public HttpResponseEither<F,S> get(final HttpGet get,
 		final HttpContext context) {
 		return request(get, context);
 	}
 	
-	public final HttpResponseEither<F,S> post(final String url) {
+	public HttpResponseEither<F,S> post(final String url) {
 		return post(create(url));
 	}
 	
-	public final HttpResponseEither<F,S> post(final URI uri) {
+	public HttpResponseEither<F,S> post(final URI uri) {
 		return post(new HttpPost(uri), null, null);
 	}
 	
-	public final HttpResponseEither<F,S> post(final HttpPost post) {
+	public HttpResponseEither<F,S> post(final HttpPost post) {
 		return post(post, null, null);
 	}
 	
-	public final HttpResponseEither<F,S> post(final HttpPost post,
+	public HttpResponseEither<F,S> post(final HttpPost post,
 		final byte[] body, final String contentType) {
 		return post(post,
 			(body != null) ? new ByteArrayInputStream(body) : null,
@@ -109,12 +109,12 @@ public abstract class HttpClient4Closure<F,S> {
 			contentType);
 	}
 	
-	public final HttpResponseEither<F,S> post(final HttpPost post,
+	public HttpResponseEither<F,S> post(final HttpPost post,
 		final InputStream is, final long length, final String contentType) {
 		return post(post, is, length, contentType, null);
 	}
 	
-	public final HttpResponseEither<F,S> post(final HttpPost post,
+	public HttpResponseEither<F,S> post(final HttpPost post,
 		final InputStream is, final long length, final String contentType,
 		final HttpContext context) {
 		if(is != null) {
@@ -127,24 +127,24 @@ public abstract class HttpClient4Closure<F,S> {
 		return request(post, context);
 	}
 	
-	public final HttpResponseEither<F,S> put(final String url) {
+	public HttpResponseEither<F,S> put(final String url) {
 		return put(create(url));
 	}
 	
-	public final HttpResponseEither<F,S> put(final URI uri) {
+	public HttpResponseEither<F,S> put(final URI uri) {
 		return put(new HttpPut(uri), null);
 	}
 	
-	public final HttpResponseEither<F,S> put(final HttpPut put) {
+	public HttpResponseEither<F,S> put(final HttpPut put) {
 		return put(put, null);
 	}
 	
-	public final HttpResponseEither<F,S> put(final HttpPut put,
+	public HttpResponseEither<F,S> put(final HttpPut put,
 		final byte[] body) {
 		return put(put, body, null, new BasicHttpContext());
 	}
 	
-	public final HttpResponseEither<F,S> put(final HttpPut put,
+	public HttpResponseEither<F,S> put(final HttpPut put,
 		final byte[] body, final String contentType, final HttpContext context) {
 		return put(put,
 			(body != null) ? new ByteArrayInputStream(body) : null,
@@ -152,12 +152,12 @@ public abstract class HttpClient4Closure<F,S> {
 			contentType);
 	}
 	
-	public final HttpResponseEither<F,S> put(final HttpPut put,
+	public HttpResponseEither<F,S> put(final HttpPut put,
 		final InputStream is, final long length, final String contentType) {
 		return put(put, is, length, contentType, null);
 	}
 	
-	public final HttpResponseEither<F,S> put(final HttpPut put,
+	public HttpResponseEither<F,S> put(final HttpPut put,
 		final InputStream is, final long length, final String contentType,
 		final HttpContext context) {
 		if(is != null) {
@@ -170,24 +170,24 @@ public abstract class HttpClient4Closure<F,S> {
 		return request(put, context);
 	}
 	
-	public final HttpResponseEither<F,S> delete(final String url) {
+	public HttpResponseEither<F,S> delete(final String url) {
 		return delete(create(url));
 	}
 	
-	public final HttpResponseEither<F,S> delete(final URI uri) {
+	public HttpResponseEither<F,S> delete(final URI uri) {
 		return delete(new HttpDelete(uri));
 	}
 	
-	public final HttpResponseEither<F,S> delete(final HttpDelete delete) {
+	public HttpResponseEither<F,S> delete(final HttpDelete delete) {
 		return delete(delete, null);
 	}
 	
-	public final HttpResponseEither<F,S> delete(final HttpDelete delete,
+	public HttpResponseEither<F,S> delete(final HttpDelete delete,
 		final HttpContext context) {
 		return request(delete, context);
 	}
 	
-	public final HttpResponseEither<F,S> request(final HttpRequestBase request) {
+	public HttpResponseEither<F,S> request(final HttpRequestBase request) {
 		return request(request, null);
 	}
 	
