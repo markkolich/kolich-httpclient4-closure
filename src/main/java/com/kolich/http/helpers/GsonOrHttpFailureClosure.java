@@ -38,8 +38,8 @@ import java.lang.reflect.Type;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 
 public class GsonOrHttpFailureClosure<S> extends OrHttpFailureClosure<S> {
@@ -47,19 +47,33 @@ public class GsonOrHttpFailureClosure<S> extends OrHttpFailureClosure<S> {
 	private final Gson gson_;
 	private final Type type_;
 	
-	@SuppressWarnings("serial")
-	public GsonOrHttpFailureClosure(final HttpClient client, final Gson gson) {
+	public GsonOrHttpFailureClosure(final HttpClient client, final Gson gson,
+		final Type type) {
 		super(client);
 		gson_ = gson;
-		type_ = new TypeToken<S>(){}.getType();
+		type_ = type;
 	}
 	
-	public GsonOrHttpFailureClosure(final HttpClient client) {
-		this(client, getDefaultGsonBuilder().create());
+	public GsonOrHttpFailureClosure(final HttpClient client, final Gson gson,
+		final Class<S> clazz) {
+		this(client, gson, TypeToken.get(clazz).getType());
 	}
 	
-	public GsonOrHttpFailureClosure() {
-		this(getNewInstanceWithProxySelector());
+	public GsonOrHttpFailureClosure(final HttpClient client, final Type type) {
+		this(client, getDefaultGsonBuilder().create(), type);
+	}
+	
+	public GsonOrHttpFailureClosure(final HttpClient client,
+		final Class<S> clazz) {
+		this(client, getDefaultGsonBuilder().create(), clazz);
+	}
+	
+	public GsonOrHttpFailureClosure(final Type type) {
+		this(getNewInstanceWithProxySelector(), type);
+	}
+	
+	public GsonOrHttpFailureClosure(final Class<S> clazz) {
+		this(getNewInstanceWithProxySelector(), clazz);
 	}
 	
 	@Override
