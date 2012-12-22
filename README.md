@@ -19,7 +19,7 @@ Many would argue that this library simply trades one set of "boiler plate" for a
 
 ## Latest Version
 
-The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/0.0.5.1">0.0.5.1</a>.
+The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/0.0.6">0.0.6</a>.
 
 ## Resolvers
 
@@ -30,7 +30,7 @@ If you wish to use this artifact, you can easily add it to your existing Maven o
 ```scala
 resolvers += "Kolich repo" at "http://markkolich.github.com/repo"
 
-val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.0.5.1" % "compile"
+val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.0.6" % "compile"
 ```
 
 ### Maven
@@ -46,7 +46,7 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.
 <dependency>
   <groupId>com.kolich</groupId>
   <artifactId>kolich-httpclient4-closure</artifactId>
-  <version>0.0.5.1</version>
+  <version>0.0.6</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -358,6 +358,10 @@ if(result.success()) {
 }
 ```
 
+### Helpers
+
+
+
 ## Building
 
 This Java library and its dependencies are built and managed using <a href="https://github.com/harrah/xsbt">SBT 0.12.1</a>.
@@ -375,15 +379,15 @@ Run SBT from within kolich-httpclient4-closure.
     #~> cd kolich-httpclient4-closure
     #~/kolich-httpclient4-closure> sbt
     ...
-    kolich-httpclient4-closure:0.0.5.1>
+    kolich-httpclient4-closure:0.0.6>
 
 You will see a `kolich-httpclient4-closure` SBT prompt once all dependencies are resolved and the project is loaded.
 
 In SBT, run `package` to compile and package the JAR.
 
-    kolich-httpclient4-closure:0.0.5.1> package
+    kolich-httpclient4-closure:0.0.6> package
     [info] Compiling 4 Java sources to ~/kolich-httpclient4-closure/target/classes...
-    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-0.0.5.1.jar ...
+    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-0.0.6.jar ...
     [info] Done packaging.
     [success] Total time: 4 s, completed
 
@@ -391,7 +395,7 @@ Note the resulting JAR is placed into the **kolich-httpclient4-closure/dist** di
 
 To create an Eclipse Java project for kolich-httpclient4-closure, run `eclipse` in SBT.
 
-    kolich-httpclient4-closure:0.0.5.1> eclipse
+    kolich-httpclient4-closure:0.0.6> eclipse
     ...
     [info] Successfully created Eclipse project files for project(s):
     [info] kolich-httpclient4-closure

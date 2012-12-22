@@ -31,13 +31,13 @@ import org.apache.http.util.EntityUtils;
 
 import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 
-public class ByteArrayOrHttpFailureClosureClosure extends OrHttpFailureClosure<byte[]> {
+public class ByteArrayOrHttpFailureClosure extends OrHttpFailureClosure<byte[]> {
 	
-	public ByteArrayOrHttpFailureClosureClosure(final HttpClient client) {
+	public ByteArrayOrHttpFailureClosure(final HttpClient client) {
 		super(client);
 	}
 	
-	public ByteArrayOrHttpFailureClosureClosure() {
+	public ByteArrayOrHttpFailureClosure() {
 		super();
 	}
 	

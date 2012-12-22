@@ -33,32 +33,33 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Type;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.kolich.http.helpers.definitions.OrNullClosure;
 
 public class GsonOrNullClosure<S> extends OrNullClosure<S> {
 	
 	private final Gson gson_;
-	private final Class<S> clazz_;
+	private final Type type_;
 	
-	public GsonOrNullClosure(final HttpClient client, final Gson gson,
-		final Class<S> clazz) {
+	@SuppressWarnings("serial")
+	public GsonOrNullClosure(final HttpClient client, final Gson gson) {
 		super(client);
 		gson_ = gson;
-		clazz_ = clazz;
+		type_ = new TypeToken<S>(){}.getType();
 	}
 	
-	public GsonOrNullClosure(final HttpClient client,
-		final Class<S> clazz) {
-		this(client, getDefaultGsonBuilder().create(), clazz);
+	public GsonOrNullClosure(final HttpClient client) {
+		this(client, getDefaultGsonBuilder().create());
 	}
 	
-	public GsonOrNullClosure(final Class<S> clazz) {
-		this(getNewInstanceWithProxySelector(), clazz);
+	public GsonOrNullClosure() {
+		this(getNewInstanceWithProxySelector());
 	}
 	
 	@Override
@@ -67,7 +68,7 @@ public class GsonOrNullClosure<S> extends OrNullClosure<S> {
 		try {
 			final HttpEntity entity = success.getResponse().getEntity();
 			r = new InputStreamReader(entity.getContent(), UTF_8);
-			return gson_.fromJson(r, clazz_);
+			return gson_.fromJson(r, type_);
 		} finally {
 			closeQuietly(r);
 		}
