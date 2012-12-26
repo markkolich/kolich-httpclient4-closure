@@ -106,7 +106,7 @@ final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelecto
 Or, pass a `String` to the factory method to set the HTTP `User-Agent` on your new `HttpClient` instance.
 
 ```java
-final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector("IE6, whoa");
+final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector("IE6, srsly");
 ```
 
 By default, the `KolichHttpClientFactory` always returns an `HttpClient` instance backed by a **thread-safe** `PoolingClientConnectionManager`.  There's currently no support for passing your own connection manager to my `KolichHttpClientFactory` &mdash; if you need to use your own connection manager, it's safest to just build your own `HttpClient` instance elsewhere. 
@@ -120,7 +120,7 @@ You can use the `KolichHttpClientFactory` to also instantiate an `HttpClient` fo
   class="com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory"
   factory-method="getNewInstanceWithProxySelector">
   <!-- Set a custom User-Agent string too, if you want. -->
-  <constructor-arg><value>IE6, seriously?</value></constructor-arg>
+  <constructor-arg><value>IE6, srsly</value></constructor-arg>
 </bean>
 
 <bean id="SomeFooBarBean" class="com.foo.bar.SomeBean">
@@ -128,7 +128,7 @@ You can use the `KolichHttpClientFactory` to also instantiate an `HttpClient` fo
 </bean>
 ```
 
-### Full Web-Proxy Support
+### Web-Proxy Support
 
 Some environments require outgoing HTTP/HTTPS connections to use a web-proxy.
 
@@ -139,9 +139,9 @@ That said, you can easily create a proxy-aware `HttpClient` instance using the r
 ```java
 import com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory;
 
-final HttpClient lovesProxies = KolichHttpClientFactory.getNewInstanceWithProxySelector();
+final HttpClient usesProxy = KolichHttpClientFactory.getNewInstanceWithProxySelector();
 
-final HttpClient hatesProxies = KolichHttpClientFactory.getNewInstanceNoProxySelector();
+final HttpClient noProxy = KolichHttpClientFactory.getNewInstanceNoProxySelector();
 ```
 
 When using the `getNewInstanceWithProxySelector()` factory method, the underlying `HttpClient` will automatically use the JVM's `java.net.ProxySelector` to discover what web-proxy to use when establishing outgoing HTTP connections.  On all platforms, you can manually tell the JVM default `java.net.ProxySelector` what web-proxy to use by setting the `http.proxyHost` and `http.proxyPort` VM arguments for vanilla HTTP connections.  For outgoing HTTPS connections, use `https.proxyHost` and `https.proxyPort`.
@@ -362,11 +362,11 @@ if(result.success()) {
 
 To make development a bit easier, a number of helper closures are available out-of-the-box as found in the <a href="https://github.com/markkolich/kolich-httpclient4-closure/tree/master/src/main/java/com/kolich/http/helpers">com.kolich.http.helpers</a> package.  These helpers are packaged and shipped with this library and are intended to help developers avoid much of the closure boilerplate for the most common operations.
 
-Here are some examples using these helper closures.
+Below are several examples using these helper closures.
 
 #### StringOrNullClosure
 
-Send a `GET` and if the request was succedssful extract the response body as a `UTF-8` encoded `String`.  If unsuccessful, return `null`.
+Send a `GET` and if the request was successful extract the response body as a `UTF-8` encoded `String`.  If unsuccessful, return `null`.
 
 ```java
 import com.kolich.http.helpers.StringOrNullClosure;
@@ -374,7 +374,12 @@ import com.kolich.http.helpers.StringOrNullClosure;
 final HttpResponseEither<Void,String> s = new StringOrNullClosure(client)
   .get("http://google.com");
 
-System.out.println(s.right());  
+final String html;
+if((html = s.right()) != null) {
+  System.out.println("Your HTML, good sir: " + html);
+} else {
+  System.out.println("Failed miserably: " + s.left());
+}
 ```
 
 #### ByteArrayOrHttpFailureClosure
@@ -397,10 +402,11 @@ Send a `GET` and blindly ignore if the request was "successful" or not.  Extract
 ```java
 import com.kolich.http.helpers.StatusCodeAndHeadersClosure;
 
+// Tip: Use URIBuilder to add query parameters to the URI of a GET.
+// (see example usage below)
 import org.apache.http.client.utils.URIBuilder;
 
-final StatusCodeAndHeadersClosure sah =
-  new StatusCodeAndHeadersClosure(client) {
+final StatusCodeAndHeadersClosure sah = new StatusCodeAndHeadersClosure(client) {
   @Override
   public void before(final HttpRequestBase request) throws Exception {
     // Add some query parameters to the request URI before its sent.
@@ -414,25 +420,24 @@ final StatusCodeAndHeadersClosure sah =
 sah.get("https://example.com/get/status/and/headers");
 
 System.out.println("Got status " + sah.getStatusCode());
-System.out.println("Got " + sah.getHeaderList().size() + " headers too!");
+System.out.println("Found " + sah.getHeaderList().size() + " headers too!");
 ```
 
 #### GsonOrHttpFailureClosure<S>
 
-Send a `POST` and if the request succeeded, use GSON to convert the response body (a blob of JSON) to successful type `S`.  If the request failed, get back an `HttpFailure` object.
+Send a `POST` and if the request succeeded, use GSON to convert the response body (a blob of JSON) to successful type `S`.  If the request failed, expect an `HttpFailure` object.
+
+Note, `YourType` below is assumed to be an entity class (some domain object) defined by your application.
 
 ```java
 import com.kolich.http.helpers.GsonOrHttpFailureClosure;
 
 import com.google.gson.Gson;
 
-// YourType is assumed to be a known entity class
-// (domain object) defined by your application.
+final Gson gson = ...; // Get a GSON instance.
 
-// Get a GSON instance that understands YourType.
-final Gson gson = ...;
-
-// Send the POST.
+// Send the POST, and if the request is successful, use the GSON instance
+// to unmarshal the response body to a valid YourType object.
 final HttpResponseEither<HttpFailure,YourType> g =
   new GsonOrHttpFailureClosure<YourType>(client, gson, YourType.class)
     .post("https://api.example.com/resource.json");
@@ -441,7 +446,7 @@ final HttpResponseEither<HttpFailure,YourType> g =
 final YourType t = g.right();
 ```
 
-Or, use a GSON `TypeToken` if your expected successful type `S` is a generic type, and consequently, you can't use `.class` due to Java's type erasure.
+Or, use a GSON `TypeToken` if your expected successful type `S` is a generic type, and consequently, you cannot use `.class` due to Java's type erasure.
 
 ```java
 import com.kolich.http.helpers.GsonOrHttpFailureClosure;
@@ -449,10 +454,10 @@ import com.kolich.http.helpers.GsonOrHttpFailureClosure;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-// Get a GSON instance that understands YourType.
-final Gson gson = ...;
+final Gson gson = ...; // Get a GSON instance.
 
-// Send the POST.
+// Send the POST, and if the request is successful, use the GSON instance
+// to unmarshal the response body to a valid List<YourType> object.
 final HttpResponseEither<HttpFailure,List<YourType>> g =
   new GsonOrHttpFailureClosure<List<YourType>>(
     client, gson, new TypeToken<List<YourType>>(){}.getType()
