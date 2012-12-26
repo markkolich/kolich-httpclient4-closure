@@ -371,9 +371,8 @@ Send a `GET` and if the request was succedssful extract the response body as a `
 ```java
 import com.kolich.http.helpers.StringOrNullClosure;
 
-final HttpResponseEither<Void,String> s =
-  new StringOrNullClosure(client)
-    .get("http://google.com");
+final HttpResponseEither<Void,String> s = new StringOrNullClosure(client)
+  .get("http://google.com");
 
 System.out.println(s.right());  
 ```
@@ -385,9 +384,8 @@ Send a `POST` and if the request was successful extract the response body as a `
 ```java
 import com.kolich.http.helpers.ByteArrayOrHttpFailureClosure;
 
-final HttpResponseEither<HttpFailure,byte[]> r =
-  new ByteArrayOrHttpFailureClosure(client)
-    .get("http://api.example.com/resource");
+final HttpResponseEither<HttpFailure,byte[]> r = new ByteArrayOrHttpFailureClosure(client)
+  .get("http://api.example.com/resource");
 
 final byte[] bytes = r.right();
 ```
