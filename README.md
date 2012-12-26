@@ -360,7 +360,7 @@ if(result.success()) {
 
 ### Helpers
 
-To make development a bit easier, a number of helper closures are available out-of-the-box as found in the <a href="https://github.com/markkolich/kolich-httpclient4-closure/tree/master/src/main/java/com/kolich/http/helpers">com.kolich.http.helpers</a> package.  These helpers are packaged and shipped with this library and are intended to help developers avoid much of the closure boilerplate for the most common operations.
+To make development a bit easier, a number of helper closures are available out-of-the-box as found in the <a href="https://github.com/markkolich/kolich-httpclient4-closure/tree/master/src/main/java/com/kolich/http/helpers">com.kolich.http.helpers</a> package.  These helpers are packaged and shipped with this library and are intended to help developers avoid much of the closure boiler plate for the most common operations.
 
 Below are several examples using these helper closures.
 
