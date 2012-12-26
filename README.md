@@ -360,7 +360,108 @@ if(result.success()) {
 
 ### Helpers
 
+To make life a bit easier, a number of helper closures are available for free out-of-the-box as found in the <a href="https://github.com/markkolich/kolich-httpclient4-closure/tree/master/src/main/java/com/kolich/http/helpers">com.kolich.http.helpers</a> package.  These helpers are packaged and shipped with this library, and are intended to help developers avoid writing much of the closure boilerplate themselves for the most common operations.
 
+Here are some examples using these helper closures.
+
+#### StringOrNullClosure
+
+Send a `GET` and extract the response body as a UTF-8 encoded `String`.  Return `null` if the request failed.
+
+```java
+import com.kolich.http.helpers.StringOrNullClosure;
+
+final HttpResponseEither<Void,String> s =
+  new StringOrNullClosure(client)
+    .get("http://google.com");
+
+System.out.println(s.right());  
+```
+
+#### ByteArrayOrHttpFailureClosure
+
+Send a `POST` and if the request was successful get the response body as a `byte[]` array.  If not, return an `HttpFailure` object that encapsulates the resulting failure.
+
+```java
+import com.kolich.http.helpers.ByteArrayOrHttpFailureClosure;
+
+final HttpResponseEither<HttpFailure,byte[]> r =
+  new ByteArrayOrHttpFailureClosure(client)
+    .get("http://api.example.com/resource");
+
+final byte[] bytes = r.right();
+```
+
+#### StatusCodeAndHeadersClosure
+
+Send a `GET` and blindly ignore if the request was "successful" or not.  Use the `StatusCodeAndHeadersClosure` to send a request and extract the resulting HTTP status code and headers on the response &mdash; even if the server responded with an unsuccessful status code.
+
+```java
+import com.kolich.http.helpers.StatusCodeAndHeadersClosure;
+
+import org.apache.http.client.utils.URIBuilder;
+
+final StatusCodeAndHeadersClosure sah =
+  new StatusCodeAndHeadersClosure(client) {
+  @Override
+  public void before(final HttpRequestBase request) throws Exception {
+    // Add some query parameters to the request URI before its sent.
+    final URIBuilder b = new URIBuilder(request.getURI());
+    b.addParameter("foo", "bar");
+    request.setURI(b.build());
+  }
+};
+
+// Send the request.
+sah.get("https://example.com/get/status/and/headers");
+
+System.out.println("Got status " + sah.getStatusCode());
+System.out.println("Got " + sah.getHeaderList().size() + " headers too!");
+```
+#### GsonOrHttpFailureClosure<S>
+
+Send a `POST` and if the request succeeded, use GSON to convert the response body (a blob of JSON) to a successful type `S`.  If the request failed, get back an `HttpFailure` object.
+
+```java
+import com.kolich.http.helpers.GsonOrHttpFailureClosure;
+
+import com.google.gson.Gson;
+
+// YourType is assumed to be a known entity class
+// (domain object) defined by your application.
+
+// Get a GSON instance that understands YourType.
+final Gson gson = ...;
+
+// Send the POST.
+final HttpResponseEither<HttpFailure,YourType> g =
+  new GsonOrHttpFailureClosure<YourType>(client, gson, YourType.class)
+    .post("https://api.example.com/resource.json");
+
+// Will be null if the request failed.
+final YourType t = g.right();
+```
+
+Or, pass a GSON `TypeToken` (instead of using `.class`) if your expected successful type `S` is a generic type.
+
+```java
+import com.kolich.http.helpers.GsonOrHttpFailureClosure;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+// Get a GSON instance that understands YourType.
+final Gson gson = ...;
+
+// Send the POST.
+final HttpResponseEither<HttpFailure,List<YourType>> g =
+  new GsonOrHttpFailureClosure<List<YourType>>(
+    client, gson, new TypeToken<List<YourType>>(){}.getType()
+  ).post("https://api.example.com/resource.json");
+
+// Will be null if the request failed.
+final List<YourType> lt = g.right();
+```
 
 ## Building
 
