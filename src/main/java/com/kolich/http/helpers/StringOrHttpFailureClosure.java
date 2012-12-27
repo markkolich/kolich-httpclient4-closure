@@ -27,6 +27,7 @@
 package com.kolich.http.helpers;
 
 import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
+import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.util.EntityUtils;
@@ -35,17 +36,27 @@ import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 
 public class StringOrHttpFailureClosure extends OrHttpFailureClosure<String> {
 	
-	public StringOrHttpFailureClosure(final HttpClient client) {
+	private final String defaultCharset_;
+	
+	public StringOrHttpFailureClosure(final HttpClient client,
+		final String defaultCharset) {
 		super(client);
+		defaultCharset_ = defaultCharset;
+	}
+	
+	public StringOrHttpFailureClosure(final HttpClient client) {
+		this(client, UTF_8);
 	}
 	
 	public StringOrHttpFailureClosure() {
-		super();
+		this(getNewInstanceWithProxySelector());
 	}
 	
 	@Override
 	public final String success(final HttpSuccess success) throws Exception {
-		return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
+		return EntityUtils.toString(
+			success.getResponse().getEntity(),
+			defaultCharset_);
 	}
 	
 }
