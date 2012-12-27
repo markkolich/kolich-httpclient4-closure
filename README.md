@@ -360,7 +360,7 @@ if(result.success()) {
 
 ### Helpers
 
-To make development a bit easier, a number of helper closures are available out-of-the-box as found in the <a href="https://github.com/markkolich/kolich-httpclient4-closure/tree/master/src/main/java/com/kolich/http/helpers">com.kolich.http.helpers</a> package.  These helpers are packaged and shipped with this library and are intended to help developers avoid much of the closure boiler plate for the most common operations.
+To ease development, a number of helper closures are available out-of-the-box as found in the <a href="https://github.com/markkolich/kolich-httpclient4-closure/tree/master/src/main/java/com/kolich/http/helpers">com.kolich.http.helpers</a> package.  These helpers are packaged and shipped with this library and are intended to help developers avoid much of the closure boiler plate for the most common operations.
 
 Below are several examples using these helper closures.
 
@@ -376,9 +376,7 @@ final HttpResponseEither<Void,String> s = new StringOrNullClosure(client)
 
 final String html;
 if((html = s.right()) != null) {
-  System.out.println("Your HTML, good sir: " + html);
-} else {
-  System.out.println("Failed miserably: " + s.left());
+  System.out.println("Your HTML: " + html);
 }
 ```
 
@@ -397,7 +395,7 @@ final byte[] bytes = r.right();
 
 #### StatusCodeAndHeadersClosure
 
-Send a `GET` and blindly ignore if the request was "successful" or not.  Extract the resulting HTTP status code and headers on the response &mdash; even if the server responded with an unsuccessful status code.
+Send a `GET` and blindly ignore if the request was "successful" or not.  Extract the resulting HTTP status code and headers on the response &mdash; even if the server responded with an "unsuccessful" status code.
 
 ```java
 import com.kolich.http.helpers.StatusCodeAndHeadersClosure;
@@ -423,11 +421,11 @@ System.out.println("Got status " + sah.getStatusCode());
 System.out.println("Found " + sah.getHeaderList().size() + " headers too!");
 ```
 
-#### GsonOrHttpFailureClosure<S>
+#### GsonOrHttpFailureClosure&lt;S&gt;
 
 Send a `POST` and if the request succeeded, use GSON to convert the response body (a blob of JSON) to successful type `S`.  If the request failed, expect an `HttpFailure` object.
 
-Note, `YourType` below is assumed to be an entity class (some domain object) defined by your application.
+Note, `YourType` below is assumed to be an entity class (a domain object) defined by your application or schema.
 
 ```java
 import com.kolich.http.helpers.GsonOrHttpFailureClosure;
@@ -437,7 +435,7 @@ import com.google.gson.Gson;
 final Gson gson = ...; // Get a GSON instance.
 
 // Send the POST, and if the request is successful, use the GSON instance
-// to unmarshal the response body to a valid YourType object.
+// to unmarshall the response body to a valid YourType object.
 final HttpResponseEither<HttpFailure,YourType> g =
   new GsonOrHttpFailureClosure<YourType>(client, gson, YourType.class)
     .post("https://api.example.com/resource.json");
@@ -457,7 +455,7 @@ import com.google.gson.reflect.TypeToken;
 final Gson gson = ...; // Get a GSON instance.
 
 // Send the POST, and if the request is successful, use the GSON instance
-// to unmarshal the response body to a valid List<YourType> object.
+// to unmarshall the response body to a valid List<YourType> object.
 final HttpResponseEither<HttpFailure,List<YourType>> g =
   new GsonOrHttpFailureClosure<List<YourType>>(
     client, gson, new TypeToken<List<YourType>>(){}.getType()
@@ -511,7 +509,7 @@ Note your new **.classpath** file as well &mdash; all source JAR's are fetched a
 
 ## Dependencies
 
-Currently, this artifact is built around <a href="http://hc.apache.org/">Apache Commons HttpClient</a> version **4.2.2**.
+Currently, this artifact is built around <a href="http://hc.apache.org/">Apache Commons HttpClient</a> version **4.2.3**.
 
 This library does **not** work with HttpClient 3.x.  If you are *still* using HttpClient 3.x you should really consider upgrading given that 3.x is past end-of-life and no longer supported. 
 
