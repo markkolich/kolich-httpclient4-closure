@@ -23,7 +23,7 @@ import com.kolich.http.HttpClient4Closure.HttpResponseEither;
 public class Testing {
 	
 	public static void main(String[] args) {
-		
+				
 		final HttpClient client = getNewInstanceWithProxySelector("foobar");
 		
 		final HttpResponseEither<Integer,String> result = new HttpClient4Closure<Integer,String>(client) {
@@ -183,7 +183,7 @@ public class Testing {
 				System.out.println(h.getName() + ": " + h.getValue());
 			}
 		}
-		
+				
 	}
 	
 	public static class HttpClientClosureExpectString extends HttpClient4Closure<Void,String> {

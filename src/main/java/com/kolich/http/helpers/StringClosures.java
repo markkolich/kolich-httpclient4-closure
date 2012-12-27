@@ -32,31 +32,56 @@ import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.ge
 import org.apache.http.client.HttpClient;
 import org.apache.http.util.EntityUtils;
 
+import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 import com.kolich.http.helpers.definitions.OrNullClosure;
 
-public class StringOrNullClosure extends OrNullClosure<String> {
+public final class StringClosures {
 	
-	private final String defaultCharset_;
+	// Cannot instantiate.
+	private StringClosures() {}
 	
-	public StringOrNullClosure(final HttpClient client,
-		final String defaultCharset) {
-		super(client);
-		defaultCharset_ = defaultCharset;
+	public static class StringOrHttpFailureClosure extends OrHttpFailureClosure<String> {	
+		private final String defaultCharset_;		
+		public StringOrHttpFailureClosure(final HttpClient client,
+			final String defaultCharset) {
+			super(client);
+			defaultCharset_ = defaultCharset;
+		}
+		public StringOrHttpFailureClosure(final HttpClient client) {
+			this(client, UTF_8);
+		}
+		public StringOrHttpFailureClosure() {
+			this(getNewInstanceWithProxySelector());
+		}
+		@Override
+		public final String success(final HttpSuccess success)
+			throws Exception {
+			return EntityUtils.toString(
+				success.getResponse().getEntity(),
+				defaultCharset_);
+		}
 	}
 	
-	public StringOrNullClosure(final HttpClient client) {
-		this(client, UTF_8);
+	public static class StringOrNullClosure extends OrNullClosure<String> {		
+		private final String defaultCharset_;		
+		public StringOrNullClosure(final HttpClient client,
+			final String defaultCharset) {
+			super(client);
+			defaultCharset_ = defaultCharset;
+		}
+		public StringOrNullClosure(final HttpClient client) {
+			this(client, UTF_8);
+		}
+		public StringOrNullClosure() {
+			this(getNewInstanceWithProxySelector());
+		}
+		@Override
+		public final String success(final HttpSuccess success)
+			throws Exception {
+			return EntityUtils.toString(
+				success.getResponse().getEntity(),
+				defaultCharset_);
+		}
 	}
-	
-	public StringOrNullClosure() {
-		this(getNewInstanceWithProxySelector());
-	}
-		
-	@Override
-	public final String success(final HttpSuccess success) throws Exception {
-		return EntityUtils.toString(
-			success.getResponse().getEntity(),
-			defaultCharset_);
-	}
-	
+
 }

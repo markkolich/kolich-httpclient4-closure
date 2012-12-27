@@ -26,31 +26,43 @@
 
 package com.kolich.http.helpers;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.helpers.definitions.IgnoreResultClosure;
+import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
+import com.kolich.http.helpers.definitions.OrNullClosure;
 
-public class StatusCodeOnlyClosure extends IgnoreResultClosure {
+public final class ByteArrayClosures {
 	
-	private transient int statusCode_ = -1;
+	// Cannot instantiate.
+	private ByteArrayClosures() {}
 	
-	public StatusCodeOnlyClosure(final HttpClient client) {
-		super(client);
+	public static class ByteArrayOrHttpFailureClosure extends OrHttpFailureClosure<byte[]> {		
+		public ByteArrayOrHttpFailureClosure(final HttpClient client) {
+			super(client);
+		}
+		public ByteArrayOrHttpFailureClosure() {
+			super();
+		}
+		@Override
+		public final byte[] success(final HttpSuccess success) throws Exception {
+			return EntityUtils.toByteArray(success.getResponse().getEntity());
+		}
 	}
 	
-	public StatusCodeOnlyClosure() {
-		super();
-	}
-		
-	@Override
-	public final void after(final HttpResponse response, final HttpContext context) {
-		statusCode_ = response.getStatusLine().getStatusCode();
-	}
-	
-	public final int getStatusCode() {
-		return statusCode_;
+	public static class ByteArrayOrNullClosure extends OrNullClosure<byte[]> {		
+		public ByteArrayOrNullClosure(final HttpClient client) {
+			super(client);
+		}
+		public ByteArrayOrNullClosure() {
+			super();
+		}
+		@Override
+		public final byte[] success(final HttpSuccess success) throws Exception {
+			return EntityUtils.toByteArray(success.getResponse().getEntity());
+		}
 	}
 	
 }
+
+
