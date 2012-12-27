@@ -509,7 +509,7 @@ Note your new **.classpath** file as well &mdash; all source JAR's are fetched a
 
 ## Dependencies
 
-Currently, this artifact is built around <a href="http://hc.apache.org/">Apache Commons HttpClient</a> version **4.2.3**.
+Currently, this artifact is built around <a href="http://hc.apache.org/">Apache Commons HttpClient</a> version **4.2.2**.
 
 This library does **not** work with HttpClient 3.x.  If you are *still* using HttpClient 3.x you should really consider upgrading given that 3.x is past end-of-life and no longer supported. 
 
