@@ -369,7 +369,7 @@ Below are several examples using these helper closures.
 Send a `GET` and if the request was successful extract the response body as a `UTF-8` encoded `String`.  If unsuccessful, return `null`.
 
 ```java
-import com.kolich.http.helpers.StringOrNullClosure;
+import com.kolich.http.helpers.StringClosures.StringOrNullClosure;
 
 final HttpResponseEither<Void,String> s = new StringOrNullClosure(client)
   .get("http://google.com");
@@ -385,7 +385,7 @@ if((html = s.right()) != null) {
 Send a `POST` and if the request was successful extract the response body as a `byte[]` array.  If unsuccessful, return an `HttpFailure` object.
 
 ```java
-import com.kolich.http.helpers.ByteArrayOrHttpFailureClosure;
+import com.kolich.http.helpers.ByteArrayClosures.ByteArrayOrHttpFailureClosure;
 
 final HttpResponseEither<HttpFailure,byte[]> r = new ByteArrayOrHttpFailureClosure(client)
   .get("http://api.example.com/resource");
@@ -398,7 +398,7 @@ final byte[] bytes = r.right();
 Send a `GET` and blindly ignore if the request was "successful" or not.  Extract the resulting HTTP status code and headers on the response &mdash; even if the server responded with an "unsuccessful" status code.
 
 ```java
-import com.kolich.http.helpers.StatusCodeAndHeadersClosure;
+import com.kolich.http.helpers.StatusCodeAndHeaderClosures.StatusCodeAndHeadersClosure;
 
 // Tip: Use URIBuilder to add query parameters to the URI of a GET.
 // (see example usage below)
@@ -428,7 +428,7 @@ Send a `POST` and if the request succeeded, use GSON to convert the response bod
 Note, `YourType` below is assumed to be an entity class (a domain object) defined by your application or schema.
 
 ```java
-import com.kolich.http.helpers.GsonOrHttpFailureClosure;
+import com.kolich.http.helpers.GsonClosures.GsonOrHttpFailureClosure;
 
 import com.google.gson.Gson;
 
@@ -447,7 +447,7 @@ final YourType t = g.right();
 Or, use a GSON `TypeToken` if your expected successful type `S` is a generic type, and consequently, you cannot use `.class` due to Java's type erasure.
 
 ```java
-import com.kolich.http.helpers.GsonOrHttpFailureClosure;
+import com.kolich.http.helpers.GsonClosures.GsonOrHttpFailureClosure;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
