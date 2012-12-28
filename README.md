@@ -388,7 +388,7 @@ Send a `POST` and if the request was successful extract the response body as a `
 import com.kolich.http.helpers.ByteArrayClosures.ByteArrayOrHttpFailureClosure;
 
 final HttpResponseEither<HttpFailure,byte[]> r = new ByteArrayOrHttpFailureClosure(client)
-  .get("http://api.example.com/resource");
+  .post("http://api.example.com/resource");
 
 final byte[] bytes = r.right();
 ```
