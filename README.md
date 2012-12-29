@@ -17,6 +17,8 @@ The intent of this library is to let you do all of this in a cleaner, repeatable
 
 Many would argue that this library simply trades one set of "boiler plate" for another.  True.  However, the patterns used here are much easier to grasp and they help you prevent obvious mistakes &mdash; like forgetting to close an `InputStream` when you're done with a response, which almost always manifests itself as a nasty leak under a heavy load.
 
+If you're still not convinced, here are some <a href="https://github.com/markkolich/kolich-httpclient4-closure#examples">examples</a> to show you the way, and some <a href="https://github.com/markkolich/kolich-httpclient4-closure#helpers">helper closures</a> to make your integration a bit easier.
+
 ## Latest Version
 
 The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/0.0.7">0.0.7</a>.
