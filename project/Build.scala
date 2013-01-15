@@ -36,8 +36,6 @@ object Dependencies {
   private val kolichCommon = "com.kolich" % "kolich-common" % "0.0.4" % "compile"
 
   // External dependencies
-
-  private val slf4j = "org.slf4j" % "slf4j-api" % "1.7.2" % "compile"
   
   private val httpClient = "org.apache.httpcomponents" % "httpclient" % "4.2.2" % "compile"
 
@@ -45,7 +43,6 @@ object Dependencies {
     // Internal.
     kolichCommon,
     // External.
-    slf4j,
     httpClient)
 
 }
