@@ -30,29 +30,34 @@ import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.ge
 
 import org.apache.http.client.HttpClient;
 
+import com.kolich.http.HttpClient4Closure;
 import com.kolich.http.helpers.definitions.CustomEntityConverter;
-import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 
 public final class EntityConverterClosures {
 	
 	// Cannot instantiate.
 	private EntityConverterClosures() {}
 	
-	public static class CustomEntityConverterOrHttpFailureClosure<S>
-		extends OrHttpFailureClosure<S> {
-		private final CustomEntityConverter<S> converter_;		
-		public CustomEntityConverterOrHttpFailureClosure(final HttpClient client,
-			final CustomEntityConverter<S> converter) {
+	public static class CustomEntityConverterOrHttpFailureClosure<F,S>
+		extends HttpClient4Closure<F,S> {
+		private final CustomEntityConverter<F,S> converter_;		
+		public CustomEntityConverterOrHttpFailureClosure(
+			final HttpClient client,
+			final CustomEntityConverter<F,S> converter) {
 			super(client);
 			converter_ = converter;
 		}
 		public CustomEntityConverterOrHttpFailureClosure(
-			final CustomEntityConverter<S> converter) {
+			final CustomEntityConverter<F,S> converter) {
 			this(getNewInstanceWithProxySelector(), converter);
 		}
 		@Override
 		public S success(final HttpSuccess success) throws Exception {
-			return converter_.convert(success);
+			return converter_.success(success);
+		}
+		@Override
+		public F failure(final HttpFailure failure) {
+			return converter_.failure(failure);
 		}
 	}
 
