@@ -31,6 +31,7 @@ import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.ge
 import org.apache.http.client.HttpClient;
 
 import com.kolich.http.HttpClient4Closure;
+import com.kolich.http.helpers.definitions.CustomEntityConverter;
 
 public final class EntityConverterClosures {
 	
@@ -39,14 +40,14 @@ public final class EntityConverterClosures {
 	
 	public static class CustomEntityConverterClosure<F,S>
 		extends HttpClient4Closure<F,S> {
-		private final CustomEntityConverterClosure<F,S> converter_;		
+		private final CustomEntityConverter<F,S> converter_;
 		public CustomEntityConverterClosure(final HttpClient client,
-			final CustomEntityConverterClosure<F,S> converter) {
+			final CustomEntityConverter<F,S> converter) {
 			super(client);
 			converter_ = converter;
 		}
 		public CustomEntityConverterClosure(
-			final CustomEntityConverterClosure<F,S> converter) {
+			final CustomEntityConverter<F,S> converter) {
 			this(getNewInstanceWithProxySelector(), converter);
 		}
 		@Override
