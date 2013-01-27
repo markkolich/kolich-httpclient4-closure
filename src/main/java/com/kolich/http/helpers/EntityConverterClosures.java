@@ -31,24 +31,21 @@ import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.ge
 import org.apache.http.client.HttpClient;
 
 import com.kolich.http.HttpClient4Closure;
-import com.kolich.http.helpers.definitions.CustomEntityConverter;
 
 public final class EntityConverterClosures {
 	
 	// Cannot instantiate.
 	private EntityConverterClosures() {}
 	
-	public static class CustomEntityConverterOrHttpFailureClosure<F,S>
+	public static class CustomEntityConverter<F,S>
 		extends HttpClient4Closure<F,S> {
 		private final CustomEntityConverter<F,S> converter_;		
-		public CustomEntityConverterOrHttpFailureClosure(
-			final HttpClient client,
+		public CustomEntityConverter(final HttpClient client,
 			final CustomEntityConverter<F,S> converter) {
 			super(client);
 			converter_ = converter;
 		}
-		public CustomEntityConverterOrHttpFailureClosure(
-			final CustomEntityConverter<F,S> converter) {
+		public CustomEntityConverter(final CustomEntityConverter<F,S> converter) {
 			this(getNewInstanceWithProxySelector(), converter);
 		}
 		@Override
