@@ -37,15 +37,16 @@ public final class EntityConverterClosures {
 	// Cannot instantiate.
 	private EntityConverterClosures() {}
 	
-	public static class CustomEntityConverter<F,S>
+	public static class CustomEntityConverterClosure<F,S>
 		extends HttpClient4Closure<F,S> {
-		private final CustomEntityConverter<F,S> converter_;		
-		public CustomEntityConverter(final HttpClient client,
-			final CustomEntityConverter<F,S> converter) {
+		private final CustomEntityConverterClosure<F,S> converter_;		
+		public CustomEntityConverterClosure(final HttpClient client,
+			final CustomEntityConverterClosure<F,S> converter) {
 			super(client);
 			converter_ = converter;
 		}
-		public CustomEntityConverter(final CustomEntityConverter<F,S> converter) {
+		public CustomEntityConverterClosure(
+			final CustomEntityConverterClosure<F,S> converter) {
 			this(getNewInstanceWithProxySelector(), converter);
 		}
 		@Override
