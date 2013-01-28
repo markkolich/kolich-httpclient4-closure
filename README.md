@@ -21,7 +21,7 @@ If you're still not convinced, here are some <a href="https://github.com/markkol
 
 ## Latest Version
 
-The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/0.0.8.1">0.0.8.1</a>.
+The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/0.0.9">0.0.9</a>.
 
 ## Resolvers
 
@@ -32,7 +32,7 @@ If you wish to use this artifact, you can easily add it to your existing Maven o
 ```scala
 resolvers += "Kolich repo" at "http://markkolich.github.com/repo"
 
-val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.0.8.1" % "compile"
+val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.0.9" % "compile"
 ```
 
 ### Maven
@@ -48,7 +48,7 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.
 <dependency>
   <groupId>com.kolich</groupId>
   <artifactId>kolich-httpclient4-closure</artifactId>
-  <version>0.0.8.1</version>
+  <version>0.0.9</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -179,7 +179,7 @@ final HttpResponseEither<Exception,String> result =
   new HttpClient4Closure<Exception,String>(client) {
   @Override
   public String success(final HttpSuccess success) throws Exception {
-    return EntityUtils.toString(success.getResponse().getEntity(), "UTF-8");
+    return EntityUtils.toString(success.getEntity(), "UTF-8");
   }
   @Override
   public Exception failure(final HttpFailure failure) {
@@ -195,7 +195,7 @@ final HttpResponseEither<Void,String> result =
   new HttpClient4Closure<Void,String>(client) {
   @Override
   public String success(final HttpSuccess success) throws Exception {
-    return EntityUtils.toString(success.getResponse().getEntity(), "UTF-8");
+    return EntityUtils.toString(success.getEntity(), "UTF-8");
   }
 }.get(new HttpGet("http://example.com/sdljflk8831sdflk")); // Obvious 404
 
@@ -213,9 +213,7 @@ final HttpResponseEither<Void,Long> result =
   new HttpClient4Closure<Void,Long>(client) {
   @Override
   public Long success(final HttpSuccess success) throws Exception {
-    return IOUtils.copyLarge(
-      success.getResponse().getEntity().getContent(),
-      os);
+    return IOUtils.copyLarge(success.getContent(), os);
   }
 }.get("http://api.example.com/path/to/big/resource");
 
@@ -272,7 +270,7 @@ final HttpResponseEither<Integer,String> result =
   }
   @Override
   public String success(final HttpSuccess success) throws Exception {
-    return EntityUtils.toString(success.getResponse().getEntity(), "UTF-8");
+    return EntityUtils.toString(success.getEntity(), "UTF-8");
   }
   @Override
   public Integer failure(final HttpFailure failure) {
@@ -300,7 +298,7 @@ final HttpResponseEither<Void,MyClazz> result =
   public MyClazz success(final HttpSuccess success) throws Exception {
     // Expects JSON from the server in response to the POST.
     return new GsonBuilder().create().fromJson(
-      EntityUtils.toString(success.getResponse().getEntity(), "UTF-8"),
+      EntityUtils.toString(success.getEntity(), "UTF-8"),
       MyClazz.class);
   }
 }.post(request);
@@ -342,7 +340,7 @@ final HttpResponseEither<Integer,Void> result =
   @Override
   public boolean check(final HttpResponse response, final HttpContext context) {
     // Success is 410, any other status code is failure.
-    return (response.getStatusLine().getStatusCode() == 410);
+    return (response.getStatusCode() == 410);
   }
   @Override
   public Void success(final HttpSuccess success) throws Exception {
@@ -484,15 +482,15 @@ Run SBT from within kolich-httpclient4-closure.
     #~> cd kolich-httpclient4-closure
     #~/kolich-httpclient4-closure> sbt
     ...
-    kolich-httpclient4-closure:0.0.8.1>
+    kolich-httpclient4-closure:0.0.9>
 
 You will see a `kolich-httpclient4-closure` SBT prompt once all dependencies are resolved and the project is loaded.
 
 In SBT, run `package` to compile and package the JAR.
 
-    kolich-httpclient4-closure:0.0.8.1> package
+    kolich-httpclient4-closure:0.0.9> package
     [info] Compiling 12 Java sources to ~/kolich-httpclient4-closure/target/classes...
-    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-0.0.8.1.jar ...
+    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-0.0.9.jar ...
     [info] Done packaging.
     [success] Total time: 4 s, completed
 
@@ -500,7 +498,7 @@ Note the resulting JAR is placed into the **kolich-httpclient4-closure/dist** di
 
 To create an Eclipse Java project for kolich-httpclient4-closure, run `eclipse` in SBT.
 
-    kolich-httpclient4-closure:0.0.8.1> eclipse
+    kolich-httpclient4-closure:0.0.9> eclipse
     ...
     [info] Successfully created Eclipse project files for project(s):
     [info] kolich-httpclient4-closure
