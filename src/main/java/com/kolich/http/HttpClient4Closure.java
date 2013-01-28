@@ -27,13 +27,18 @@
 package com.kolich.http;
 
 import static java.net.URI.create;
+import static org.apache.http.HttpHeaders.CONTENT_LENGTH;
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.apache.http.HttpHeaders.ETAG;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.util.EntityUtils.consume;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -369,12 +374,36 @@ public abstract class HttpClient4Closure<F,S> {
 		public final HttpContext getContext() {
 			return context_;
 		}
+		public final InputStream getContent() throws IllegalStateException, IOException {
+			final HttpEntity entity;
+			if((entity = response_.getEntity()) != null) {
+				return entity.getContent();
+			}
+			return null;
+		}
 		public final int getStatusCode() {
 			return (response_ != null) ?
 				// If the response is non-null, extract the resulting status.
 				response_.getStatusLine().getStatusCode() :
 				// Might be -1 if the response is unset or null.
 				-1;
+		}
+		public final String getFirstHeader(final String headerName) {
+			final Header header;
+			if(response_ != null &&
+				(header = response_.getFirstHeader(headerName)) != null) {
+				return header.getValue();
+			}
+			return null;
+		}
+		public final String getContentType() {
+			return getFirstHeader(CONTENT_TYPE);
+		}
+		public final String getContentLength() {
+			return getFirstHeader(CONTENT_LENGTH);
+		}
+		public final String getETag() {
+			return getFirstHeader(ETAG);
 		}
 	}
 	public static final class HttpFailure extends HttpClientClosureResponse {		
