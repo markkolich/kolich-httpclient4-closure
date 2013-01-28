@@ -46,14 +46,17 @@ public final class KolichDefaultHttpClient {
 	private static final String HTTP_USERAGENT_PARAM = "http.useragent";
 	
 	/**
-	 * The maximum number of total connections, across all routes/hosts.
+	 * The default maximum number of total connections, across all
+	 * routes/hosts.
 	 */
 	private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 200;
 	
 	/**
-	 * The maximum number of connections we can have to any given host.
+	 * The default maximum number of connections we can have to
+	 * any given host.  Assumes the client would be connecting to at
+	 * most (2) hosts/routes in typical situations.
 	 */
-	private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 10;
+	private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 100;
 	
 	private static final int DEFAULT_CONNECTION_TIMEOUT_MS = 10000; // 10 secs
 	private static final int DEFAULT_SOCKET_TIMEOUT_MS = 0; // Inf
