@@ -41,6 +41,7 @@ import java.net.URI;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -374,19 +375,25 @@ public abstract class HttpClient4Closure<F,S> {
 		public final HttpContext getContext() {
 			return context_;
 		}
+		public final HttpEntity getEntity() {
+			return (response_ != null) ? response_.getEntity() : null;
+		}
 		public final InputStream getContent() throws IllegalStateException, IOException {
 			final HttpEntity entity;
-			if((entity = response_.getEntity()) != null) {
+			if((entity = getEntity()) != null) {
 				return entity.getContent();
 			}
 			return null;
 		}
+		public final StatusLine getStatusLine() {
+			return (response_ != null) ? response_.getStatusLine() : null;
+		}
 		public final int getStatusCode() {
-			return (response_ != null) ?
-				// If the response is non-null, extract the resulting status.
-				response_.getStatusLine().getStatusCode() :
-				// Might be -1 if the response is unset or null.
-				-1;
+			final StatusLine line;
+			if((line = getStatusLine()) != null) {
+				return line.getStatusCode();
+			}
+			return -1; // Unset
 		}
 		public final String getFirstHeader(final String headerName) {
 			final Header header;
