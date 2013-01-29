@@ -32,6 +32,8 @@ import org.apache.http.client.HttpClient;
 
 import com.kolich.http.HttpClient4Closure;
 import com.kolich.http.helpers.definitions.CustomEntityConverter;
+import com.kolich.http.helpers.definitions.CustomFailureEntityConverter;
+import com.kolich.http.helpers.definitions.CustomSuccessEntityConverter;
 
 public final class EntityConverterClosures {
 	
@@ -57,6 +59,29 @@ public final class EntityConverterClosures {
 		@Override
 		public F failure(final HttpFailure failure) {
 			return converter_.failure(failure);
+		}
+	}
+	
+	public static class CustomEntitySeparateConverterClosure<F,S>
+		extends CustomEntityConverterClosure<F,S> {
+		public CustomEntitySeparateConverterClosure(final HttpClient client,
+			final CustomSuccessEntityConverter<S> success,
+			final CustomFailureEntityConverter<F> failure) {
+			super(client, new CustomEntityConverter<F,S>() {
+				@Override
+				public S success(final HttpSuccess hSuccess) throws Exception {
+					return success.success(hSuccess);
+				}
+				@Override
+				public F failure(final HttpFailure hFailure) {
+					return failure.failure(hFailure);
+				}
+			});
+		}
+		public CustomEntitySeparateConverterClosure(
+			final CustomSuccessEntityConverter<S> success,
+			final CustomFailureEntityConverter<F> failure) {
+			this(getNewInstanceWithProxySelector(), success, failure);
 		}
 	}
 
