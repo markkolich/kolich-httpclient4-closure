@@ -340,7 +340,7 @@ final HttpResponseEither<Integer,Void> result =
   @Override
   public boolean check(final HttpResponse response, final HttpContext context) {
     // Success is 410, any other status code is failure.
-    return (response.getStatusCode() == 410);
+    return (response.getStatusLine().getStatusCode() == 410);
   }
   @Override
   public Void success(final HttpSuccess success) throws Exception {
