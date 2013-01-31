@@ -37,13 +37,13 @@ object Dependencies {
 
   // External dependencies
   
-  private val httpClient = "org.apache.httpcomponents" % "httpclient" % "4.2.2" % "compile"
+  private val httpAsyncClient = "org.apache.httpcomponents" % "httpasyncclient" % "4.0-beta3" % "compile"
 
   val deps = Seq(
     // Internal.
     kolichCommon,
     // External.
-    httpClient)
+    httpAsyncClient)
 
 }
 
@@ -61,7 +61,7 @@ object HttpClient extends Build {
   import Resolvers._
 
   private val aName = "kolich-httpclient4-closure"
-  private val aVer = "0.0.9.1"
+  private val aVer = "0.1-ASYNC"
   private val aOrg = "com.kolich"
 
   lazy val httpClientClosure: Project = Project(
