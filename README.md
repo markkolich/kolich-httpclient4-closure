@@ -1,6 +1,6 @@
 # kolich-httpclient4-closure
 
-A convenient Java wrapper around the Apache Commons HttpClient 4.x library.
+A convenient Java wrapper around the *synchronous (a.k.a., blocking)* Apache Commons HttpClient 4.x library.
 
 As is, using HttpClient is often cumbersome and bulky for typical `HEAD`, `GET`, `POST`, `PUT` and `DELETE` operations.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any) and close/free the connection back into the connection pool.
 
