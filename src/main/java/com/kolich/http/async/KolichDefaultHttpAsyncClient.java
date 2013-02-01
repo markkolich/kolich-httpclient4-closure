@@ -64,8 +64,8 @@ public final class KolichDefaultHttpAsyncClient {
 	 */
 	private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 100;
 	
-	private static final int DEFAULT_CONNECTION_TIMEOUT_MS = 10000; // 10 secs
-	private static final int DEFAULT_SOCKET_TIMEOUT_MS = 0; // Inf
+	private static final int DEFAULT_CONNECTION_TIMEOUT_MS = 0; // Infinite
+	private static final int DEFAULT_SOCKET_TIMEOUT_MS = 0; // Infinite
 		
 	private int maxTotalConnections_ = DEFAULT_MAX_TOTAL_CONNECTIONS;
 	
@@ -121,14 +121,14 @@ public final class KolichDefaultHttpAsyncClient {
 			// configuration policies.
 			final IOReactorConfig config = new IOReactorConfig();		
 			final ConnectingIOReactor reactor =
-				new DefaultConnectingIOReactor(config);		
+				new DefaultConnectingIOReactor(config);
 			final PoolingClientAsyncConnectionManager cm =
-				new PoolingClientAsyncConnectionManager(reactor);		
+				new PoolingClientAsyncConnectionManager(reactor);	
 			// Set the max connections per route and the maximum number of
 			// total connections this connection manager is allowed to use.
 			cm.setMaxTotal(maxTotalConnections_);
 			cm.setDefaultMaxPerRoute(maxConnectionsPerRoute_);
-			final HttpAsyncClient client = getAsyncInstance(params, cm);		
+			final HttpAsyncClient client = getAsyncInstance(params, cm);	
 			// Declare support for GZIP and DEFLATE response encodings.
 			((DefaultHttpAsyncClient)client).addRequestInterceptor(
 				new RequestAcceptEncoding());
@@ -226,7 +226,7 @@ public final class KolichDefaultHttpAsyncClient {
 	/**
 	 * A class that provides a few static factory methods for Spring Beans.
 	 */
-	public final static class KolichHttpClientFactory {
+	public final static class KolichHttpAsyncClientFactory {
 		
 		public static final HttpAsyncClient getNewAsyncInstanceNoProxySelector(
 			final String userAgent) {
