@@ -58,8 +58,8 @@ public final class KolichDefaultHttpClient {
 	 */
 	private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 100;
 	
-	private static final int DEFAULT_CONNECTION_TIMEOUT_MS = 10000; // 10 secs
-	private static final int DEFAULT_SOCKET_TIMEOUT_MS = 0; // Inf
+	private static final int DEFAULT_CONNECTION_TIMEOUT_MS = 0; // Infinite
+	private static final int DEFAULT_SOCKET_TIMEOUT_MS = 0; // Infinite
 		
 	private int maxTotalConnections_ = DEFAULT_MAX_TOTAL_CONNECTIONS;
 	
