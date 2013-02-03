@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012 Mark S. Kolich
+ * Copyright (c) 2013 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http;
+package com.kolich.http.async;
 
 import static java.net.URI.create;
 import static org.apache.http.HttpHeaders.CONTENT_LENGTH;
@@ -37,19 +37,21 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.concurrent.Future;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
@@ -57,76 +59,86 @@ import com.kolich.http.either.HttpResponseEither;
 import com.kolich.http.either.Left;
 import com.kolich.http.either.Right;
 
-public abstract class HttpClient4Closure<F,S> {
+public abstract class HttpAsyncClient4Closure {
 				
-	private final HttpClient client_;
+	private final HttpAsyncClient client_;
 	
-	public HttpClient4Closure(final HttpClient client) {
+	public HttpAsyncClient4Closure(final HttpAsyncClient client) {
 		client_ = client;
 	}
 	
-	public HttpResponseEither<F,S> head(final String url) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> head(
+		final String url) {
 		return head(create(url));
 	}
 	
-	public HttpResponseEither<F,S> head(final URI uri) {
+	public HttpResponseEither<Exception	,Future<HttpResponse>> head(
+		final URI uri) {
 		return head(new HttpHead(uri));
 	}
 	
-	public HttpResponseEither<F,S> head(final HttpHead head) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> head(
+		final HttpHead head) {
 		return head(head, null);
 	}
 	
-	public HttpResponseEither<F,S> head(final HttpHead head,
-		final HttpContext context) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> head(
+		final HttpHead head, final HttpContext context) {
 		return request(head, context);
 	}
 	
-	public HttpResponseEither<F,S> get(final String url) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> get(
+		final String url) {
 		return get(create(url));
 	}
 	
-	public HttpResponseEither<F,S> get(final URI uri) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> get(
+		final URI uri) {
 		return get(new HttpGet(uri));
 	}
 	
-	public HttpResponseEither<F,S> get(final HttpGet get) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> get(
+		final HttpGet get) {
 		return get(get, null);
 	}
 	
-	public HttpResponseEither<F,S> get(final HttpGet get,
-		final HttpContext context) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> get(
+		final HttpGet get, final HttpContext context) {
 		return request(get, context);
 	}
 	
-	public HttpResponseEither<F,S> post(final String url) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> post(
+		final String url) {
 		return post(create(url));
 	}
 	
-	public HttpResponseEither<F,S> post(final URI uri) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> post(
+		final URI uri) {
 		return post(new HttpPost(uri), null, null);
 	}
 	
-	public HttpResponseEither<F,S> post(final HttpPost post) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> post(
+		final HttpPost post) {
 		return post(post, null, null);
 	}
 	
-	public HttpResponseEither<F,S> post(final HttpPost post,
-		final byte[] body, final String contentType) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> post(
+		final HttpPost post, final byte[] body, final String contentType) {
 		return post(post,
 			(body != null) ? new ByteArrayInputStream(body) : null,
 			(body != null) ? (long)body.length : 0L,
 			contentType);
 	}
 	
-	public HttpResponseEither<F,S> post(final HttpPost post,
-		final InputStream is, final long length, final String contentType) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> post(
+		final HttpPost post, final InputStream is, final long length,
+		final String contentType) {
 		return post(post, is, length, contentType, null);
 	}
 	
-	public HttpResponseEither<F,S> post(final HttpPost post,
-		final InputStream is, final long length, final String contentType,
-		final HttpContext context) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> post(
+		final HttpPost post, final InputStream is, final long length,
+		final String contentType, final HttpContext context) {
 		if(is != null) {
 			final InputStreamEntity entity = new InputStreamEntity(is, length);			
 			if(contentType != null) {
@@ -137,39 +149,44 @@ public abstract class HttpClient4Closure<F,S> {
 		return request(post, context);
 	}
 	
-	public HttpResponseEither<F,S> put(final String url) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> put(
+		final String url) {
 		return put(create(url));
 	}
 	
-	public HttpResponseEither<F,S> put(final URI uri) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> put(
+		final URI uri) {
 		return put(new HttpPut(uri), null);
 	}
 	
-	public HttpResponseEither<F,S> put(final HttpPut put) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> put(
+		final HttpPut put) {
 		return put(put, null);
 	}
 	
-	public HttpResponseEither<F,S> put(final HttpPut put,
-		final byte[] body) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> put(
+		final HttpPut put, final byte[] body) {
 		return put(put, body, null, new BasicHttpContext());
 	}
 	
-	public HttpResponseEither<F,S> put(final HttpPut put,
-		final byte[] body, final String contentType, final HttpContext context) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> put(
+		final HttpPut put, final byte[] body, final String contentType,
+		final HttpContext context) {
 		return put(put,
 			(body != null) ? new ByteArrayInputStream(body) : null,
 			(body != null) ? (long)body.length : 0L,
 			contentType);
 	}
 	
-	public HttpResponseEither<F,S> put(final HttpPut put,
-		final InputStream is, final long length, final String contentType) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> put(
+		final HttpPut put, final InputStream is, final long length,
+		final String contentType) {
 		return put(put, is, length, contentType, null);
 	}
 	
-	public HttpResponseEither<F,S> put(final HttpPut put,
-		final InputStream is, final long length, final String contentType,
-		final HttpContext context) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> put(
+		final HttpPut put, final InputStream is, final long length,
+		final String contentType, final HttpContext context) {
 		if(is != null) {
 			final InputStreamEntity entity = new InputStreamEntity(is, length);			
 			if(contentType != null) {
@@ -180,68 +197,39 @@ public abstract class HttpClient4Closure<F,S> {
 		return request(put, context);
 	}
 	
-	public HttpResponseEither<F,S> delete(final String url) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> delete(
+		final String url) {
 		return delete(create(url));
 	}
 	
-	public HttpResponseEither<F,S> delete(final URI uri) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> delete(
+		final URI uri) {
 		return delete(new HttpDelete(uri));
 	}
 	
-	public HttpResponseEither<F,S> delete(final HttpDelete delete) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> delete(
+		final HttpDelete delete) {
 		return delete(delete, null);
 	}
 	
-	public HttpResponseEither<F,S> delete(final HttpDelete delete,
-		final HttpContext context) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> delete(
+		final HttpDelete delete, final HttpContext context) {
 		return request(delete, context);
 	}
 	
-	public HttpResponseEither<F,S> request(final HttpRequestBase request) {
+	public HttpResponseEither<Exception,Future<HttpResponse>> request(
+		final HttpRequestBase request) {
 		return request(request, null);
 	}
 	
-	public final HttpResponseEither<F,S> request(final HttpRequestBase request,
-		final HttpContext context) {
+	public final HttpResponseEither<Exception,Future<HttpResponse>> request(
+		final HttpRequestBase request, final HttpContext context) {
 		return doit(request, (context == null) ?
 			new BasicHttpContext() : context);
 	}
 	
-	private final HttpResponseEither<F,S> doit(final HttpRequestBase request,
-		final HttpContext context) {
-		HttpResponseEither<F,S> result = null;
-		// Any failures/exceptions encountered during request execution
-		// (in a call to execute) are wrapped up as a Left() and are delt
-		// with in the failure path below.
-		final HttpResponseEither<HttpFailure,HttpSuccess> response =
-			execute(request, context);
-		try {
-			if(response.success()) {
-				result = Right.right(success(((Right<HttpFailure,HttpSuccess>)
-					response).right_));
-			} else {
-				result = Left.left(failure(((Left<HttpFailure,HttpSuccess>)
-					response).left_));
-			}
-		} catch (Exception e) {
-			// Wrap up any failures/exceptions that might have occurred
-			// while processing the response.
-			result = Left.left(failure(new HttpFailure(e)));
-		} finally {
-			if(response.success()) {
-				consumeQuietly(((Right<HttpFailure,HttpSuccess>)
-					response).right_.getResponse());
-			} else {
-				consumeQuietly(((Left<HttpFailure,HttpSuccess>)
-					response).left_.getResponse());
-			}
-		}
-		return result;
-	}
-	
-	private final HttpResponseEither<HttpFailure,HttpSuccess> execute(
+	private final HttpResponseEither<Exception,Future<HttpResponse>> doit(
 		final HttpRequestBase request, final HttpContext context) {
-		HttpResponse response = null;
 		try {
 			// Before the request is "executed" give the consumer an entry
 			// point into the raw request object to tweak as necessary first.
@@ -249,29 +237,47 @@ public abstract class HttpClient4Closure<F,S> {
 			// destination host are done here.
 			before(request, context);
 			// Actually execute the request, get a response.
-			response = client_.execute(request, context);
-			// Immediately after execution, only if the request was executed.
-			after(response, context);
-			// Check if the response was "successful".  The definition of
-			// success is arbitrary based on what's defined in the check()
-			// method.  The default success check is simply checking the
-			// HTTP status code and if it's less than 400 (Bad Request) then
-			// it's considered "good".  If the user wants evaluate this
-			// response against some custom criteria, they should override
-			// this check() method.
-			if(check(response, context)) {
-				return Right.right(new HttpSuccess(response, context));
-			} else {
-				return Left.left(new HttpFailure(response, context));
-			}
+			return Right.right(client_.execute(request, context,
+				new FutureCallback<HttpResponse>() {
+				@Override
+				public void completed(final HttpResponse response) {
+					try {
+						// Immediately after execution, only if the request
+						// was executed.
+						after(response, context);
+						// Check if the response was "successful".  The
+						// definition of success is arbitrary based on what's
+						// defined in the check() method.  The default success
+						// check is simply checking the HTTP status code and if
+						// it's less than 400 (Bad Request) then it's considered
+						// "good".  If the user wants evaluate this response
+						// against some custom criteria, they should override
+						// this check() method.
+						if(check(response, context)) {
+							success(new HttpSuccess(response, context));
+						} else {
+							failure(new HttpFailure(response, context));
+						}
+					} catch (Exception e) {
+						failure(new HttpFailure(e));
+					} finally {
+						consumeQuietly(response);
+					}
+				}
+				@Override
+				public void failed(final Exception e) {
+					failure(new HttpFailure(e));
+				}
+				@Override
+				public void cancelled() {
+					cancel(request, context);
+				}
+			}));
 		} catch (Exception e) {
-			// Something went wrong with the request, abort it,
-			// return failure.
-			request.abort();
-			return Left.left(new HttpFailure(e, response, context));
+			return Left.left(e);
 		}
 	}
-
+	
 	/**
 	 * Called before the request is executed.  The final {@link HttpRequestBase}
 	 * is passed as the only argument such that the consumer can tweak or
@@ -331,20 +337,23 @@ public abstract class HttpClient4Closure<F,S> {
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract S success(final HttpSuccess success)
+	public abstract void success(final HttpSuccess success)
 		throws Exception;
 
 	/**
 	 * Called only if the request is unsuccessful.  The default behavior,
-	 * as implemented here, is to simply return null if the request failed.
+	 * as implemented here, is to simply do nothing if the request failed.
 	 * Consumers should override this default behavior if they need to extract
 	 * more granular information about the failure, like an {@link Exception}
 	 * or status code.
 	 * @param failure
-	 * @return null by default, override this if you want to return something else
 	 */
-	public F failure(final HttpFailure failure) {
-		return null; // Default, return null on failure.
+	public void failure(final HttpFailure failure) {
+		// Default, do nothing.
+	}
+	
+	public void cancel(final HttpRequestBase request, final HttpContext context) {
+		// Default, do nothing.
 	}
 		
 	public static final void consumeQuietly(final HttpEntity entity) {
@@ -439,5 +448,5 @@ public abstract class HttpClient4Closure<F,S> {
 			super(response, context);
 		}
 	}
-	
+		
 }

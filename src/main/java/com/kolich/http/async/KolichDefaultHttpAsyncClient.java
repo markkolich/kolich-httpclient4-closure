@@ -95,7 +95,7 @@ public final class KolichDefaultHttpAsyncClient {
 	 * should use the JVM default {@link ProxySelector}.
 	 * @return
 	 */
-	public HttpAsyncClient getNewAsyncInstance(final boolean useProxySelector,
+	private HttpAsyncClient getNewAsyncInstance(final boolean useProxySelector,
 		final String userAgent) {
 		// Set some parameters.
 		final HttpParams params = new BasicHttpParams();
