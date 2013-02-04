@@ -31,6 +31,7 @@ import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.ge
 import org.apache.http.client.HttpClient;
 
 import com.kolich.http.HttpClient4Closure;
+import com.kolich.http.response.HttpFailure;
 
 /**
  * Abstract closure to return null on failure.

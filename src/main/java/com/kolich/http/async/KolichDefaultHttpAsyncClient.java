@@ -121,17 +121,16 @@ public final class KolichDefaultHttpAsyncClient {
 		}
 		try {
 			// Create a connection manager with some default I/O reactor
-			// configuration policies.
-			final IOReactorConfig config = new IOReactorConfig();		
+			// configuration policies.	
 			final ConnectingIOReactor reactor =
-				new DefaultConnectingIOReactor(config);
+				new DefaultConnectingIOReactor(new IOReactorConfig());
 			final PoolingClientAsyncConnectionManager cm =
-				new PoolingClientAsyncConnectionManager(reactor);	
+				new PoolingClientAsyncConnectionManager(reactor);
 			// Set the max connections per route and the maximum number of
 			// total connections this connection manager is allowed to use.
 			cm.setMaxTotal(maxTotalConnections_);
 			cm.setDefaultMaxPerRoute(maxConnectionsPerRoute_);
-			final HttpAsyncClient client = getAsyncInstance(params, cm);	
+			final HttpAsyncClient client = getAsyncInstance(params, cm);
 			// Declare support for GZIP and DEFLATE response encodings.
 			((DefaultHttpAsyncClient)client).addRequestInterceptor(
 				new RequestAcceptEncoding());

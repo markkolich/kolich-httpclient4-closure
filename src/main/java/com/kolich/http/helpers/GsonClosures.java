@@ -43,6 +43,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 import com.kolich.http.helpers.definitions.OrNullClosure;
+import com.kolich.http.response.HttpSuccess;
 
 public final class GsonClosures {
 	

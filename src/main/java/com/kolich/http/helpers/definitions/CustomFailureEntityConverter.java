@@ -1,6 +1,6 @@
 package com.kolich.http.helpers.definitions;
 
-import com.kolich.http.HttpClient4Closure.HttpFailure;
+import com.kolich.http.response.HttpFailure;
 
 public interface CustomFailureEntityConverter<F> {
 	

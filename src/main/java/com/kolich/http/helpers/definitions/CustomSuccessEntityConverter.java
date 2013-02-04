@@ -1,6 +1,6 @@
 package com.kolich.http.helpers.definitions;
 
-import com.kolich.http.HttpClient4Closure.HttpSuccess;
+import com.kolich.http.response.HttpSuccess;
 
 public interface CustomSuccessEntityConverter<S> {
 

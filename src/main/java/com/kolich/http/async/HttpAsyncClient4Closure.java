@@ -27,22 +27,16 @@
 package com.kolich.http.async;
 
 import static java.net.URI.create;
-import static org.apache.http.HttpHeaders.CONTENT_LENGTH;
-import static org.apache.http.HttpHeaders.CONTENT_TYPE;
-import static org.apache.http.HttpHeaders.ETAG;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.util.EntityUtils.consume;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.Future;
 
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -58,6 +52,8 @@ import org.apache.http.protocol.HttpContext;
 import com.kolich.http.either.HttpResponseEither;
 import com.kolich.http.either.Left;
 import com.kolich.http.either.Right;
+import com.kolich.http.response.HttpFailure;
+import com.kolich.http.response.HttpSuccess;
 
 public abstract class HttpAsyncClient4Closure {
 				
@@ -371,81 +367,6 @@ public abstract class HttpAsyncClient4Closure {
 	public static final void consumeQuietly(final HttpResponse response) {
 		if(response != null) {
 			consumeQuietly(response.getEntity());
-		}
-	}
-		
-	public static abstract class HttpClientClosureResponse {
-		private final HttpResponse response_;
-		private final HttpContext context_;
-		public HttpClientClosureResponse(HttpResponse response,
-			HttpContext context) {
-			response_ = response;
-			context_ = context;
-		}
-		public final HttpResponse getResponse() {
-			return response_;
-		}
-		public final HttpContext getContext() {
-			return context_;
-		}
-		public final HttpEntity getEntity() {
-			return (response_ != null) ? response_.getEntity() : null;
-		}
-		public final InputStream getContent() throws IllegalStateException, IOException {
-			final HttpEntity entity;
-			if((entity = getEntity()) != null) {
-				return entity.getContent();
-			}
-			return null;
-		}
-		public final StatusLine getStatusLine() {
-			return (response_ != null) ? response_.getStatusLine() : null;
-		}
-		public final int getStatusCode() {
-			final StatusLine line;
-			if((line = getStatusLine()) != null) {
-				return line.getStatusCode();
-			}
-			return -1; // Unset
-		}
-		public final String getFirstHeader(final String headerName) {
-			final Header header;
-			if(response_ != null &&
-				(header = response_.getFirstHeader(headerName)) != null) {
-				return header.getValue();
-			}
-			return null;
-		}
-		public final String getContentType() {
-			return getFirstHeader(CONTENT_TYPE);
-		}
-		public final String getContentLength() {
-			return getFirstHeader(CONTENT_LENGTH);
-		}
-		public final String getETag() {
-			return getFirstHeader(ETAG);
-		}
-	}
-	public static final class HttpFailure extends HttpClientClosureResponse {		
-		private final Exception cause_;
-		public HttpFailure(Exception cause, HttpResponse response,
-			HttpContext context) {
-			super(response, context);
-			cause_ = cause;
-		}
-		public HttpFailure(HttpResponse response, HttpContext context) {
-			this(null, response, context);
-		}
-		public HttpFailure(Exception cause) {
-			this(cause, null, null);
-		}
-		public Exception getCause() {
-			return cause_;
-		}
-	}
-	public static final class HttpSuccess extends HttpClientClosureResponse {
-		public HttpSuccess(HttpResponse response, HttpContext context) {
-			super(response, context);
 		}
 	}
 		
