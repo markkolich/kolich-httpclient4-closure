@@ -26,15 +26,14 @@
 
 package com.kolich.http.blocking;
 
+import static com.kolich.http.util.ResponseUtils.consumeQuietly;
 import static java.net.URI.create;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
-import static org.apache.http.util.EntityUtils.consume;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
@@ -341,24 +340,6 @@ public abstract class HttpClient4Closure<F,S> {
 	 */
 	public F failure(final HttpFailure failure) {
 		return null; // Default, return null on failure.
-	}
-		
-	public static final void consumeQuietly(final HttpEntity entity) {
-		try {
-			consume(entity);
-		} catch (Exception e) {}
-	}
-	
-	/**
-	 * Quietly closes any {@link HttpEntity} in the provided
-	 * {@link HttpResponse}, suppressing any exceptions. Ensures that
-	 * the entity content is fully consumed and the content stream, if exists,
-	 * is closed.
-	 */
-	public static final void consumeQuietly(final HttpResponse response) {
-		if(response != null) {
-			consumeQuietly(response.getEntity());
-		}
 	}
 	
 }
