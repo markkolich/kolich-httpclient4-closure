@@ -24,31 +24,31 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers.definitions;
+package com.kolich.http.blocking.helpers.definitions;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
 
 import org.apache.http.client.HttpClient;
 
-import com.kolich.http.HttpClient4Closure;
+import com.kolich.http.blocking.HttpClient4Closure;
 import com.kolich.http.response.HttpFailure;
 
 /**
- * Abstract closure to return a proper {@link HttpFailure} on failure.
+ * Abstract closure to return null on failure.
  */
-public abstract class OrHttpFailureClosure<S> extends HttpClient4Closure<HttpFailure,S> {
+public abstract class OrNullClosure<S> extends HttpClient4Closure<Void,S> {
 
-	public OrHttpFailureClosure(final HttpClient client) {
+	public OrNullClosure(final HttpClient client) {
 		super(client);
 	}
 	
-	public OrHttpFailureClosure() {
+	public OrNullClosure() {
 		this(getNewInstanceWithProxySelector());
 	}
 	
 	@Override
-	public final HttpFailure failure(final HttpFailure failure) {
-		return failure;
+	public final Void failure(final HttpFailure failure) {
+		return null;
 	}
 
 }

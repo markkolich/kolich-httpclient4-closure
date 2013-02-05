@@ -24,38 +24,31 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers.definitions;
+package com.kolich.http.blocking.helpers.definitions;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceNoProxySelector;
+import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
 
 import org.apache.http.client.HttpClient;
 
-import com.kolich.http.HttpClient4Closure;
+import com.kolich.http.blocking.HttpClient4Closure;
 import com.kolich.http.response.HttpFailure;
-import com.kolich.http.response.HttpSuccess;
 
 /**
- * This abstract closure is used when you don't care whether
- * the request completed successfully or not, just that it completed.
+ * Abstract closure to return a proper {@link HttpFailure} on failure.
  */
-public abstract class IgnoreResultClosure extends HttpClient4Closure<Void,Void> {
+public abstract class OrHttpFailureClosure<S> extends HttpClient4Closure<HttpFailure,S> {
 
-	public IgnoreResultClosure(final HttpClient client) {
+	public OrHttpFailureClosure(final HttpClient client) {
 		super(client);
 	}
 	
-	public IgnoreResultClosure() {
-		this(getNewInstanceNoProxySelector());
+	public OrHttpFailureClosure() {
+		this(getNewInstanceWithProxySelector());
 	}
 	
 	@Override
-	public final Void success(final HttpSuccess success) {
-		return null;
+	public final HttpFailure failure(final HttpFailure failure) {
+		return failure;
 	}
-	
-	@Override
-	public final Void failure(final HttpFailure failure) {
-		return null;
-	}
-	
+
 }

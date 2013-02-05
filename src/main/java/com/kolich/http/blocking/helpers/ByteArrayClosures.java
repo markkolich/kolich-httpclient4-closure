@@ -24,31 +24,46 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers.definitions;
-
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+package com.kolich.http.blocking.helpers;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.HttpClient4Closure;
-import com.kolich.http.response.HttpFailure;
+import com.kolich.http.blocking.helpers.definitions.OrHttpFailureClosure;
+import com.kolich.http.blocking.helpers.definitions.OrNullClosure;
+import com.kolich.http.response.HttpSuccess;
 
-/**
- * Abstract closure to return null on failure.
- */
-public abstract class OrNullClosure<S> extends HttpClient4Closure<Void,S> {
-
-	public OrNullClosure(final HttpClient client) {
-		super(client);
+public final class ByteArrayClosures {
+	
+	// Cannot instantiate.
+	private ByteArrayClosures() {}
+	
+	public static class ByteArrayOrHttpFailureClosure extends OrHttpFailureClosure<byte[]> {		
+		public ByteArrayOrHttpFailureClosure(final HttpClient client) {
+			super(client);
+		}
+		public ByteArrayOrHttpFailureClosure() {
+			super();
+		}
+		@Override
+		public final byte[] success(final HttpSuccess success) throws Exception {
+			return EntityUtils.toByteArray(success.getResponse().getEntity());
+		}
 	}
 	
-	public OrNullClosure() {
-		this(getNewInstanceWithProxySelector());
+	public static class ByteArrayOrNullClosure extends OrNullClosure<byte[]> {		
+		public ByteArrayOrNullClosure(final HttpClient client) {
+			super(client);
+		}
+		public ByteArrayOrNullClosure() {
+			super();
+		}
+		@Override
+		public final byte[] success(final HttpSuccess success) throws Exception {
+			return EntityUtils.toByteArray(success.getResponse().getEntity());
+		}
 	}
 	
-	@Override
-	public final Void failure(final HttpFailure failure) {
-		return null;
-	}
-
 }
+
+

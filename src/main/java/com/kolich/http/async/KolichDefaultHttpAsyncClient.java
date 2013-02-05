@@ -26,6 +26,8 @@
 
 package com.kolich.http.async;
 
+import static java.lang.Runtime.getRuntime;
+
 import java.net.ProxySelector;
 
 import org.apache.http.HttpVersion;
@@ -51,10 +53,19 @@ public final class KolichDefaultHttpAsyncClient {
 	
 	private static final String HTTP_USERAGENT_PARAM = "http.useragent";
 		
-	private static final int DEFAULT_CONNECTION_TIMEOUT_MS = 0; // Infinite
+	private static final int DEFAULT_CONNECTION_TIMEOUT_MS = 30000; // 30-seconds
 	private static final int DEFAULT_SOCKET_TIMEOUT_MS = 0; // Infinite
-		
+	 
+	/**
+	 * The maximum number of total outgoing connections from this
+	 * {@link HttpAsyncClient} instance.
+	 */
 	private final int maxTotalConnections_;
+	
+	/**
+	 * The maximum number of outgoing connections per route from this
+	 * {@link HttpAsyncClient} instance.
+	 */
 	private final int maxConnectionsPerRoute_;
 	
 	/**
@@ -148,10 +159,12 @@ public final class KolichDefaultHttpAsyncClient {
 			}
 			return client;
 		} catch (Exception e) {
+			// Should, in theory, ~never~ happen but we have to
+			// be a good citizen anyways.
 			throw new HttpClient4ClosureException(e);
 		}
 	}
-		
+	
 	/**
 	 * Instantiate a new async {@link HttpAsyncClient} instance using the
 	 * provided {@link HttpParams} and requested
@@ -210,6 +223,13 @@ public final class KolichDefaultHttpAsyncClient {
 	 */
 	public final static class KolichDefaultHttpAsyncClientFactory {
 		
+		private static final int AVAILABLE_PROCESSORS =
+			getRuntime().availableProcessors();
+				
+		private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 15;
+		private static final int DEFAULT_MAX_TOTAL_CONNECTIONS =
+			DEFAULT_MAX_CONNECTIONS_PER_ROUTE * AVAILABLE_PROCESSORS;
+		
 		public static final HttpAsyncClient getNewAsyncInstanceNoProxySelector(
 			final String userAgent, int maxTotalConnections,
 			int maxConnectionsPerRoute) {
@@ -223,6 +243,17 @@ public final class KolichDefaultHttpAsyncClient {
 				maxTotalConnections, maxConnectionsPerRoute);
 		}
 		
+		public static final HttpAsyncClient getNewAsyncInstanceNoProxySelector(
+			final String userAgent) {
+			return getNewAsyncInstanceNoProxySelector(userAgent,
+				DEFAULT_MAX_TOTAL_CONNECTIONS,
+				DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
+		}
+		
+		public static final HttpAsyncClient getNewAsyncInstanceNoProxySelector() {
+			return getNewAsyncInstanceNoProxySelector(null);
+		}
+		
 		public static final HttpAsyncClient getNewAsyncInstanceWithProxySelector(
 			final String userAgent, int maxTotalConnections,
 			int maxConnectionsPerRoute) {
@@ -234,6 +265,17 @@ public final class KolichDefaultHttpAsyncClient {
 			int maxTotalConnections, int maxConnectionsPerRoute) {
 			return getNewAsyncInstanceWithProxySelector(null,
 				maxTotalConnections, maxConnectionsPerRoute);
+		}
+		
+		public static final HttpAsyncClient getNewAsyncInstanceWithProxySelector(
+			final String userAgent) {
+			return getNewAsyncInstanceWithProxySelector(userAgent,
+				DEFAULT_MAX_TOTAL_CONNECTIONS,
+				DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
+		}
+		
+		public static final HttpAsyncClient getNewAsyncInstanceWithProxySelector() {
+			return getNewAsyncInstanceWithProxySelector(null);
 		}
 		
 	}

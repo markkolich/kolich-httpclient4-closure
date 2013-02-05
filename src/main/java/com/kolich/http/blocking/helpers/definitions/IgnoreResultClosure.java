@@ -24,46 +24,38 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers;
+package com.kolich.http.blocking.helpers.definitions;
+
+import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceNoProxySelector;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
-import com.kolich.http.helpers.definitions.OrNullClosure;
+import com.kolich.http.blocking.HttpClient4Closure;
+import com.kolich.http.response.HttpFailure;
 import com.kolich.http.response.HttpSuccess;
 
-public final class ByteArrayClosures {
-	
-	// Cannot instantiate.
-	private ByteArrayClosures() {}
-	
-	public static class ByteArrayOrHttpFailureClosure extends OrHttpFailureClosure<byte[]> {		
-		public ByteArrayOrHttpFailureClosure(final HttpClient client) {
-			super(client);
-		}
-		public ByteArrayOrHttpFailureClosure() {
-			super();
-		}
-		@Override
-		public final byte[] success(final HttpSuccess success) throws Exception {
-			return EntityUtils.toByteArray(success.getResponse().getEntity());
-		}
+/**
+ * This abstract closure is used when you don't care whether
+ * the request completed successfully or not, just that it completed.
+ */
+public abstract class IgnoreResultClosure extends HttpClient4Closure<Void,Void> {
+
+	public IgnoreResultClosure(final HttpClient client) {
+		super(client);
 	}
 	
-	public static class ByteArrayOrNullClosure extends OrNullClosure<byte[]> {		
-		public ByteArrayOrNullClosure(final HttpClient client) {
-			super(client);
-		}
-		public ByteArrayOrNullClosure() {
-			super();
-		}
-		@Override
-		public final byte[] success(final HttpSuccess success) throws Exception {
-			return EntityUtils.toByteArray(success.getResponse().getEntity());
-		}
+	public IgnoreResultClosure() {
+		this(getNewInstanceNoProxySelector());
+	}
+	
+	@Override
+	public final Void success(final HttpSuccess success) {
+		return null;
+	}
+	
+	@Override
+	public final Void failure(final HttpFailure failure) {
+		return null;
 	}
 	
 }
-
-

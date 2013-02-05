@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http;
+package com.kolich.http.blocking;
 
 import static java.net.URI.create;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;

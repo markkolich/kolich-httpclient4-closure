@@ -1,4 +1,4 @@
-package com.kolich.http.helpers.definitions;
+package com.kolich.http.blocking.helpers.definitions;
 
 import com.kolich.http.response.HttpFailure;
 
