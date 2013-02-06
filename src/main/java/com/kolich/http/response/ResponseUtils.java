@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.util;
+package com.kolich.http.response;
 
 import static org.apache.http.util.EntityUtils.consume;
 
@@ -32,6 +32,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 
 public final class ResponseUtils {
+	
+	// Cannot instantiate
+	private ResponseUtils() { }
 	
 	public static final void consumeQuietly(final HttpEntity entity) {
 		try {

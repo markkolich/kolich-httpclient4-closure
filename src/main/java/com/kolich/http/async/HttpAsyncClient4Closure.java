@@ -26,7 +26,7 @@
 
 package com.kolich.http.async;
 
-import static com.kolich.http.util.ResponseUtils.consumeQuietly;
+import static com.kolich.http.response.ResponseUtils.consumeQuietly;
 import static java.net.URI.create;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 
