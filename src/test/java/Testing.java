@@ -18,9 +18,9 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import com.kolich.http.blocking.HttpClient4Closure;
-import com.kolich.http.either.HttpResponseEither;
-import com.kolich.http.response.HttpFailure;
-import com.kolich.http.response.HttpSuccess;
+import com.kolich.http.common.either.HttpResponseEither;
+import com.kolich.http.common.response.HttpFailure;
+import com.kolich.http.common.response.HttpSuccess;
 
 public class Testing {
 	

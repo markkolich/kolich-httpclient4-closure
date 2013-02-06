@@ -24,33 +24,33 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.either;
+package com.kolich.http.common.either;
 
-public final class Left<F,S> implements HttpResponseEither<F,S> {
+public final class Right<F,S> implements HttpResponseEither<F,S> {
 	
-	public final F left_;
+	public final S right_;
 	
-	private Left(final F left) {
-		left_ = left;
+	private Right(final S right) {
+		right_ = right;
 	}
 	
 	@Override
 	public boolean success() {
-		return false;
+		return true;
 	}
 	
 	@Override
 	public F left() {
-		return left_;
+		return null;
 	}
 	
 	@Override
 	public S right() {
-		return null;
+		return right_;
 	}
 	
-	public static final <F,S> HttpResponseEither<F,S> left(final F left) {
-		return new Left<F,S>(left);
+	public static final <F,S> HttpResponseEither<F,S> right(final S right) {
+		return new Right<F,S>(right);
 	}
 	
 }

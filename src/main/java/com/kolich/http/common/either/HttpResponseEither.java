@@ -24,34 +24,14 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.response;
+package com.kolich.http.common.either;
 
-import static org.apache.http.util.EntityUtils.consume;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-
-public final class ResponseUtils {
+public interface HttpResponseEither<F,S> {
 	
-	// Cannot instantiate
-	private ResponseUtils() { }
+	public boolean success();
 	
-	public static final void consumeQuietly(final HttpEntity entity) {
-		try {
-			consume(entity);
-		} catch (Exception e) {}
-	}
+	public F left();
 	
-	/**
-	 * Quietly closes any {@link HttpEntity} in the provided
-	 * {@link HttpResponse}, suppressing any exceptions. Ensures that
-	 * the entity content is fully consumed and the content stream, if exists,
-	 * is closed.
-	 */
-	public static final void consumeQuietly(final HttpResponse response) {
-		if(response != null) {
-			consumeQuietly(response.getEntity());
-		}
-	}
-
+	public S right();
+	
 }

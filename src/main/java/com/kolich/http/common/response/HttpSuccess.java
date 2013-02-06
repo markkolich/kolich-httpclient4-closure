@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012 Mark S. Kolich
+ * Copyright (c) 2013 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,38 +24,15 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.blocking.helpers.definitions;
+package com.kolich.http.common.response;
 
-import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceNoProxySelector;
+import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
 
-import org.apache.http.client.HttpClient;
-
-import com.kolich.http.blocking.HttpClient4Closure;
-import com.kolich.http.common.response.HttpFailure;
-import com.kolich.http.common.response.HttpSuccess;
-
-/**
- * This abstract closure is used when you don't care whether
- * the request completed successfully or not, just that it completed.
- */
-public abstract class IgnoreResultClosure extends HttpClient4Closure<Void,Void> {
-
-	public IgnoreResultClosure(final HttpClient client) {
-		super(client);
-	}
+public final class HttpSuccess extends HttpClientClosureResponse {
 	
-	public IgnoreResultClosure() {
-		this(getNewInstanceNoProxySelector());
-	}
-	
-	@Override
-	public final Void success(final HttpSuccess success) {
-		return null;
-	}
-	
-	@Override
-	public final Void failure(final HttpFailure failure) {
-		return null;
+	public HttpSuccess(HttpResponse response, HttpContext context) {
+		super(response, context);
 	}
 	
 }

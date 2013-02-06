@@ -34,7 +34,7 @@ import org.apache.http.util.EntityUtils;
 
 import com.kolich.http.blocking.helpers.definitions.OrHttpFailureClosure;
 import com.kolich.http.blocking.helpers.definitions.OrNullClosure;
-import com.kolich.http.response.HttpSuccess;
+import com.kolich.http.common.response.HttpSuccess;
 
 public final class StringClosures {
 	

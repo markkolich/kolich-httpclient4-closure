@@ -1,6 +1,6 @@
 package com.kolich.http.blocking.helpers.definitions;
 
-import com.kolich.http.response.HttpFailure;
+import com.kolich.http.common.response.HttpFailure;
 
 public interface CustomFailureEntityConverter<F> {
 	

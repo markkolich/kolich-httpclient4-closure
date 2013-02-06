@@ -24,14 +24,31 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.either;
+package com.kolich.http.common.response;
 
-public interface HttpResponseEither<F,S> {
+import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
+
+public final class HttpFailure extends HttpClientClosureResponse {
 	
-	public boolean success();
+	private final Exception cause_;
 	
-	public F left();
+	public HttpFailure(Exception cause, HttpResponse response,
+		HttpContext context) {
+		super(response, context);
+		cause_ = cause;
+	}
 	
-	public S right();
+	public HttpFailure(HttpResponse response, HttpContext context) {
+		this(null, response, context);
+	}
+	
+	public HttpFailure(Exception cause) {
+		this(cause, null, null);
+	}
+	
+	public Exception getCause() {
+		return cause_;
+	}
 	
 }

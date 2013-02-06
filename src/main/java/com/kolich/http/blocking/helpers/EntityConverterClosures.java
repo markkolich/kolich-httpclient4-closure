@@ -34,8 +34,8 @@ import com.kolich.http.blocking.HttpClient4Closure;
 import com.kolich.http.blocking.helpers.definitions.CustomEntityConverter;
 import com.kolich.http.blocking.helpers.definitions.CustomFailureEntityConverter;
 import com.kolich.http.blocking.helpers.definitions.CustomSuccessEntityConverter;
-import com.kolich.http.response.HttpFailure;
-import com.kolich.http.response.HttpSuccess;
+import com.kolich.http.common.response.HttpFailure;
+import com.kolich.http.common.response.HttpSuccess;
 
 public final class EntityConverterClosures {
 	

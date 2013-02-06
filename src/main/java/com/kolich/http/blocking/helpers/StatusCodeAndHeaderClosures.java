@@ -36,7 +36,7 @@ import org.apache.http.protocol.HttpContext;
 
 import com.kolich.http.blocking.helpers.definitions.IgnoreResultClosure;
 import com.kolich.http.blocking.helpers.definitions.OrHttpFailureClosure;
-import com.kolich.http.response.HttpSuccess;
+import com.kolich.http.common.response.HttpSuccess;
 
 public final class StatusCodeAndHeaderClosures {
 	

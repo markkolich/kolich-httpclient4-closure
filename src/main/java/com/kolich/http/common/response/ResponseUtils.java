@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012 Mark S. Kolich
+ * Copyright (c) 2013 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,38 +24,34 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.blocking.helpers.definitions;
+package com.kolich.http.common.response;
 
-import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceNoProxySelector;
+import static org.apache.http.util.EntityUtils.consume;
 
-import org.apache.http.client.HttpClient;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 
-import com.kolich.http.blocking.HttpClient4Closure;
-import com.kolich.http.common.response.HttpFailure;
-import com.kolich.http.common.response.HttpSuccess;
-
-/**
- * This abstract closure is used when you don't care whether
- * the request completed successfully or not, just that it completed.
- */
-public abstract class IgnoreResultClosure extends HttpClient4Closure<Void,Void> {
-
-	public IgnoreResultClosure(final HttpClient client) {
-		super(client);
+public final class ResponseUtils {
+	
+	// Cannot instantiate
+	private ResponseUtils() { }
+	
+	public static final void consumeQuietly(final HttpEntity entity) {
+		try {
+			consume(entity);
+		} catch (Exception e) {}
 	}
 	
-	public IgnoreResultClosure() {
-		this(getNewInstanceNoProxySelector());
+	/**
+	 * Quietly closes any {@link HttpEntity} in the provided
+	 * {@link HttpResponse}, suppressing any exceptions. Ensures that
+	 * the entity content is fully consumed and the content stream, if exists,
+	 * is closed.
+	 */
+	public static final void consumeQuietly(final HttpResponse response) {
+		if(response != null) {
+			consumeQuietly(response.getEntity());
+		}
 	}
-	
-	@Override
-	public final Void success(final HttpSuccess success) {
-		return null;
-	}
-	
-	@Override
-	public final Void failure(final HttpFailure failure) {
-		return null;
-	}
-	
+
 }

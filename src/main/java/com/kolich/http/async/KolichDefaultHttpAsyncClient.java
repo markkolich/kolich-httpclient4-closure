@@ -47,7 +47,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
 import com.kolich.http.async.routing.ProxySelectorAsyncRoutePlanner;
-import com.kolich.http.exceptions.HttpClient4ClosureException;
+import com.kolich.http.common.exceptions.HttpClient4ClosureException;
 
 public final class KolichDefaultHttpAsyncClient {
 	
