@@ -115,7 +115,7 @@ public abstract class HttpAsyncClient4Closure
 	 */
 	public abstract void success(final HttpSuccess success)
 		throws Exception;
-
+	
 	/**
 	 * Called only if the request is unsuccessful.  The default behavior,
 	 * as implemented here, is to simply do nothing if the request failed.
@@ -124,11 +124,20 @@ public abstract class HttpAsyncClient4Closure
 	 * or status code.
 	 * @param failure
 	 */
-	public void failure(final HttpFailure failure) {
-		// Default, do nothing.
-	}
+	public abstract void failure(final HttpFailure failure);
 	
-	public void cancel(final HttpRequestBase request, final HttpContext context) {
+	/**
+	 * Called when the asynchronous request/operation is cancelled.
+	 * The default behavior, in this default implementation, is to do
+	 * nothing.  However, if the consumer wishes to be notified or do
+	 * something other than "nothing" when the request is cancelled,
+	 * this method should be overridden in the anonymous class
+	 * implementation as needed.
+	 * @param request
+	 * @param context
+	 */
+	public void cancel(final HttpRequestBase request,
+		final HttpContext context) {
 		// Default, do nothing.
 	}
 		
