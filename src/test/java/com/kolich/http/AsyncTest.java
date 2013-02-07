@@ -31,7 +31,7 @@ public final class AsyncTest {
 				@Override
 				public void failure(final HttpFailure failure) {
 					System.out.println(Thread.currentThread().getName() +
-						" -- google " + failure.getStatusLine());
+						" -- (failure) google " + failure.getStatusLine());
 				}
 			}.get("http://www.google.com");
 			
@@ -48,7 +48,7 @@ public final class AsyncTest {
 				@Override
 				public void failure(final HttpFailure failure) {
 					System.out.println(Thread.currentThread().getName() +
-						" -- kolich.com " + failure.getStatusLine());
+						" -- (failure) kolich.com " + failure.getStatusLine());
 				}
 			}.put("http://kolich.com");
 			
@@ -56,7 +56,7 @@ public final class AsyncTest {
 				System.out.println("failed to queue request!");
 			}
 			
-			Thread.sleep(5000L); // Wait for a bit to let the requests finish.
+			Thread.sleep(20000L); // Wait for a bit to let the requests finish.
 			
 		} finally {
 			client.shutdown(); // important too
