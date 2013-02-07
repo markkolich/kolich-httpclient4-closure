@@ -1,6 +1,6 @@
 package com.kolich.http;
 
-import static com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichDefaultHttpAsyncClientFactory.getNewAsyncInstanceNoProxySelector;
+import static com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichDefaultHttpAsyncClientFactory.getNewAsyncInstanceWithProxySelector;
 
 import java.util.concurrent.Future;
 
@@ -16,27 +16,52 @@ public final class AsyncTest {
 
 	public static void main(String[] args) throws Exception {
 		
-		final HttpAsyncClient client = getNewAsyncInstanceNoProxySelector("foobar");
+		final HttpAsyncClient client = getNewAsyncInstanceWithProxySelector("foobar");
+		client.start(); // important
 		
-		final HttpResponseEither<Exception,Future<HttpResponse>> result =
-			new HttpAsyncClient4Closure(client) {
-			@Override
-			public void success(final HttpSuccess success) throws Exception {
-				System.out.println(success.getStatusCode());
+		try {
+			
+			HttpResponseEither<Exception,Future<HttpResponse>> result =
+				new HttpAsyncClient4Closure(client) {
+				@Override
+				public void success(final HttpSuccess success) throws Exception {
+					System.out.println(Thread.currentThread().getName() +
+						" -- google " + success.getStatusLine());
+				}
+				@Override
+				public void failure(final HttpFailure failure) {
+					System.out.println(Thread.currentThread().getName() +
+						" -- google " + failure.getStatusLine());
+				}
+			}.get("http://www.google.com");
+			
+			if(!result.success()) {
+				System.out.println("failed to queue request!");
 			}
-			@Override
-			public void failure(final HttpFailure failure) {
-				System.out.println(failure.getStatusCode());
+			
+			result = new HttpAsyncClient4Closure(client) {
+				@Override
+				public void success(final HttpSuccess success) throws Exception {
+					System.out.println(Thread.currentThread().getName() +
+						" -- kolich.com " + success.getStatusLine());
+				}
+				@Override
+				public void failure(final HttpFailure failure) {
+					System.out.println(Thread.currentThread().getName() +
+						" -- kolich.com " + failure.getStatusLine());
+				}
+			}.put("http://kolich.com");
+			
+			if(!result.success()) {
+				System.out.println("failed to queue request!");
 			}
-		}.get("http://www.google.com");
-		
-		if(result.success()) {
-			System.out.println("worked...");
-			result.right().get();
-		} else {
-			System.out.println("failed");
+			
+			Thread.sleep(5000L); // Wait for a bit to let the requests finish.
+			
+		} finally {
+			client.shutdown(); // important too
 		}
-
+		
 	}
 
 }
