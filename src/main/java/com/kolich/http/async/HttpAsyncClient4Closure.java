@@ -28,10 +28,18 @@ package com.kolich.http.async;
 
 import static org.apache.http.nio.client.methods.HttpAsyncMethods.create;
 
+import java.io.IOException;
 import java.util.concurrent.Future;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.ContentDecoder;
+import org.apache.http.nio.IOControl;
 import org.apache.http.nio.client.HttpAsyncClient;
+import org.apache.http.nio.protocol.AbstractAsyncResponseConsumer;
 import org.apache.http.nio.protocol.HttpAsyncResponseConsumer;
 import org.apache.http.protocol.HttpContext;
 
@@ -57,6 +65,37 @@ public abstract class HttpAsyncClient4Closure<T>
 	@Override
 	public final HttpResponseEither<Exception,Future<T>> doit(
 		final HttpRequestBase request, final HttpContext context) {
+		return execute(request, context, new AbstractAsyncResponseConsumer<T>() {
+			@Override
+			protected void onResponseReceived(final HttpResponse response)
+				throws HttpException, IOException {
+				// TODO Auto-generated method stub				
+			}
+			@Override
+			protected void onContentReceived(final ContentDecoder decoder,
+				final IOControl ioctrl) throws IOException {
+				// TODO Auto-generated method stub				
+			}
+			@Override
+			protected void onEntityEnclosed(final HttpEntity entity,
+				final ContentType contentType) throws IOException {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			protected T buildResult(HttpContext context) throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			@Override
+			protected void releaseResources() {
+				// TODO Auto-generated method stub
+			}			
+		});
+	}
+	
+	private final HttpResponseEither<Exception,Future<T>> execute(
+		final HttpRequestBase request, final HttpContext context,
+		final HttpAsyncResponseConsumer<T> consumer) {
 		try {
 			// Before the request is "executed" give the consumer an entry
 			// point into the raw request object to tweak as necessary first.

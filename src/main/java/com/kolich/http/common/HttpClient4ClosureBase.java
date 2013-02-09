@@ -40,6 +40,7 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
@@ -178,6 +179,23 @@ public abstract class HttpClient4ClosureBase<F,S> {
 	public HttpResponseEither<F,S> delete(final HttpDelete delete,
 		final HttpContext context) {
 		return request(delete, context);
+	}
+
+	public HttpResponseEither<F,S> trace(final String url) {
+		return trace(create(url));
+	}
+	
+	public HttpResponseEither<F,S> trace(final URI uri) {
+		return trace(new HttpTrace(uri));
+	}
+	
+	public HttpResponseEither<F,S> trace(final HttpTrace trace) {
+		return trace(trace, null);
+	}
+	
+	public HttpResponseEither<F,S> trace(final HttpTrace trace,
+		final HttpContext context) {
+		return request(trace, context);
 	}
 	
 	public HttpResponseEither<F,S> request(final HttpRequestBase request) {
