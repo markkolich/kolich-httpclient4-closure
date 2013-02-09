@@ -43,7 +43,7 @@ import com.kolich.http.common.response.HttpSuccess;
 public abstract class HttpClient4Closure<F,S>
 	extends HttpClient4ClosureBase<F,S> {
 				
-	protected final HttpClient client_;
+	private final HttpClient client_;
 	
 	public HttpClient4Closure(final HttpClient client) {
 		client_ = client;

@@ -26,14 +26,13 @@
 
 package com.kolich.http.async;
 
-import static com.kolich.http.common.response.ResponseUtils.consumeQuietly;
+import static org.apache.http.nio.client.methods.HttpAsyncMethods.create;
 
 import java.util.concurrent.Future;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.nio.client.HttpAsyncClient;
+import org.apache.http.nio.protocol.HttpAsyncResponseConsumer;
 import org.apache.http.protocol.HttpContext;
 
 import com.kolich.http.common.HttpClient4ClosureBase;
@@ -43,17 +42,20 @@ import com.kolich.http.common.either.Right;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
-public abstract class HttpAsyncClient4Closure
-	extends HttpClient4ClosureBase<Exception,Future<HttpResponse>> {
+public abstract class HttpAsyncClient4Closure<T>
+	extends HttpClient4ClosureBase<Exception,Future<T>> {
 				
-	protected final HttpAsyncClient client_;
+	private final HttpAsyncClient client_;	
+	private final HttpAsyncResponseConsumer<T> consumer_;
 	
-	public HttpAsyncClient4Closure(final HttpAsyncClient client) {
+	public HttpAsyncClient4Closure(final HttpAsyncClient client,
+		final HttpAsyncResponseConsumer<T> consumer) {
 		client_ = client;
+		consumer_ = consumer;
 	}
 	
 	@Override
-	public final HttpResponseEither<Exception,Future<HttpResponse>> doit(
+	public final HttpResponseEither<Exception,Future<T>> doit(
 		final HttpRequestBase request, final HttpContext context) {
 		try {
 			// Before the request is "executed" give the consumer an entry
@@ -62,42 +64,13 @@ public abstract class HttpAsyncClient4Closure
 			// destination host are done here.
 			before(request, context);
 			// Actually execute the request, get a response.
-			return Right.right(client_.execute(request, context,
-				new FutureCallback<HttpResponse>() {
-				@Override
-				public void completed(final HttpResponse response) {
-					try {
-						// Immediately after execution, only if the request
-						// was executed.
-						after(response, context);
-						// Check if the response was "successful".  The
-						// definition of success is arbitrary based on what's
-						// defined in the check() method.  The default success
-						// check is simply checking the HTTP status code and if
-						// it's less than 400 (Bad Request) then it's considered
-						// "good".  If the user wants evaluate this response
-						// against some custom criteria, they should override
-						// this check() method.
-						if(check(response, context)) {
-							success(new HttpSuccess(response, context));
-						} else {
-							failure(new HttpFailure(response, context));
-						}
-					} catch (Exception e) {
-						failure(new HttpFailure(e));
-					} finally {
-						consumeQuietly(response);
-					}
-				}
-				@Override
-				public void failed(final Exception e) {
-					failure(new HttpFailure(e));
-				}
-				@Override
-				public void cancelled() {
-					cancel(request, context);
-				}
-			}));
+			return Right.right(client_.execute(
+				// Create a new Http Async request "method".
+				create(request),
+				// Send in the response consumer.
+				consumer_,
+				// Not passing any future callback, intentional.
+				null));
 		} catch (Exception e) {
 			return Left.left(e);
 		}
