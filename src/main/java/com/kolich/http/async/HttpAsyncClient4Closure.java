@@ -117,11 +117,12 @@ public abstract class HttpAsyncClient4Closure<F,S>
 				}
 				@Override
 				public HttpResponseEither<F,S> onCancel() {
-					return null;
+					return null; // todo
 				}
 			};
 			// Go ahead and execute the asynchronous request.
-			client_.execute(request, context, callback);			
+			final Future<HttpResponse> r = client_.execute(request, context, callback);
+			r.get();			
 			return Right.right(callback.getFuture());
 		} catch (Exception e) {
 			return Left.left(e);

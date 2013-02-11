@@ -40,7 +40,7 @@ public abstract class FutureCallbackWrapper<F,S> implements FutureCallback<HttpR
     }
 
     @Override
-	public final void cancelled() {
+	public final void cancelled() {    	
     	future_ = pool_.submit(new Callable<HttpResponseEither<F,S>>() {
 			@Override
 			public HttpResponseEither<F,S> call() throws Exception {
