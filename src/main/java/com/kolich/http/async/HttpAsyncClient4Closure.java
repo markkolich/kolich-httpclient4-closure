@@ -28,6 +28,7 @@ package com.kolich.http.async;
 
 import static com.kolich.http.common.response.ResponseUtils.consumeQuietly;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -47,8 +48,8 @@ import com.kolich.http.common.either.Right;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
-public abstract class HttpAsyncClient4Closure<F,S>
-	extends HttpClient4ClosureBase<F,Future<S>> {
+public abstract class HttpAsyncClient4Closure
+	extends HttpClient4ClosureBase<Exception,Future<HttpResponse>> {
 	
 	private static final int DEFAULT_HANDLER_THREADS = 15;
 				
@@ -77,7 +78,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 	}
 	
 	@Override
-	public final HttpResponseEither<F,Future<S>> doit(
+	public final HttpResponseEither<Exception,Future<HttpResponse>> doit(
 		final HttpRequestBase request, final HttpContext context) {
 		try {
 			// Before the request is "executed" give the consumer an entry
@@ -85,15 +86,14 @@ public abstract class HttpAsyncClient4Closure<F,S>
 			// Usually things like "signing" the request or modifying the
 			// destination host are done here.
 			before(request, context);
-			
-			
 			// Actually execute the request, get a response.
-			client_.execute(request, context, new FutureCallback<S>() {
+			
+			return Right.right(client_.execute(request, context, new FutureCallback<HttpResponse>() {
 				@Override
 				public void completed(final HttpResponse response) {
-					pool_.submit(new Runnable() {
+					pool_.submit(new Callable<HttpResponseEither<F,S>>() {
 						@Override
-						public void run() {
+						public HttpResponseEither<F,S> call() throws Exception {
 							try {
 								// Immediately after execution, only if the
 								// request was executed.
@@ -117,7 +117,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 							} finally {
 								consumeQuietly(response);
 							}
-						}
+						}						
 					});
 				}
 				@Override
@@ -138,10 +138,9 @@ public abstract class HttpAsyncClient4Closure<F,S>
 						}
 					});
 				}
-			});
-			
+			}));			
 		} catch (Exception e) {
-			return Left.left(failure(new HttpFailure(e)));
+			return Left.left(e);
 		}
 	}
 	
@@ -154,7 +153,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract S success(final HttpSuccess success)
+	public abstract void success(final HttpSuccess success)
 		throws Exception;
 	
 	/**
@@ -165,9 +164,8 @@ public abstract class HttpAsyncClient4Closure<F,S>
 	 * or status code.
 	 * @param failure
 	 */
-	public F failure(final HttpFailure failure) {
+	public void failure(final HttpFailure failure) {
 		// Default, nothing.
-		return null;
 	}
 	
 	/**
