@@ -26,9 +26,11 @@
 
 package com.kolich.http.async;
 
+import static com.kolich.http.common.response.ResponseUtils.consumeQuietly;
 import static org.apache.http.nio.client.methods.HttpAsyncMethods.create;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.Future;
 
 import org.apache.http.HttpEntity;
@@ -50,52 +52,79 @@ import com.kolich.http.common.either.Right;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
-public abstract class HttpAsyncClient4Closure<T>
-	extends HttpClient4ClosureBase<Exception,Future<T>> {
+public abstract class HttpAsyncClient4Closure<S>
+	extends HttpClient4ClosureBase<Exception,Future<S>> {
 				
 	private final HttpAsyncClient client_;	
-	private final HttpAsyncResponseConsumer<T> consumer_;
 	
-	public HttpAsyncClient4Closure(final HttpAsyncClient client,
-		final HttpAsyncResponseConsumer<T> consumer) {
+	public HttpAsyncClient4Closure(final HttpAsyncClient client) {
 		client_ = client;
-		consumer_ = consumer;
 	}
 	
 	@Override
-	public final HttpResponseEither<Exception,Future<T>> doit(
+	public final HttpResponseEither<Exception,Future<S>> doit(
 		final HttpRequestBase request, final HttpContext context) {
-		return execute(request, context, new AbstractAsyncResponseConsumer<T>() {
+		return execute(request, context, new AbstractAsyncResponseConsumer<S>() {
+			private HttpResponse response_ = null;
+			private ByteBuffer buffer_ = null;
 			@Override
 			protected void onResponseReceived(final HttpResponse response)
 				throws HttpException, IOException {
-				// TODO Auto-generated method stub				
+				// Seems to always be called when a response is received for
+				// this request.  Feels like a good place to check for success.
+				try {
+					if(!check(response)) {
+						failure(new HttpFailure(response, context));
+					} else {
+						buffer_ = ByteBuffer.allocate(8*1024);
+					}
+				} catch (Exception e) {
+					throw new HttpException("Unexpected error occured " +
+						"while checking response for success.", e);
+				}
 			}
 			@Override
 			protected void onContentReceived(final ContentDecoder decoder,
 				final IOControl ioctrl) throws IOException {
-				// TODO Auto-generated method stub				
+				if (buffer_ == null) {
+		            throw new IllegalStateException("Byte buffer is null");
+		        }
+		        for (;;) {
+		            int bytesRead = decoder.read(buffer_);
+		            if (bytesRead <= 0) {
+		                break;
+		            }
+		        }
 			}
 			@Override
 			protected void onEntityEnclosed(final HttpEntity entity,
 				final ContentType contentType) throws IOException {
-				// TODO Auto-generated method stub
+				// The entity that's passed here is the same as what's set
+				// in onResponseReceived(response.getEntity()) fwiw.
+				// Entering this method seems to indicate that there's a valid
+				// response worth processing.
+				
 			}
 			@Override
-			protected T buildResult(HttpContext context) throws Exception {
-				// TODO Auto-generated method stub
-				return null;
+			protected S buildResult(final HttpContext context) throws Exception {
+				S result = null;
+				try {
+					result = success(new HttpSuccess(response_, context));
+				} catch (Exception e) {
+					failure(new HttpFailure(e));
+				}
+				return result;
 			}
 			@Override
 			protected void releaseResources() {
-				// TODO Auto-generated method stub
-			}			
+				consumeQuietly(response_);
+			}
 		});
 	}
 	
-	private final HttpResponseEither<Exception,Future<T>> execute(
+	private final HttpResponseEither<Exception,Future<S>> execute(
 		final HttpRequestBase request, final HttpContext context,
-		final HttpAsyncResponseConsumer<T> consumer) {
+		final HttpAsyncResponseConsumer<S> consumer) {
 		try {
 			// Before the request is "executed" give the consumer an entry
 			// point into the raw request object to tweak as necessary first.
@@ -107,7 +136,7 @@ public abstract class HttpAsyncClient4Closure<T>
 				// Create a new Http Async request "method".
 				create(request),
 				// Send in the response consumer.
-				consumer_,
+				consumer,
 				// Not passing any future callback, intentional.
 				null));
 		} catch (Exception e) {
@@ -125,7 +154,7 @@ public abstract class HttpAsyncClient4Closure<T>
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract void success(final HttpSuccess success)
+	public abstract S success(final HttpSuccess success)
 		throws Exception;
 	
 	/**
