@@ -4,12 +4,10 @@ import static com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichDefaultHt
 
 import java.util.concurrent.Future;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.nio.client.HttpAsyncClient;
 
 import com.kolich.http.async.HttpAsyncClient4Closure;
 import com.kolich.http.common.either.HttpResponseEither;
-import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
 public final class AsyncTest {
@@ -21,16 +19,13 @@ public final class AsyncTest {
 		
 		try {
 			
-			HttpResponseEither<Exception,Future<HttpResponse>> result =
-				new HttpAsyncClient4Closure(client) {
-				@Override
-				public void success(final HttpSuccess success) throws Exception {
-					System.out.println("Oh hai google!");
-				}
-				@Override
-				public void failure(final HttpFailure failure) {
-					System.out.println("Failed miserably");
-				}
+			HttpResponseEither<Exception,Future<HttpResponseEither<Exception,String>>> result =
+				new HttpAsyncClient4Closure<Exception,String>(client) {
+					@Override
+					public String success(final HttpSuccess success) throws Exception {
+						// TODO Auto-generated method stub
+						return null;
+					}
 			}.get("http://www.google.com");
 			if(!result.success()) {
 				System.out.println("failed to queue request!");

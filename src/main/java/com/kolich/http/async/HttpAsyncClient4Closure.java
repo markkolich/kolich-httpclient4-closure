@@ -35,7 +35,6 @@ import java.util.concurrent.Future;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.conn.PoolingClientAsyncConnectionManager;
 import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.nio.conn.ClientAsyncConnectionManager;
@@ -48,8 +47,8 @@ import com.kolich.http.common.either.Right;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
-public abstract class HttpAsyncClient4Closure
-	extends HttpClient4ClosureBase<Exception,Future<HttpResponse>> {
+public abstract class HttpAsyncClient4Closure<F,S>
+	extends HttpClient4ClosureBase<Exception,Future<HttpResponseEither<F,S>>> {
 	
 	private static final int DEFAULT_HANDLER_THREADS = 15;
 				
@@ -68,7 +67,7 @@ public abstract class HttpAsyncClient4Closure
 	}
 	
 	public HttpAsyncClient4Closure(final HttpAsyncClient client) {
-		int maxTotal = DEFAULT_HANDLER_THREADS;
+		int maxTotal = DEFAULT_HANDLER_THREADS; // Default thread pool size
 		final ClientAsyncConnectionManager cm = client.getConnectionManager();		
 		if(cm instanceof PoolingClientAsyncConnectionManager) {
 			maxTotal = ((PoolingClientAsyncConnectionManager)cm).getMaxTotal();
@@ -78,22 +77,22 @@ public abstract class HttpAsyncClient4Closure
 	}
 	
 	@Override
-	public final HttpResponseEither<Exception,Future<HttpResponse>> doit(
+	public final HttpResponseEither<Exception,Future<HttpResponseEither<F,S>>> doit(
 		final HttpRequestBase request, final HttpContext context) {
 		try {
 			// Before the request is "executed" give the consumer an entry
 			// point into the raw request object to tweak as necessary first.
 			// Usually things like "signing" the request or modifying the
 			// destination host are done here.
-			before(request, context);
-			// Actually execute the request, get a response.
-			
-			return Right.right(client_.execute(request, context, new FutureCallback<HttpResponse>() {
+			before(request, context);			
+			final Callable<HttpResponseEither<F,S>> callable =
+				new Callable<HttpResponseEither<F,S>>() {
 				@Override
-				public void completed(final HttpResponse response) {
-					pool_.submit(new Callable<HttpResponseEither<F,S>>() {
+				public HttpResponseEither<F,S> call() throws Exception {
+					final FutureCallbackWrapper<F,S> callback =
+						new FutureCallbackWrapper<F,S>() {
 						@Override
-						public HttpResponseEither<F,S> call() throws Exception {
+						public HttpResponseEither<F,S> onComplete(final HttpResponse response) {
 							try {
 								// Immediately after execution, only if the
 								// request was executed.
@@ -108,37 +107,31 @@ public abstract class HttpAsyncClient4Closure
 								// against some custom criteria, they should
 								// override this check() method.
 								if(check(response, context)) {
-									success(new HttpSuccess(response, context));
+									return Right.right(success(new HttpSuccess(response, context)));
 								} else {
-									failure(new HttpFailure(response, context));
+									return Left.left(failure(new HttpFailure(response, context)));
 								}
 							} catch (Exception e) {
-								failure(new HttpFailure(e));
+								return Left.left(failure(new HttpFailure(e)));
 							} finally {
 								consumeQuietly(response);
 							}
-						}						
-					});
-				}
-				@Override
-				public void failed(final Exception e) {
-					pool_.submit(new Runnable() {
-						@Override
-						public void run() {
-							failure(new HttpFailure(e));
 						}
-					});
-				}
-				@Override
-				public void cancelled() {
-					pool_.submit(new Runnable() {
 						@Override
-						public void run() {
-							cancel(request, context);
+						public HttpResponseEither<F,S> onFailure(final Exception e) {
+							return Left.left(failure(new HttpFailure(e)));
 						}
-					});
+						@Override
+						public HttpResponseEither<F,S> onCancel() {
+							return null;
+						}
+					};
+					// Go ahead and execute the asynchronous request.
+					client_.execute(request, context, callback);
+					return callback.getEither();
 				}
-			}));			
+			};
+			return Right.right(pool_.submit(callable));
 		} catch (Exception e) {
 			return Left.left(e);
 		}
@@ -153,7 +146,7 @@ public abstract class HttpAsyncClient4Closure
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract void success(final HttpSuccess success)
+	public abstract S success(final HttpSuccess success)
 		throws Exception;
 	
 	/**
@@ -164,8 +157,9 @@ public abstract class HttpAsyncClient4Closure
 	 * or status code.
 	 * @param failure
 	 */
-	public void failure(final HttpFailure failure) {
+	public F failure(final HttpFailure failure) {
 		// Default, nothing.
+		return null;
 	}
 	
 	/**
@@ -182,5 +176,5 @@ public abstract class HttpAsyncClient4Closure
 		final HttpContext context) {
 		// Default, do nothing.
 	}
-		
+	
 }
