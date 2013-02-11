@@ -28,7 +28,6 @@ package com.kolich.http.async;
 
 import static com.kolich.http.common.response.ResponseUtils.consumeQuietly;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -84,54 +83,46 @@ public abstract class HttpAsyncClient4Closure<F,S>
 			// point into the raw request object to tweak as necessary first.
 			// Usually things like "signing" the request or modifying the
 			// destination host are done here.
-			before(request, context);			
-			final Callable<HttpResponseEither<F,S>> callable =
-				new Callable<HttpResponseEither<F,S>>() {
+			before(request, context);
+			final FutureCallbackWrapper<F,S> callback = new FutureCallbackWrapper<F,S>(pool_) {
 				@Override
-				public HttpResponseEither<F,S> call() throws Exception {
-					final FutureCallbackWrapper<F,S> callback =
-						new FutureCallbackWrapper<F,S>() {
-						@Override
-						public HttpResponseEither<F,S> onComplete(final HttpResponse response) {
-							try {
-								// Immediately after execution, only if the
-								// request was executed.
-								after(response, context);
-								// Check if the response was "successful".  The
-								// definition of success is arbitrary based on
-								// what's defined in the check() method.  The
-								// default success check is simply checking the
-								// HTTP status code and if it's less than 400
-								// (Bad Request) then it's considered "good".
-								// If the user wants evaluate this response
-								// against some custom criteria, they should
-								// override this check() method.
-								if(check(response, context)) {
-									return Right.right(success(new HttpSuccess(response, context)));
-								} else {
-									return Left.left(failure(new HttpFailure(response, context)));
-								}
-							} catch (Exception e) {
-								return Left.left(failure(new HttpFailure(e)));
-							} finally {
-								consumeQuietly(response);
-							}
+				public HttpResponseEither<F,S> onComplete(final HttpResponse response) {
+					try {
+						// Immediately after execution, only if the
+						// request was executed.
+						after(response, context);
+						// Check if the response was "successful".  The
+						// definition of success is arbitrary based on
+						// what's defined in the check() method.  The
+						// default success check is simply checking the
+						// HTTP status code and if it's less than 400
+						// (Bad Request) then it's considered "good".
+						// If the user wants evaluate this response
+						// against some custom criteria, they should
+						// override this check() method.
+						if(check(response, context)) {
+							return Right.right(success(new HttpSuccess(response, context)));
+						} else {
+							return Left.left(failure(new HttpFailure(response, context)));
 						}
-						@Override
-						public HttpResponseEither<F,S> onFailure(final Exception e) {
-							return Left.left(failure(new HttpFailure(e)));
-						}
-						@Override
-						public HttpResponseEither<F,S> onCancel() {
-							return null;
-						}
-					};
-					// Go ahead and execute the asynchronous request.
-					client_.execute(request, context, callback);
-					return callback.getEither();
+					} catch (Exception e) {
+						return Left.left(failure(new HttpFailure(e)));
+					} finally {
+						consumeQuietly(response);
+					}
+				}
+				@Override
+				public HttpResponseEither<F,S> onFailure(final Exception e) {
+					return Left.left(failure(new HttpFailure(e)));
+				}
+				@Override
+				public HttpResponseEither<F,S> onCancel() {
+					return null;
 				}
 			};
-			return Right.right(pool_.submit(callable));
+			// Go ahead and execute the asynchronous request.
+			client_.execute(request, context, callback);			
+			return Right.right(callback.getFuture());
 		} catch (Exception e) {
 			return Left.left(e);
 		}

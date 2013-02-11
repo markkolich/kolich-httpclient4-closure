@@ -26,7 +26,7 @@ public final class AsyncTest {
 						// TODO Auto-generated method stub
 						return null;
 					}
-			}.get("http://www.google.com");
+			}.get("http://www.google.com/sdlkfjslkdfjsld");
 			if(!result.success()) {
 				System.out.println("failed to queue request!");
 			}
