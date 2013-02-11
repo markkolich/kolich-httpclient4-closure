@@ -27,22 +27,17 @@
 package com.kolich.http.async;
 
 import static com.kolich.http.common.response.ResponseUtils.consumeQuietly;
-import static org.apache.http.nio.client.methods.HttpAsyncMethods.create;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
-import org.apache.http.nio.ContentDecoder;
-import org.apache.http.nio.IOControl;
+import org.apache.http.concurrent.FutureCallback;
+import org.apache.http.impl.nio.conn.PoolingClientAsyncConnectionManager;
 import org.apache.http.nio.client.HttpAsyncClient;
-import org.apache.http.nio.protocol.AbstractAsyncResponseConsumer;
-import org.apache.http.nio.protocol.HttpAsyncResponseConsumer;
+import org.apache.http.nio.conn.ClientAsyncConnectionManager;
 import org.apache.http.protocol.HttpContext;
 
 import com.kolich.http.common.HttpClient4ClosureBase;
@@ -52,105 +47,110 @@ import com.kolich.http.common.either.Right;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
-public abstract class HttpAsyncClient4Closure<S>
-	extends HttpClient4ClosureBase<Exception,Future<S>> {
+public abstract class HttpAsyncClient4Closure<F,S>
+	extends HttpClient4ClosureBase<F,Future<S>> {
+	
+	private static final int DEFAULT_HANDLER_THREADS = 15;
 				
-	private final HttpAsyncClient client_;	
+	private final HttpAsyncClient client_;
+	private final ExecutorService pool_;
+	
+	public HttpAsyncClient4Closure(final HttpAsyncClient client,
+		final ExecutorService pool) {
+		client_ = client;
+		pool_ = pool;
+	}
+	
+	public HttpAsyncClient4Closure(final HttpAsyncClient client,
+		final int handlerPoolSize) {
+		this(client, Executors.newFixedThreadPool(handlerPoolSize));
+	}
 	
 	public HttpAsyncClient4Closure(final HttpAsyncClient client) {
+		int maxTotal = DEFAULT_HANDLER_THREADS;
+		final ClientAsyncConnectionManager cm = client.getConnectionManager();		
+		if(cm instanceof PoolingClientAsyncConnectionManager) {
+			maxTotal = ((PoolingClientAsyncConnectionManager)cm).getMaxTotal();
+		}
 		client_ = client;
+		pool_ = Executors.newFixedThreadPool(maxTotal);
 	}
 	
 	@Override
-	public final HttpResponseEither<Exception,Future<S>> doit(
+	public final HttpResponseEither<F,Future<S>> doit(
 		final HttpRequestBase request, final HttpContext context) {
-		return execute(request, context, new AbstractAsyncResponseConsumer<S>() {
-			private HttpResponse response_ = null;
-			private ByteBuffer buffer_ = null;
-			@Override
-			protected void onResponseReceived(final HttpResponse response)
-				throws HttpException, IOException {
-				// Seems to always be called when a response is received for
-				// this request.  Feels like a good place to check for success.
-				try {
-					if(!check(response)) {
-						failure(new HttpFailure(response, context));
-					} else {
-						buffer_ = ByteBuffer.allocate(8*1024);
-					}
-				} catch (Exception e) {
-					throw new HttpException("Unexpected error occured " +
-						"while checking response for success.", e);
-				}
-			}
-			@Override
-			protected void onContentReceived(final ContentDecoder decoder,
-				final IOControl ioctrl) throws IOException {
-				if (buffer_ == null) {
-		            throw new IllegalStateException("Byte buffer is null");
-		        }
-		        for (;;) {
-		            int bytesRead = decoder.read(buffer_);
-		            if (bytesRead <= 0) {
-		                break;
-		            }
-		        }
-			}
-			@Override
-			protected void onEntityEnclosed(final HttpEntity entity,
-				final ContentType contentType) throws IOException {
-				// The entity that's passed here is the same as what's set
-				// in onResponseReceived(response.getEntity()) fwiw.
-				// Entering this method seems to indicate that there's a valid
-				// response worth processing.
-				
-			}
-			@Override
-			protected S buildResult(final HttpContext context) throws Exception {
-				S result = null;
-				try {
-					result = success(new HttpSuccess(response_, context));
-				} catch (Exception e) {
-					failure(new HttpFailure(e));
-				}
-				return result;
-			}
-			@Override
-			protected void releaseResources() {
-				consumeQuietly(response_);
-			}
-		});
-	}
-	
-	private final HttpResponseEither<Exception,Future<S>> execute(
-		final HttpRequestBase request, final HttpContext context,
-		final HttpAsyncResponseConsumer<S> consumer) {
 		try {
 			// Before the request is "executed" give the consumer an entry
 			// point into the raw request object to tweak as necessary first.
 			// Usually things like "signing" the request or modifying the
 			// destination host are done here.
 			before(request, context);
+			
+			
 			// Actually execute the request, get a response.
-			return Right.right(client_.execute(
-				// Create a new Http Async request "method".
-				create(request),
-				// Send in the response consumer.
-				consumer,
-				// Not passing any future callback, intentional.
-				null));
+			client_.execute(request, context, new FutureCallback<S>() {
+				@Override
+				public void completed(final HttpResponse response) {
+					pool_.submit(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								// Immediately after execution, only if the
+								// request was executed.
+								after(response, context);
+								// Check if the response was "successful".  The
+								// definition of success is arbitrary based on
+								// what's defined in the check() method.  The
+								// default success check is simply checking the
+								// HTTP status code and if it's less than 400
+								// (Bad Request) then it's considered "good".
+								// If the user wants evaluate this response
+								// against some custom criteria, they should
+								// override this check() method.
+								if(check(response, context)) {
+									success(new HttpSuccess(response, context));
+								} else {
+									failure(new HttpFailure(response, context));
+								}
+							} catch (Exception e) {
+								failure(new HttpFailure(e));
+							} finally {
+								consumeQuietly(response);
+							}
+						}
+					});
+				}
+				@Override
+				public void failed(final Exception e) {
+					pool_.submit(new Runnable() {
+						@Override
+						public void run() {
+							failure(new HttpFailure(e));
+						}
+					});
+				}
+				@Override
+				public void cancelled() {
+					pool_.submit(new Runnable() {
+						@Override
+						public void run() {
+							cancel(request, context);
+						}
+					});
+				}
+			});
+			
 		} catch (Exception e) {
-			return Left.left(e);
+			return Left.left(failure(new HttpFailure(e)));
 		}
 	}
-			
+	
 	/**
 	 * Called only if the request is successful.  Success is defined by
 	 * the boolean state that the {@link #check} method returns.  If
 	 * {@link #check} returns true, the request is considered to be
 	 * successful. If it returns false, the request failed.  
 	 * @param success
-	 * @param context
 	 * @return
 	 * @throws Exception
 	 */
@@ -159,13 +159,16 @@ public abstract class HttpAsyncClient4Closure<S>
 	
 	/**
 	 * Called only if the request is unsuccessful.  The default behavior,
-	 * as implemented here, is to simply do nothing if the request failed.
+	 * as implemented here, is to do nothing if the request failed.
 	 * Consumers should override this default behavior if they need to extract
 	 * more granular information about the failure, like an {@link Exception}
 	 * or status code.
 	 * @param failure
 	 */
-	public abstract void failure(final HttpFailure failure);
+	public F failure(final HttpFailure failure) {
+		// Default, nothing.
+		return null;
+	}
 	
 	/**
 	 * Called when the asynchronous request/operation is cancelled.

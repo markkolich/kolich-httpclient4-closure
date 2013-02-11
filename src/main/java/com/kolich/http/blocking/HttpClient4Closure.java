@@ -114,20 +114,19 @@ public abstract class HttpClient4Closure<F,S>
 			return Left.left(new HttpFailure(e, response, context));
 		}
 	}
-
+	
 	/**
 	 * Called only if the request is successful.  Success is defined by
 	 * the boolean state that the {@link #check} method returns.  If
 	 * {@link #check} returns true, the request is considered to be
 	 * successful. If it returns false, the request failed.  
 	 * @param success
-	 * @param context
 	 * @return
 	 * @throws Exception
 	 */
 	public abstract S success(final HttpSuccess success)
 		throws Exception;
-
+	
 	/**
 	 * Called only if the request is unsuccessful.  The default behavior,
 	 * as implemented here, is to simply return null if the request failed.

@@ -4,6 +4,7 @@ import static com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichDefaultHt
 
 import java.util.concurrent.Future;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.nio.client.HttpAsyncClient;
 
 import com.kolich.http.async.HttpAsyncClient4Closure;
@@ -20,12 +21,11 @@ public final class AsyncTest {
 		
 		try {
 			
-			HttpResponseEither<Exception,Future<Void>> result =
-				new HttpAsyncClient4Closure<Void>(client) {
+			HttpResponseEither<Exception,Future<HttpResponse>> result =
+				new HttpAsyncClient4Closure(client) {
 				@Override
-				public Void success(final HttpSuccess success) throws Exception {
+				public void success(final HttpSuccess success) throws Exception {
 					System.out.println("Oh hai google!");
-					return null;
 				}
 				@Override
 				public void failure(final HttpFailure failure) {

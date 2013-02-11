@@ -259,5 +259,5 @@ public abstract class HttpClient4ClosureBase<F,S> {
 	
 	public abstract HttpResponseEither<F,S> doit(final HttpRequestBase request,
 		final HttpContext context);
-
+	
 }
