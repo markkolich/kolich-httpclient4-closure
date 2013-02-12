@@ -133,8 +133,13 @@ public final class KolichDefaultHttpAsyncClient {
 		try {
 			// Create a connection manager with some default I/O reactor
 			// configuration policies.	
+			final IOReactorConfig ioRConfig = new IOReactorConfig();
+			// Be sure that we setup enough I/O dispatcher threads to match
+			// the total number of supported max connections we
+			// expect to handle at any one time.
+			ioRConfig.setIoThreadCount(maxTotalConnections_);
 			final ConnectingIOReactor reactor =
-				new DefaultConnectingIOReactor(new IOReactorConfig());
+				new DefaultConnectingIOReactor(ioRConfig);
 			final PoolingClientAsyncConnectionManager cm =
 				new PoolingClientAsyncConnectionManager(reactor);
 			// Set the max connections per route and the maximum number of
