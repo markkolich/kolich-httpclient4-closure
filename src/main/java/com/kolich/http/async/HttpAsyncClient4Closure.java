@@ -28,15 +28,27 @@ package com.kolich.http.async;
 
 import static com.kolich.http.common.response.ResponseUtils.consumeQuietly;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.http.ContentTooLongException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.nio.conn.PoolingClientAsyncConnectionManager;
+import org.apache.http.nio.ContentDecoder;
+import org.apache.http.nio.IOControl;
 import org.apache.http.nio.client.HttpAsyncClient;
+import org.apache.http.nio.client.methods.HttpAsyncMethods;
 import org.apache.http.nio.conn.ClientAsyncConnectionManager;
+import org.apache.http.nio.entity.ContentBufferEntity;
+import org.apache.http.nio.protocol.AbstractAsyncResponseConsumer;
+import org.apache.http.nio.util.HeapByteBufferAllocator;
+import org.apache.http.nio.util.SimpleInputBuffer;
 import org.apache.http.protocol.HttpContext;
 
 import com.kolich.http.common.HttpClient4ClosureBase;
@@ -84,13 +96,43 @@ public abstract class HttpAsyncClient4Closure<F,S>
 			// Usually things like "signing" the request or modifying the
 			// destination host are done here.
 			before(request, context);
-			final FutureCallbackWrapper<F,S> callback = new FutureCallbackWrapper<F,S>(pool_) {
+			// Go ahead and execute the asynchronous request.
+			return Right.right(client_.execute(HttpAsyncMethods.create(request),
+				new AbstractAsyncResponseConsumer<HttpResponseEither<F,S>>() {
+				private volatile HttpResponse response_;
+			    private volatile SimpleInputBuffer buf_;
 				@Override
-				public HttpResponseEither<F,S> onComplete(final HttpResponse response) {
+				protected void onResponseReceived(final HttpResponse response)
+					throws HttpException, IOException {
+					response_ = response;
+				}
+				@Override
+				protected void onContentReceived(final ContentDecoder decoder,
+					final IOControl ioctrl) throws IOException {
+					if (buf_ == null) {
+						throw new IllegalStateException("Content buffer is null");
+					}
+					buf_.consumeContent(decoder);
+				}
+				@Override
+				protected void onEntityEnclosed(final HttpEntity entity,
+					final ContentType contentType) throws IOException {
+					long len = entity.getContentLength();
+			        if (len > Integer.MAX_VALUE) {
+			            throw new ContentTooLongException("Entity content is too long: " + len);
+			        } else if (len < 0) {
+			        	len = 4096;
+			        }
+			        buf_ = new SimpleInputBuffer((int) len, new HeapByteBufferAllocator());
+			        response_.setEntity(new ContentBufferEntity(entity, buf_));
+				}
+				@Override
+				protected HttpResponseEither<F,S> buildResult(
+					final HttpContext context) throws Exception {
 					try {
 						// Immediately after execution, only if the
 						// request was executed.
-						after(response, context);
+						after(response_, context);
 						// Check if the response was "successful".  The
 						// definition of success is arbitrary based on
 						// what's defined in the check() method.  The
@@ -100,30 +142,23 @@ public abstract class HttpAsyncClient4Closure<F,S>
 						// If the user wants evaluate this response
 						// against some custom criteria, they should
 						// override this check() method.
-						if(check(response, context)) {
-							return Right.right(success(new HttpSuccess(response, context)));
+						if(check(response_, context)) {
+							return Right.right(success(new HttpSuccess(response_, context)));
 						} else {
-							return Left.left(failure(new HttpFailure(response, context)));
+							return Left.left(failure(new HttpFailure(response_, context)));
 						}
 					} catch (Exception e) {
 						return Left.left(failure(new HttpFailure(e)));
 					} finally {
-						consumeQuietly(response);
+						consumeQuietly(response_);
 					}
 				}
 				@Override
-				public HttpResponseEither<F,S> onFailure(final Exception e) {
-					return Left.left(failure(new HttpFailure(e)));
+				protected void releaseResources() {
+					response_ = null;
+			        buf_ = null;
 				}
-				@Override
-				public HttpResponseEither<F,S> onCancel() {
-					return null; // todo
-				}
-			};
-			// Go ahead and execute the asynchronous request.
-			final Future<HttpResponse> r = client_.execute(request, context, callback);
-			r.get();			
-			return Right.right(callback.getFuture());
+			}, context, null));
 		} catch (Exception e) {
 			return Left.left(e);
 		}
@@ -164,9 +199,10 @@ public abstract class HttpAsyncClient4Closure<F,S>
 	 * @param request
 	 * @param context
 	 */
-	public void cancel(final HttpRequestBase request,
+	public F cancel(final HttpRequestBase request,
 		final HttpContext context) {
-		// Default, do nothing.
+		// Default, nothing.
+		return null;
 	}
 	
 }

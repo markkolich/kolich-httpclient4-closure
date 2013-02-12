@@ -8,6 +8,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.concurrent.FutureCallback;
 
 import com.kolich.http.common.either.HttpResponseEither;
+import com.kolich.http.common.either.Left;
 
 public abstract class FutureCallbackWrapper<F,S> implements FutureCallback<HttpResponse> {
 	
@@ -44,7 +45,7 @@ public abstract class FutureCallbackWrapper<F,S> implements FutureCallback<HttpR
     	future_ = pool_.submit(new Callable<HttpResponseEither<F,S>>() {
 			@Override
 			public HttpResponseEither<F,S> call() throws Exception {
-				return onCancel();
+				return Left.left(onCancel());
 			}
 		});
     }
@@ -53,7 +54,7 @@ public abstract class FutureCallbackWrapper<F,S> implements FutureCallback<HttpR
     
     public abstract HttpResponseEither<F,S> onFailure(final Exception e);
     
-    public abstract HttpResponseEither<F,S> onCancel();
+    public abstract F onCancel();
     
     public final Future<HttpResponseEither<F,S>> getFuture() {
     	return future_;
