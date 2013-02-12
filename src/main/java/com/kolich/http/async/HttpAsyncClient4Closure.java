@@ -26,8 +26,6 @@
 
 package com.kolich.http.async;
 
-import static org.apache.http.nio.client.methods.HttpAsyncMethods.create;
-
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +34,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.concurrent.Cancellable;
 import org.apache.http.nio.client.HttpAsyncClient;
+import org.apache.http.nio.client.methods.HttpAsyncMethods;
 import org.apache.http.nio.protocol.HttpAsyncResponseConsumer;
 import org.apache.http.protocol.HttpContext;
 
@@ -64,20 +63,31 @@ public abstract class HttpAsyncClient4Closure<F,S>
 			// Usually things like "signing" the request or modifying the
 			// destination host are done here.
 			before(request, context);
-			// Go ahead and execute the asynchronous request.
+			// Go ahead and execute the asynchronous request.  Note the
+			// resulting Future<T> is wrapped by an internal wrapper so
+			// that any exceptions that pop-up when future.get() is called
+			// can be caught gracefully and wrapped up in the
+			// HttpResponseEither<F,S>.
 			return new InternalBasicFutureWrapper(client_.execute(
-				create(request),
+				// Create a fresh asynchronous request object from the
+				// incoming request base.
+				HttpAsyncMethods.create(request),
+				// Load the asynchronous response consumer; this is the
+				// "class" that will be responsible for doing the real work
+				// asynchronously under-the-hood to process the response.
 				getConsumer(),
+				// Internal HTTP request context.
 				context,
+				// Intentionally not providing a FutureCallback<T>
 				null));
 		} catch (Exception e) {
-			// If something went wront, create a new future that's already
-			// "done" and contains an either where the Left type (error) is
-			// set to indicate failure.
+			// If something went wrong, create a new future that's already
+			// "done" and contains an Either<F,S> where the Left error type is
+			// immeaditely set to indicate failure.
 			return AlreadyDoneFuture.create(Left.left(failure(new HttpFailure(e))));
 		}
 	}
-		
+	
 	public abstract HttpAsyncResponseConsumer<HttpResponseEither<F,S>> getConsumer();
 	
 	/**
@@ -106,34 +116,27 @@ public abstract class HttpAsyncClient4Closure<F,S>
 	}
 	
 	private final class InternalBasicFutureWrapper implements 
-		Future<HttpResponseEither<F,S>>, Cancellable {
-		
-		private final Future<HttpResponseEither<F,S>> future_;
-		
+		Future<HttpResponseEither<F,S>>, Cancellable {		
+		private final Future<HttpResponseEither<F,S>> future_;		
 		private InternalBasicFutureWrapper(final Future<HttpResponseEither<F,S>> future) {
 			future_ = future;
 		}
-
 		@Override
 		public boolean cancel() {
 			return future_.cancel(true);
 		}
-
 		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
 			return future_.cancel(mayInterruptIfRunning);
 		}
-
 		@Override
 		public boolean isCancelled() {
 			return future_.isCancelled();
 		}
-
 		@Override
 		public boolean isDone() {
 			return future_.isDone();
 		}
-
 		@Override
 		public HttpResponseEither<F,S> get() throws InterruptedException,
 			ExecutionException {
@@ -143,7 +146,6 @@ public abstract class HttpAsyncClient4Closure<F,S>
 				return Left.left(failure(new HttpFailure(e)));
 			}
 		}
-
 		@Override
 		public HttpResponseEither<F,S> get(long timeout, TimeUnit unit)
 			throws InterruptedException, ExecutionException, TimeoutException {
@@ -153,7 +155,6 @@ public abstract class HttpAsyncClient4Closure<F,S>
 				return Left.left(failure(new HttpFailure(e)));
 			}
 		}
-		
 	}
 	
 }

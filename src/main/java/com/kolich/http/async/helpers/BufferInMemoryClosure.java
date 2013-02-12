@@ -90,6 +90,7 @@ public abstract class BufferInMemoryClosure<F,S>
 			@Override
 			protected HttpResponseEither<F,S> buildResult(final HttpContext context)
 				throws Exception {
+				HttpResponseEither<F,S> result = null;
 				try {						
 					// Check if the response was "successful".  The
 					// definition of success is arbitrary based on
@@ -101,13 +102,14 @@ public abstract class BufferInMemoryClosure<F,S>
 					// against some custom criteria, they should
 					// override this check() method.
 					if(check(response_, context)) {
-						return Right.right(success(new HttpSuccess(response_, context)));
+						result = Right.right(success(new HttpSuccess(response_, context)));
 					} else {
-						return Left.left(failure(new HttpFailure(response_, context)));
+						result = Left.left(failure(new HttpFailure(response_, context)));
 					}
 				} catch (Exception e) {
-					return Left.left(failure(new HttpFailure(e)));
+					result = Left.left(failure(new HttpFailure(e)));
 				}
+				return result;
 			}
 			@Override
 			protected void releaseResources() {

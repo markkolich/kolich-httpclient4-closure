@@ -26,8 +26,6 @@
 
 package com.kolich.http.common.response;
 
-import static org.apache.http.HttpHeaders.CONTENT_LENGTH;
-import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.HttpHeaders.ETAG;
 
 import java.io.IOException;
@@ -91,16 +89,27 @@ public abstract class HttpClientClosureResponse {
 		return null;
 	}
 	
-	public final String getContentType() {
-		return getFirstHeader(CONTENT_TYPE);
-	}
-	
-	public final String getContentLength() {
-		return getFirstHeader(CONTENT_LENGTH);
-	}
-	
 	public final String getETag() {
 		return getFirstHeader(ETAG);
+	}
+	
+	public final String getContentType() {
+		final HttpEntity entity;
+		if((entity = getEntity()) != null) {
+			final Header contentType;
+			if((contentType = entity.getContentType()) != null) {
+				return contentType.getValue();
+			}
+		}
+		return null;
+	}
+	
+	public final long getContentLength() {
+		final HttpEntity entity;
+		if((entity = getEntity()) != null) {
+			return entity.getContentLength();
+		}
+		return -1L;
 	}
 	
 }
