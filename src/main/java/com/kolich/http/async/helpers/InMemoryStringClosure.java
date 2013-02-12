@@ -33,7 +33,7 @@ import org.apache.http.util.EntityUtils;
 
 import com.kolich.http.common.response.HttpSuccess;
 
-public final class InMemoryStringClosure
+public abstract class InMemoryStringClosure
 	extends BufferInMemoryClosure<Exception,String> {
 	
 	public InMemoryStringClosure(HttpAsyncClient client) {

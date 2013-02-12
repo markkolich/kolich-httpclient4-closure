@@ -1,4 +1,4 @@
-package com.kolich.http.async;
+package com.kolich.http.async.futures;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;

@@ -8,6 +8,7 @@ import org.apache.http.nio.client.HttpAsyncClient;
 
 import com.kolich.http.async.helpers.InMemoryStringClosure;
 import com.kolich.http.common.either.HttpResponseEither;
+import com.kolich.http.common.response.HttpFailure;
 
 public final class AsyncTest {
 
@@ -18,9 +19,13 @@ public final class AsyncTest {
 		
 		try {
 			
-			Future<HttpResponseEither<Exception,String>> future =
-				new InMemoryStringClosure(client)
-					.get("http://www.google.com");
+			final Future<HttpResponseEither<Exception,String>> future =
+				new InMemoryStringClosure(client){
+				@Override
+				public Exception failure(final HttpFailure failure) {
+					return failure.getCause();
+				}
+			}.get("http://www.google.com");
 						
 			while(true) {
 				if(future.isDone()) {
@@ -29,7 +34,7 @@ public final class AsyncTest {
 						System.out.println("Success!.. has " +
 							either.right().length() + " long String.");
 					} else {
-						System.out.println("Oops, failed: " + either.left().getMessage());
+						System.out.println("Oops, failed: " + either.left().getCause());
 					}
 				} else {
 					System.out.println("not done yet...");

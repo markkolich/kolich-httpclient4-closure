@@ -28,13 +28,18 @@ package com.kolich.http.async;
 
 import static org.apache.http.nio.client.methods.HttpAsyncMethods.create;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.concurrent.Cancellable;
 import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.nio.protocol.HttpAsyncResponseConsumer;
 import org.apache.http.protocol.HttpContext;
 
+import com.kolich.http.async.futures.AlreadyDoneFuture;
 import com.kolich.http.common.HttpClient4ClosureBase;
 import com.kolich.http.common.either.HttpResponseEither;
 import com.kolich.http.common.either.Left;
@@ -60,11 +65,11 @@ public abstract class HttpAsyncClient4Closure<F,S>
 			// destination host are done here.
 			before(request, context);
 			// Go ahead and execute the asynchronous request.
-			return client_.execute(
+			return new InternalBasicFutureWrapper(client_.execute(
 				create(request),
 				getConsumer(),
 				context,
-				null);
+				null));
 		} catch (Exception e) {
 			// If something went wront, create a new future that's already
 			// "done" and contains an either where the Left type (error) is
@@ -98,6 +103,57 @@ public abstract class HttpAsyncClient4Closure<F,S>
 	public F failure(final HttpFailure failure) {
 		// Default, nothing.
 		return null;
+	}
+	
+	private final class InternalBasicFutureWrapper implements 
+		Future<HttpResponseEither<F,S>>, Cancellable {
+		
+		private final Future<HttpResponseEither<F,S>> future_;
+		
+		private InternalBasicFutureWrapper(final Future<HttpResponseEither<F,S>> future) {
+			future_ = future;
+		}
+
+		@Override
+		public boolean cancel() {
+			return future_.cancel(true);
+		}
+
+		@Override
+		public boolean cancel(boolean mayInterruptIfRunning) {
+			return future_.cancel(mayInterruptIfRunning);
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return future_.isCancelled();
+		}
+
+		@Override
+		public boolean isDone() {
+			return future_.isDone();
+		}
+
+		@Override
+		public HttpResponseEither<F,S> get() throws InterruptedException,
+			ExecutionException {
+			try {
+				return future_.get();
+			} catch (Exception e) {
+				return Left.left(failure(new HttpFailure(e)));
+			}
+		}
+
+		@Override
+		public HttpResponseEither<F,S> get(long timeout, TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
+			try {
+				return future_.get(timeout, unit);
+			} catch (Exception e) {
+				return Left.left(failure(new HttpFailure(e)));
+			}
+		}
+		
 	}
 	
 }
