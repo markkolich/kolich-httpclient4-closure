@@ -38,12 +38,11 @@ import org.apache.http.protocol.HttpContext;
 import com.kolich.http.common.HttpClient4ClosureBase;
 import com.kolich.http.common.either.HttpResponseEither;
 import com.kolich.http.common.either.Left;
-import com.kolich.http.common.either.Right;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
 public abstract class HttpAsyncClient4Closure<F,S>
-	extends HttpClient4ClosureBase<Exception,Future<HttpResponseEither<F,S>>> {
+	extends HttpClient4ClosureBase<Future<HttpResponseEither<F,S>>> {
 					
 	private final HttpAsyncClient client_;
 	
@@ -52,7 +51,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 	}
 	
 	@Override
-	public HttpResponseEither<Exception,Future<HttpResponseEither<F,S>>> doit(
+	public Future<HttpResponseEither<F,S>> doit(
 		final HttpRequestBase request, final HttpContext context) {
 		try {
 			// Before the request is "executed" give the consumer an entry
@@ -61,13 +60,16 @@ public abstract class HttpAsyncClient4Closure<F,S>
 			// destination host are done here.
 			before(request, context);
 			// Go ahead and execute the asynchronous request.
-			return Right.right(client_.execute(
+			return client_.execute(
 				create(request),
 				getConsumer(),
 				context,
-				null));
+				null);
 		} catch (Exception e) {
-			return Left.left(e);
+			// If something went wront, create a new future that's already
+			// "done" and contains an either where the Left type (error) is
+			// set to indicate failure.
+			return AlreadyDoneFuture.create(Left.left(failure(new HttpFailure(e))));
 		}
 	}
 		

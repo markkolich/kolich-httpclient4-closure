@@ -18,21 +18,21 @@ public final class AsyncTest {
 		
 		try {
 			
-			HttpResponseEither<Exception,Future<HttpResponseEither<Exception,String>>> result =
+			Future<HttpResponseEither<Exception,String>> future =
 				new InMemoryStringClosure(client)
 					.get("http://www.google.com");
-			
-			if(!result.success()) {
-				System.out.println("failed to queue request!");
-			}
-			
+						
 			while(true) {
-				final Future<HttpResponseEither<Exception,String>> future = result.right();
 				if(future.isDone()) {
-					System.out.println("got HTML string: " +
-						future.get().right().length());
+					final HttpResponseEither<Exception,String> either = future.get();
+					if(either.success()) {
+						System.out.println("Success!.. has " +
+							either.right().length() + " long String.");
+					} else {
+						System.out.println("Oops, failed: " + either.left().getMessage());
+					}
 				} else {
-					System.out.println("not done");
+					System.out.println("not done yet...");
 				}
 				Thread.sleep(1000L);
 			}
