@@ -57,6 +57,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 	@Override
 	public Future<HttpResponseEither<F,S>> doit(
 		final HttpRequestBase request, final HttpContext context) {
+		Future<HttpResponseEither<F,S>> result = null;
 		try {
 			// Before the request is "executed" give the consumer an entry
 			// point into the raw request object to tweak as necessary first.
@@ -68,7 +69,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 			// that any exceptions that pop-up when future.get() is called
 			// can be caught gracefully and wrapped up in the
 			// HttpResponseEither<F,S>.
-			return new InternalBasicFutureWrapper(client_.execute(
+			result = new InternalBasicFutureWrapper(client_.execute(
 				// Create a fresh asynchronous request object from the
 				// incoming request base.
 				HttpAsyncMethods.create(request),
@@ -84,8 +85,9 @@ public abstract class HttpAsyncClient4Closure<F,S>
 			// If something went wrong, create a new future that's already
 			// "done" and contains an Either<F,S> where the Left error type is
 			// immeaditely set to indicate failure.
-			return AlreadyDoneFuture.create(Left.left(failure(new HttpFailure(e))));
+			result = AlreadyDoneFuture.create(Left.left(failure(new HttpFailure(e))));
 		}
+		return result;
 	}
 	
 	public abstract HttpAsyncResponseConsumer<HttpResponseEither<F,S>> getConsumer();

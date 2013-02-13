@@ -91,7 +91,7 @@ public abstract class BufferInMemoryClosure<F,S>
 			protected HttpResponseEither<F,S> buildResult(final HttpContext context)
 				throws Exception {
 				HttpResponseEither<F,S> result = null;
-				try {						
+				try {
 					// Check if the response was "successful".  The
 					// definition of success is arbitrary based on
 					// what's defined in the check() method.  The
