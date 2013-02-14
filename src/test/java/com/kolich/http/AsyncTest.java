@@ -20,12 +20,12 @@ public final class AsyncTest {
 		try {
 			
 			final Future<HttpResponseEither<Exception,String>> future =
-				new InMemoryStringClosure(client){
+				new InMemoryStringClosure(client) {
 				@Override
 				public Exception failure(final HttpFailure failure) {
 					return failure.getCause();
 				}
-			}.get("http://www.google.com");
+			}.get("https://www.google.com");
 						
 			while(true) {
 				if(future.isDone()) {

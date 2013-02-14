@@ -26,16 +26,23 @@
 
 package com.kolich.http.async;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.concurrent.Cancellable;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.ContentDecoder;
+import org.apache.http.nio.IOControl;
 import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.nio.client.methods.HttpAsyncMethods;
-import org.apache.http.nio.protocol.HttpAsyncResponseConsumer;
+import org.apache.http.nio.protocol.AbstractAsyncResponseConsumer;
 import org.apache.http.protocol.HttpContext;
 
 import com.kolich.http.async.futures.AlreadyDoneFuture;
@@ -76,7 +83,32 @@ public abstract class HttpAsyncClient4Closure<F,S>
 				// Load the asynchronous response consumer; this is the
 				// "class" that will be responsible for doing the real work
 				// asynchronously under-the-hood to process the response.
-				getConsumer(),
+				new AbstractAsyncResponseConsumer<HttpResponseEither<F,S>>() {
+					@Override
+					protected void onResponseReceived(final HttpResponse response)
+						throws HttpException, IOException {
+						HttpAsyncClient4Closure.this.onResponseReceived(response);
+					}
+					@Override
+					protected void onContentReceived(final ContentDecoder decoder,
+						final IOControl ioctrl) throws IOException {
+						HttpAsyncClient4Closure.this.onContentReceived(decoder, ioctrl);
+					}
+					@Override
+					protected void onEntityEnclosed(final HttpEntity entity,
+						final ContentType contentType) throws IOException {
+						HttpAsyncClient4Closure.this.onEntityEnclosed(entity, contentType);
+					}
+					@Override
+					protected HttpResponseEither<F,S> buildResult(
+						final HttpContext context) throws Exception {
+						return HttpAsyncClient4Closure.this.buildResult(context);
+					}
+					@Override
+					protected void releaseResources() {
+						HttpAsyncClient4Closure.this.releaseResources();
+					}
+				},
 				// Internal HTTP request context.
 				context,
 				// Intentionally not providing a FutureCallback<T>
@@ -89,8 +121,16 @@ public abstract class HttpAsyncClient4Closure<F,S>
 		}
 		return result;
 	}
-	
-	public abstract HttpAsyncResponseConsumer<HttpResponseEither<F,S>> getConsumer();
+		
+	public abstract void onResponseReceived(final HttpResponse response)
+		throws HttpException, IOException;
+	public abstract void onContentReceived(final ContentDecoder decoder,
+		final IOControl ioctrl) throws IOException;
+	public abstract void onEntityEnclosed(final HttpEntity entity,
+		final ContentType contentType) throws IOException;
+	public abstract HttpResponseEither<F,S> buildResult(final HttpContext context)
+		throws Exception;
+	public abstract void releaseResources();
 	
 	/**
 	 * Called only if the request is successful.  Success is defined by

@@ -37,8 +37,6 @@ import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.IOControl;
 import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.nio.entity.ContentBufferEntity;
-import org.apache.http.nio.protocol.AbstractAsyncResponseConsumer;
-import org.apache.http.nio.protocol.HttpAsyncResponseConsumer;
 import org.apache.http.nio.util.HeapByteBufferAllocator;
 import org.apache.http.nio.util.SimpleInputBuffer;
 import org.apache.http.protocol.HttpContext;
@@ -52,71 +50,69 @@ import com.kolich.http.common.response.HttpSuccess;
 
 public abstract class BufferInMemoryClosure<F,S>
 	extends HttpAsyncClient4Closure<F,S> {
+	
+	private volatile HttpResponse response_;
+    private volatile SimpleInputBuffer buf_;
 
 	public BufferInMemoryClosure(final HttpAsyncClient client) {
 		super(client);
 	}
 	
 	@Override
-	public final HttpAsyncResponseConsumer<HttpResponseEither<F,S>> getConsumer() {
-		return new AbstractAsyncResponseConsumer<HttpResponseEither<F,S>>() {
-			private volatile HttpResponse response_;
-		    private volatile SimpleInputBuffer buf_;
-			@Override
-			protected void onResponseReceived(final HttpResponse response)
-				throws HttpException, IOException {
-				response_ = response;
-			}
-			@Override
-			protected void onContentReceived(final ContentDecoder decoder,
-				final IOControl ioctrl) throws IOException {
-				if(buf_ == null) {
-		            throw new IllegalStateException("Content buffer is null?");
-		        }
-		        buf_.consumeContent(decoder);
-			}
-			@Override
-			protected void onEntityEnclosed(final HttpEntity entity,
-				final ContentType contentType) throws IOException {
-				long len = entity.getContentLength();
-		        if (len > Integer.MAX_VALUE) {
-		            throw new ContentTooLongException("Entity content is too long: " + len);
-		        } else if (len < 0) {
-		            len = 4096;
-		        }
-		        buf_ = new SimpleInputBuffer((int) len, new HeapByteBufferAllocator());
-		        response_.setEntity(new ContentBufferEntity(entity, buf_));
-			}
-			@Override
-			protected HttpResponseEither<F,S> buildResult(final HttpContext context)
-				throws Exception {
-				HttpResponseEither<F,S> result = null;
-				try {
-					// Check if the response was "successful".  The
-					// definition of success is arbitrary based on
-					// what's defined in the check() method.  The
-					// default success check is simply checking the
-					// HTTP status code and if it's less than 400
-					// (Bad Request) then it's considered "good".
-					// If the user wants evaluate this response
-					// against some custom criteria, they should
-					// override this check() method.
-					if(check(response_, context)) {
-						result = Right.right(success(new HttpSuccess(response_, context)));
-					} else {
-						result = Left.left(failure(new HttpFailure(response_, context)));
-					}
-				} catch (Exception e) {
-					result = Left.left(failure(new HttpFailure(e)));
-				}
-				return result;
-			}
-			@Override
-			protected void releaseResources() {
-				buf_ = null;
-				response_ = null;
-			}
-		};
+	public final void onResponseReceived(final HttpResponse response)
+		throws HttpException, IOException {
+		response_ = response;
 	}
-
+	
+	@Override
+	public final void onContentReceived(final ContentDecoder decoder,
+		final IOControl ioctrl) throws IOException {
+		if(buf_ == null) {
+            throw new IllegalStateException("Content buffer is null?");
+        }
+        buf_.consumeContent(decoder);
+	}
+	
+	@Override
+	public final void onEntityEnclosed(final HttpEntity entity,
+		final ContentType contentType) throws IOException {
+		long len = entity.getContentLength();
+        if (len > Integer.MAX_VALUE) {
+            throw new ContentTooLongException("Entity content is too long: " + len);
+        } else if (len < 0) {
+            len = 4096;
+        }
+        buf_ = new SimpleInputBuffer((int) len, new HeapByteBufferAllocator());
+        response_.setEntity(new ContentBufferEntity(entity, buf_));
+	}
+	
+	@Override
+	public final HttpResponseEither<F,S> buildResult(final HttpContext context)
+		throws Exception {
+		HttpResponseEither<F,S> result = null;
+		try {
+			// Check if the response was "successful".  The definition of
+			// success is arbitrary based on what's defined in the check()
+			// method.  The default success check is simply checking the
+			// HTTP status code and if it's less than 400 (Bad Request) then
+			// it's considered "good". If the user wants evaluate this response
+			// against some custom criteria, they should override this
+			// check() method.
+			if(check(response_, context)) {
+				result = Right.right(success(new HttpSuccess(response_, context)));
+			} else {
+				result = Left.left(failure(new HttpFailure(response_, context)));
+			}
+		} catch (Exception e) {
+			result = Left.left(failure(new HttpFailure(e)));
+		}
+		return result;
+	}
+	
+	@Override
+	public final void releaseResources() {
+		buf_ = null;
+		response_ = null;
+	}
+	
 }
