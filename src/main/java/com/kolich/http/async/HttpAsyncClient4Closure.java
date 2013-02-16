@@ -45,7 +45,6 @@ import org.apache.http.nio.client.methods.HttpAsyncMethods;
 import org.apache.http.nio.protocol.AbstractAsyncResponseConsumer;
 import org.apache.http.protocol.HttpContext;
 
-import com.kolich.http.async.futures.AlreadyDoneFuture;
 import com.kolich.http.common.HttpClient4ClosureBase;
 import com.kolich.http.common.either.HttpResponseEither;
 import com.kolich.http.common.either.Left;
@@ -117,7 +116,25 @@ public abstract class HttpAsyncClient4Closure<F,S>
 			// If something went wrong, create a new future that's already
 			// "done" and contains an Either<F,S> where the Left error type is
 			// immeaditely set to indicate failure.
-			result = AlreadyDoneFuture.create(Left.left(failure(new HttpFailure(e))));
+			final HttpResponseEither<F,S> either = Left.left(failure(new HttpFailure(e)));
+			result = new Future<HttpResponseEither<F,S>>() {
+				@Override
+				public boolean cancel(boolean mayInterruptIfRunning) { return false; }
+				@Override
+				public boolean isCancelled() { return false; }
+				@Override
+				public boolean isDone() { return true; }
+				@Override
+				public HttpResponseEither<F,S> get()
+					throws InterruptedException, ExecutionException {
+					return either;
+				}
+				@Override
+				public HttpResponseEither<F,S> get(long timeout, TimeUnit unit)
+					throws InterruptedException, ExecutionException, TimeoutException {
+					return either;
+				}				
+			};
 		}
 		return result;
 	}
