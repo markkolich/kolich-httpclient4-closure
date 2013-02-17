@@ -36,7 +36,7 @@ import com.kolich.http.common.response.HttpSuccess;
 public abstract class InMemoryStringClosure
 	extends BufferInMemoryClosure<Exception,String> {
 	
-	public InMemoryStringClosure(HttpAsyncClient client) {
+	public InMemoryStringClosure(final HttpAsyncClient client) {
 		super(client);
 	}
 

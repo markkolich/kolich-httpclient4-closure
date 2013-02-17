@@ -133,7 +133,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 				public HttpResponseEither<F,S> get(long timeout, TimeUnit unit)
 					throws InterruptedException, ExecutionException, TimeoutException {
 					return either;
-				}				
+				}
 			};
 		}
 		return result;

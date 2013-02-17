@@ -26,6 +26,8 @@
 
 package com.kolich.http.async.helpers;
 
+import static com.kolich.http.common.response.ResponseUtils.consumeQuietly;
+
 import java.io.IOException;
 
 import org.apache.http.ContentTooLongException;
@@ -111,8 +113,9 @@ public abstract class BufferInMemoryClosure<F,S>
 	
 	@Override
 	public final void releaseResources() {
+		consumeQuietly(response_);
 		buf_ = null;
-		response_ = null;
+		response_ = null;		
 	}
 	
 }

@@ -46,6 +46,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.kolich.http.async.routing.ProxySelectorAsyncRoutePlanner;
 import com.kolich.http.common.exceptions.HttpClient4ClosureException;
 
@@ -135,11 +136,15 @@ public final class KolichDefaultHttpAsyncClient {
 			// configuration policies.	
 			final IOReactorConfig ioRConfig = new IOReactorConfig();
 			// Be sure that we setup enough I/O dispatcher threads to match
-			// the total number of supported max connections we
-			// expect to handle at any one time.
+			// the total number of supported max connections we expect to
+			// handle at any one time.
 			ioRConfig.setIoThreadCount(maxTotalConnections_);
 			final ConnectingIOReactor reactor =
-				new DefaultConnectingIOReactor(ioRConfig);
+				new DefaultConnectingIOReactor(ioRConfig,
+					new ThreadFactoryBuilder()
+						.setDaemon(false)
+						.setNameFormat("async-http-I/O dispatcher %d")
+						.build());
 			final PoolingClientAsyncConnectionManager cm =
 				new PoolingClientAsyncConnectionManager(reactor);
 			// Set the max connections per route and the maximum number of
