@@ -1,9 +1,10 @@
 package com.kolich.http;
 
-import static com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichDefaultHttpAsyncClientFactory.getNewAsyncInstanceWithProxySelector;
+import static com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichHttpAsyncClientFactory.getNewAsyncInstanceWithProxySelector;
 
 import java.util.concurrent.Future;
 
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.nio.client.HttpAsyncClient;
 
 import com.kolich.http.async.helpers.InMemoryStringClosure;
@@ -22,10 +23,14 @@ public final class AsyncTest {
 			final Future<HttpResponseEither<Exception,String>> future =
 				new InMemoryStringClosure(client) {
 				@Override
+				public void before(final HttpRequestBase request) {
+					request.addHeader("Authorization", "super-secret-password");
+				}
+				@Override
 				public Exception failure(final HttpFailure failure) {
 					return failure.getCause();
 				}
-			}.get("https://www.google.com");
+			}.get("http://www.google.com");
 						
 			while(true) {
 				if(future.isDone()) {

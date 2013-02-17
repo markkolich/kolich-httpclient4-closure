@@ -1,4 +1,5 @@
 package com.kolich.http;
+
 import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
 import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
 import static org.apache.http.client.protocol.ClientContext.COOKIE_STORE;
@@ -19,6 +20,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import com.kolich.http.blocking.HttpClient4Closure;
+import com.kolich.http.blocking.helpers.StringClosures.StringOrNullClosure;
 import com.kolich.http.common.either.HttpResponseEither;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
@@ -60,7 +62,7 @@ public final class BlockingTest {
 		}
 		
 		final HttpResponseEither<Void,String> sResult =
-			new HttpClientClosureExpectString(client)
+			new StringOrNullClosure(client)
 				.get("http://mark.koli.ch");
 		if(sResult.success()) {
 			System.out.println(sResult.right());
@@ -187,26 +189,6 @@ public final class BlockingTest {
 			}
 		}
 				
-	}
-	
-	public static class HttpClientClosureExpectString extends HttpClient4Closure<Void,String> {
-		public HttpClientClosureExpectString(final HttpClient client) {
-			super(client);
-		}
-		@Override
-		public String success(final HttpSuccess success) throws Exception {
-			return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
-		}
-	}
-	
-	public static class HttpClientClosureExpectBytes extends HttpClient4Closure<Void,byte[]> {
-		public HttpClientClosureExpectBytes(final HttpClient client) {
-			super(client);
-		}
-		@Override
-		public byte[] success(final HttpSuccess success) throws Exception {
-			return EntityUtils.toByteArray(success.getResponse().getEntity());
-		}
 	}
 	
 }

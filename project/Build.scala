@@ -61,7 +61,7 @@ object HttpClient extends Build {
   import Resolvers._
 
   private val aName = "kolich-httpclient4-closure"
-  private val aVer = "0.1-ASYNC"
+  private val aVer = "1.0"
   private val aOrg = "com.kolich"
 
   lazy val httpClientClosure: Project = Project(

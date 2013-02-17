@@ -209,12 +209,17 @@ public final class KolichDefaultHttpClient {
 	 */
 	public final static class KolichHttpClientFactory {
 		
-		private static final int AVAILABLE_PROCESSORS =
+		private static final int AVAILABLE_CORES =
 			getRuntime().availableProcessors();
-				
+		
+		// Trying to be like a real browser and only allow at most
+		// 15-connections per route by default.
 		private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 15;
+		
+		// Max total connections defaults to the default max connections
+		// per route multiplied by the number of cores.
 		private static final int DEFAULT_MAX_TOTAL_CONNECTIONS =
-			DEFAULT_MAX_CONNECTIONS_PER_ROUTE * AVAILABLE_PROCESSORS;
+			DEFAULT_MAX_CONNECTIONS_PER_ROUTE * AVAILABLE_CORES;
 		
 		public static final HttpClient getNewInstanceNoProxySelector(
 			final String userAgent, int maxTotalConnections,
