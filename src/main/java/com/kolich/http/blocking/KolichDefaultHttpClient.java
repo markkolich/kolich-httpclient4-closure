@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012 Mark S. Kolich
+ * Copyright (c) 2013 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,7 +24,9 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http;
+package com.kolich.http.blocking;
+
+import static java.lang.Runtime.getRuntime;
 
 import java.net.ProxySelector;
 
@@ -36,6 +38,7 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.ProxySelectorRoutePlanner;
+import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -44,40 +47,52 @@ import org.apache.http.params.HttpProtocolParams;
 public final class KolichDefaultHttpClient {
 	
 	private static final String HTTP_USERAGENT_PARAM = "http.useragent";
-	
-	/**
-	 * The default maximum number of total connections, across all
-	 * routes/hosts.
-	 */
-	private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 200;
-	
-	/**
-	 * The default maximum number of connections we can have to
-	 * any given host.  Assumes the client would be connecting to at
-	 * most (2) hosts/routes in typical situations.
-	 */
-	private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 100;
-	
-	private static final int DEFAULT_CONNECTION_TIMEOUT_MS = 10000; // 10 secs
-	private static final int DEFAULT_SOCKET_TIMEOUT_MS = 0; // Inf
 		
-	private int maxTotalConnections_ = DEFAULT_MAX_TOTAL_CONNECTIONS;
+	private static final int DEFAULT_CONNECTION_TIMEOUT_MS = 30000; // 30-seconds
+	private static final int DEFAULT_SOCKET_TIMEOUT_MS = 0; // Infinite
 	
-	private int maxConnectionsPerRoute_ = DEFAULT_MAX_CONNECTIONS_PER_ROUTE;
+	/**
+	 * The maximum number of total outgoing connections from this
+	 * {@link HttpAsyncClient} instance.
+	 */
+	private final int maxTotalConnections_;
+	
+	/**
+	 * The maximum number of outgoing connections per route from this
+	 * {@link HttpAsyncClient} instance.
+	 */
+	private final int maxConnectionsPerRoute_;
 	
 	/**
 	 * Determines the timeout in milliseconds until a connection is
 	 * established.  A timeout value of zero is interpreted as an
-	 * infinite timeout.
+	 * infinite timeout.  Default is zero, infinite connection timeout.
 	 */
-	private int connectionTimeoutMs_ = DEFAULT_CONNECTION_TIMEOUT_MS;
+	private final int connectionTimeoutMs_;
 	
 	/**
 	 * Defines the socket timeout (SO_TIMEOUT) in milliseconds, which
 	 * is the timeout for waiting for data.  A timeout value of zero
-	 * is interpreted as an infinite timeout.
+	 * is interpreted as an infinite timeout.  Default is zero,
+	 * infinite connection timeout.
 	 */
-	private int socketTimoutMs_ = DEFAULT_SOCKET_TIMEOUT_MS;
+	private final int socketTimoutMs_;
+	
+	public KolichDefaultHttpClient(int maxTotalConnections,
+		int maxConnectionsPerRoute, int connectionTimeoutMs,
+		int socketTimoutMs) {
+		maxTotalConnections_ = maxTotalConnections;
+		maxConnectionsPerRoute_ = maxConnectionsPerRoute;
+		connectionTimeoutMs_ = connectionTimeoutMs;
+		socketTimoutMs_ = socketTimoutMs;
+	}
+	
+	public KolichDefaultHttpClient(int maxTotalConnections,
+		int maxConnectionsPerRoute) {
+		this(maxTotalConnections, maxConnectionsPerRoute,
+			DEFAULT_CONNECTION_TIMEOUT_MS,
+			DEFAULT_SOCKET_TIMEOUT_MS);
+	}
 		
 	/**
 	 * Creates a new {@link HttpClient} using the default set of
@@ -188,36 +203,37 @@ public final class KolichDefaultHttpClient {
 	public HttpClient getNewInstanceWithProxySelector() {
 		return getNewInstance(true, null);
 	}
-	
-	public KolichDefaultHttpClient setMaxTotalConnections(int maxTotalConnections) {
-		maxTotalConnections_ = maxTotalConnections;
-		return this;
-	}
-	
-	public KolichDefaultHttpClient setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
-		maxConnectionsPerRoute_ = maxConnectionsPerRoute;
-		return this;
-	}
-	
-	public KolichDefaultHttpClient setConnectionTimeoutMs(int connectionTimeoutMs) {
-		connectionTimeoutMs_ = connectionTimeoutMs;
-		return this;
-	}
-	
-	public KolichDefaultHttpClient setSocketTimeoutMs(int socketTimoutMs) {
-		socketTimoutMs_ = socketTimoutMs;
-		return this;
-	}
-		
+			
 	/**
 	 * A class that provides a few static factory methods for Spring Beans.
 	 */
 	public final static class KolichHttpClientFactory {
 		
+		private static final int AVAILABLE_PROCESSORS =
+			getRuntime().availableProcessors();
+				
+		private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 15;
+		private static final int DEFAULT_MAX_TOTAL_CONNECTIONS =
+			DEFAULT_MAX_CONNECTIONS_PER_ROUTE * AVAILABLE_PROCESSORS;
+		
+		public static final HttpClient getNewInstanceNoProxySelector(
+			final String userAgent, int maxTotalConnections,
+			int maxConnectionsPerRoute) {
+			return new KolichDefaultHttpClient(maxTotalConnections,
+				maxConnectionsPerRoute).getNewInstanceNoProxySelector(userAgent);
+		}
+		
+		public static final HttpClient getNewInstanceNoProxySelector(
+			int maxTotalConnections, int maxConnectionsPerRoute) {
+			return getNewInstanceNoProxySelector(null,
+				maxTotalConnections, maxConnectionsPerRoute);
+		}
+		
 		public static final HttpClient getNewInstanceNoProxySelector(
 			final String userAgent) {
-			return new KolichDefaultHttpClient()
-				.getNewInstanceNoProxySelector(userAgent);
+			return getNewInstanceNoProxySelector(userAgent,
+				DEFAULT_MAX_TOTAL_CONNECTIONS,
+				DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
 		}
 		
 		public static final HttpClient getNewInstanceNoProxySelector() {
@@ -225,9 +241,23 @@ public final class KolichDefaultHttpClient {
 		}
 		
 		public static final HttpClient getNewInstanceWithProxySelector(
+			final String userAgent, int maxTotalConnections,
+			int maxConnectionsPerRoute) {
+			return new KolichDefaultHttpClient(maxTotalConnections,
+				maxConnectionsPerRoute).getNewInstanceWithProxySelector(userAgent);
+		}
+		
+		public static final HttpClient getNewInstanceWithProxySelector(
+			int maxTotalConnections, int maxConnectionsPerRoute) {
+			return getNewInstanceWithProxySelector(null,
+				maxTotalConnections, maxConnectionsPerRoute);
+		}
+		
+		public static final HttpClient getNewInstanceWithProxySelector(
 			final String userAgent) {
-			return new KolichDefaultHttpClient()
-				.getNewInstanceWithProxySelector(userAgent);
+			return getNewInstanceWithProxySelector(userAgent,
+				DEFAULT_MAX_TOTAL_CONNECTIONS,
+				DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
 		}
 		
 		public static final HttpClient getNewInstanceWithProxySelector() {

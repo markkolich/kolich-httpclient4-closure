@@ -24,16 +24,18 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers;
+package com.kolich.http.blocking.helpers;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
 
 import org.apache.http.client.HttpClient;
 
-import com.kolich.http.HttpClient4Closure;
-import com.kolich.http.helpers.definitions.CustomEntityConverter;
-import com.kolich.http.helpers.definitions.CustomFailureEntityConverter;
-import com.kolich.http.helpers.definitions.CustomSuccessEntityConverter;
+import com.kolich.http.blocking.HttpClient4Closure;
+import com.kolich.http.blocking.helpers.definitions.CustomEntityConverter;
+import com.kolich.http.blocking.helpers.definitions.CustomFailureEntityConverter;
+import com.kolich.http.blocking.helpers.definitions.CustomSuccessEntityConverter;
+import com.kolich.http.common.response.HttpFailure;
+import com.kolich.http.common.response.HttpSuccess;
 
 public final class EntityConverterClosures {
 	

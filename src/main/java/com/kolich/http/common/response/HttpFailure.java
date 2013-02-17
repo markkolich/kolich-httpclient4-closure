@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012 Mark S. Kolich
+ * Copyright (c) 2013 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,30 +24,31 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers.definitions;
+package com.kolich.http.common.response;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
 
-import org.apache.http.client.HttpClient;
-
-import com.kolich.http.HttpClient4Closure;
-
-/**
- * Abstract closure to return null on failure.
- */
-public abstract class OrNullClosure<S> extends HttpClient4Closure<Void,S> {
-
-	public OrNullClosure(final HttpClient client) {
-		super(client);
+public final class HttpFailure extends HttpClientClosureResponse {
+	
+	private final Exception cause_;
+	
+	public HttpFailure(Exception cause, HttpResponse response,
+		HttpContext context) {
+		super(response, context);
+		cause_ = cause;
 	}
 	
-	public OrNullClosure() {
-		this(getNewInstanceWithProxySelector());
+	public HttpFailure(HttpResponse response, HttpContext context) {
+		this(null, response, context);
 	}
 	
-	@Override
-	public final Void failure(final HttpFailure failure) {
-		return null;
+	public HttpFailure(Exception cause) {
+		this(cause, null, null);
 	}
-
+	
+	public Exception getCause() {
+		return cause_;
+	}
+	
 }

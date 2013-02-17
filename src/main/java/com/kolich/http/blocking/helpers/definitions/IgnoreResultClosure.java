@@ -24,13 +24,15 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers.definitions;
+package com.kolich.http.blocking.helpers.definitions;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceNoProxySelector;
+import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceNoProxySelector;
 
 import org.apache.http.client.HttpClient;
 
-import com.kolich.http.HttpClient4Closure;
+import com.kolich.http.blocking.HttpClient4Closure;
+import com.kolich.http.common.response.HttpFailure;
+import com.kolich.http.common.response.HttpSuccess;
 
 /**
  * This abstract closure is used when you don't care whether

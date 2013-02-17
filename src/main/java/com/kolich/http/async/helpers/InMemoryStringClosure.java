@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012 Mark S. Kolich
+ * Copyright (c) 2013 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,31 +24,25 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers.definitions;
+package com.kolich.http.async.helpers;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
 
-import org.apache.http.client.HttpClient;
+import org.apache.http.nio.client.HttpAsyncClient;
+import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.HttpClient4Closure;
-import com.kolich.http.HttpClient4Closure.HttpFailure;
+import com.kolich.http.common.response.HttpSuccess;
 
-/**
- * Abstract closure to return a proper {@link HttpFailure} on failure.
- */
-public abstract class OrHttpFailureClosure<S> extends HttpClient4Closure<HttpFailure,S> {
-
-	public OrHttpFailureClosure(final HttpClient client) {
+public abstract class InMemoryStringClosure
+	extends BufferInMemoryClosure<Exception,String> {
+	
+	public InMemoryStringClosure(final HttpAsyncClient client) {
 		super(client);
 	}
-	
-	public OrHttpFailureClosure() {
-		this(getNewInstanceWithProxySelector());
-	}
-	
+
 	@Override
-	public final HttpFailure failure(final HttpFailure failure) {
-		return failure;
+	public final String success(final HttpSuccess success) throws Exception {
+		return EntityUtils.toString(success.getEntity(), UTF_8);
 	}
 
 }

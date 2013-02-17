@@ -24,16 +24,17 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.helpers;
+package com.kolich.http.blocking.helpers;
 
 import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
-import com.kolich.http.helpers.definitions.OrNullClosure;
+import com.kolich.http.blocking.helpers.definitions.OrHttpFailureClosure;
+import com.kolich.http.blocking.helpers.definitions.OrNullClosure;
+import com.kolich.http.common.response.HttpSuccess;
 
 public final class StringClosures {
 	

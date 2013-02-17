@@ -1,6 +1,6 @@
-package com.kolich.http.helpers.definitions;
+package com.kolich.http.blocking.helpers.definitions;
 
-import com.kolich.http.HttpClient4Closure.HttpSuccess;
+import com.kolich.http.common.response.HttpSuccess;
 
 public interface CustomSuccessEntityConverter<S> {
 

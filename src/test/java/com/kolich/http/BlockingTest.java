@@ -1,5 +1,6 @@
+package com.kolich.http;
 import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
 import static org.apache.http.client.protocol.ClientContext.COOKIE_STORE;
 
 import java.io.ByteArrayOutputStream;
@@ -17,10 +18,12 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.HttpClient4Closure;
-import com.kolich.http.HttpClient4Closure.HttpResponseEither;
+import com.kolich.http.blocking.HttpClient4Closure;
+import com.kolich.http.common.either.HttpResponseEither;
+import com.kolich.http.common.response.HttpFailure;
+import com.kolich.http.common.response.HttpSuccess;
 
-public class Testing {
+public final class BlockingTest {
 	
 	public static void main(String[] args) {
 				
