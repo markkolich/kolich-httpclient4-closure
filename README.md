@@ -1,27 +1,32 @@
 # kolich-httpclient4-closure
 
-A convenient Java wrapper around the *synchronous (a.k.a., blocking)* Apache Commons HttpClient 4.x library.
+A convenient Java wrapper around the Apache Commons HttpClient 4.x libraries.
 
-As is, using HttpClient is often cumbersome and bulky for typical `HEAD`, `GET`, `POST`, `PUT` and `DELETE` operations.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any) and close/free the connection back into the connection pool.
+This library supports two mechanisms for making HTTP requests:
 
-In *most* implementations, the typical HttpClient usage pattern almost always involves:
+* Asynchronous (non-blocking) &ndash; Uses httpasyncclient-4.0-beta3 internally.
+* Synchronous (blocking) &ndash; Uses httpclient-4.2.1 internally.
+
+## Overview
+
+As is, using HttpClient directly is often cumbersome and bulky for typical `HEAD`, `GET`, `POST`, `PUT` and `DELETE` operations.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any), close the connection and release it back into the connection pool.
+
+In *most* implementations, the typical `HttpClient` usage pattern almost always involves:
 
 1. Creating a new `HttpHead`, `HttpGet`, `HttpPost`, `HttpPut`, or `HttpDelete` instance specific to the operation.
 2. Setting an request body ("entity") to be sent with the request, if any.
 3. Actually sending the request.
 4. Checking the HTTP response status code.  If successful, do something.  If not successful, do something else.
-5. Reading a response entity, if any.  If one exists, convert it to a `String` so you can do something with it.
-6. Freeing the response and releasing the connection back into the underlying thread-safe connection pool.
+5. Reading a response entity, if any.  If one exists, convert the entity to something useful so you can do something with it.
+6. Freeing the response entity and releasing the connection back into the underlying connection pool.
 
-The intent of this library is to let you do all of this in a cleaner, repeatable and understandable way.
+The intent of this library is to let you do all of this in a cleaner, repeatable and more understandable manner.
 
 Many would argue that this library simply trades one set of "boiler plate" for another.  True.  However, the patterns used here are much easier to grasp and they help you prevent obvious mistakes &mdash; like forgetting to close an `InputStream` when you're done with a response, which almost always manifests itself as a nasty leak under a heavy load.
 
-If you're still not convinced, here are some <a href="https://github.com/markkolich/kolich-httpclient4-closure#examples">examples</a> to show you the way, and some <a href="https://github.com/markkolich/kolich-httpclient4-closure#helpers">helper closures</a> to make your integration a bit easier.
-
 ## Latest Version
 
-The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/0.0.9.1">0.0.9.1</a>.
+The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/1.0">1.0</a>.
 
 ## Resolvers
 
@@ -32,7 +37,7 @@ If you wish to use this artifact, you can easily add it to your existing Maven o
 ```scala
 resolvers += "Kolich repo" at "http://markkolich.github.com/repo"
 
-val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.0.9.1" % "compile"
+val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "1.0" % "compile"
 ```
 
 ### Maven
@@ -48,7 +53,7 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "0.
 <dependency>
   <groupId>com.kolich</groupId>
   <artifactId>kolich-httpclient4-closure</artifactId>
-  <version>0.0.9.1</version>
+  <version>1.0</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -59,20 +64,46 @@ Technically speaking, this library does not use "closures" (Lambda expressions) 
 
 ### Functional Concepts
 
-Some concepts in this library, like the `HttpResponseEither<F,S>`, were borrowed directly from the Functional Programming world, namely Scala.  In this case, `HttpResponseEither<F,S>` uses Java generics so that this library can return *either* a left type `F` indicating failure, or a right type `S` indicating success.  It's up to you, the developer, to define what these types are &mdash; the definition of a "successful" return type varies from application to application, and developer to developer.
+Some concepts in this library, like the `HttpResponseEither<F,S>`, were borrowed directly from Scala.  In this case, `HttpResponseEither<F,S>` uses Java generics so that this library can return *either* a left type `F` indicating failure, or a right type `S` indicating success.  It's up to you, the developer, to define what these types are &mdash; the definition of a "successful" return type varies from application to application.
 
-When you "get back" an `HttpResponseEither<F,S>` you can check for success by calling the `success` method on the result.
+#### Synchronous (Blocking)
+
+If using the synchronous wrapper, when you "get back" an `HttpResponseEither<F,S>` you can check for success by calling the `success` method on the result.
 
 ```java
 final HttpResponseEither<Exception,String> result =
   new HttpClient4Closure<Exception,String>(client) {
     // ...
-  }.get("http://example.com");
+  }.get("http://example.com"); // blocks
 
 if(result.success()) {
   // It worked!
 }
 ```
+
+#### Asynchronous (Non-blocking)
+
+If using the non-blocking asynchronous wrapper, when you "get back" a `Future<HttpResponseEither<F,S>>` you can check its completion status by calling `isDone` on the resulting `Future`.  When the `Future` has finished, call its `get` method to retrieve the completed `HttpResponseEither<F,S>`.
+
+```java
+final Future<HttpResponseEither<Exception,String>> future =
+  new HttpAsyncClient4Closure<Exception,String>(client) {
+    // ...
+  }.get("http://example.com"); // non-blocking, starts async request
+
+// Wait for the future to finish.
+// You would never "wait" like this in a real application, though.
+while(!future.isDone()) {
+  Thread.sleep(1000L);
+}
+
+final HttpResponseEither<Exception,String> result = future.get();
+if(result.success()) {
+  // It worked!
+}
+```
+
+#### Using HttpResponseEither<F,S>
 
 To extract the return value of type `S` on success, call `right` on the result.
 
@@ -88,7 +119,7 @@ final Exception cause = result.left();
 
 Note that if you call `right` on a request that failed, expect a `null` return value.  Similarly, if you call `left` on a request that succeeded, also expect a `null` return value.
 
-A few other things to keep in mind:
+A few other details:
 
 * This library automatically releases/frees all connection resources when a request has finished, either successfully or unsuccessfully.  You don't have to worry about closing any internal entity streams, that's done for you.
 * All return types are developer-defined based on how you parameterize your `HttpResponseEither<F,S>`.  It's up to you to write a `success` method which converts an `HttpSuccess` object to your desired success type `S`.
