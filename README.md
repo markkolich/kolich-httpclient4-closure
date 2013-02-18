@@ -4,12 +4,12 @@ A convenient Java wrapper around the Apache Commons HttpClient 4.x libraries.
 
 This library supports two mechanisms for making HTTP requests:
 
-* Asynchronous (non-blocking) &ndash; Uses httpasyncclient-4.0-beta3 internally.
-* Synchronous (blocking) &ndash; Uses httpclient-4.2.1 internally.
+* Asynchronous (non-blocking) &ndash; Uses httpasyncclient-4.0-beta3 under-the-hood.
+* Synchronous (blocking) &ndash; Uses httpclient-4.2.1 under-the-hood.
 
 ## Overview
 
-As is, using HttpClient directly is often cumbersome and bulky for typical `HEAD`, `GET`, `POST`, `PUT` and `DELETE` operations.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any), close the connection and release it back into the connection pool.
+As is, using HttpClient directly is often cumbersome and a bit bulky for typical `HEAD`, `GET`, `POST`, `PUT` and `DELETE` requests.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any), and release the connection back into the connection pool.
 
 In *most* implementations, the typical `HttpClient` usage pattern almost always involves:
 
@@ -58,17 +58,13 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "1.
 </dependency>
 ```
 
-## Usage
+## Functional Concepts
 
 Technically speaking, this library does not use "closures" (Lambda expressions) but rather a well defined pattern with **anonymous classes**.
 
-### Functional Concepts
+Some concepts in this library, like the `HttpResponseEither<F,S>`, were borrowed directly from Scala.  In this case, `HttpResponseEither<F,S>` uses Java generics so that this library can return *either* a left type `F` indicating failure, or a right type `S` indicating success.  It's up to you, the developer, to define what these types are when you define your (anonymous) class &mdash; the definition of a "successful" return type varies from application to application.
 
-Some concepts in this library, like the `HttpResponseEither<F,S>`, were borrowed directly from Scala.  In this case, `HttpResponseEither<F,S>` uses Java generics so that this library can return *either* a left type `F` indicating failure, or a right type `S` indicating success.  It's up to you, the developer, to define what these types are &mdash; the definition of a "successful" return type varies from application to application.
-
-#### Synchronous (Blocking)
-
-If using the synchronous wrapper, when you "get back" an `HttpResponseEither<F,S>` you can check for success by calling the `success` method on the result.
+If using the synchronous closure, when you receive an `HttpResponseEither<F,S>` you can check for success by calling the `success` method on the result.
 
 ```java
 final HttpResponseEither<Exception,String> result =
@@ -81,9 +77,7 @@ if(result.success()) {
 }
 ```
 
-#### Asynchronous (Non-blocking)
-
-If using the non-blocking asynchronous wrapper, when you "get back" a `Future<HttpResponseEither<F,S>>` you can check its completion status by calling `isDone` on the resulting `Future`.  When the `Future` has finished, call its `get` method to retrieve the completed `HttpResponseEither<F,S>`.
+If using the non-blocking asynchronous closure, when you receive a `Future<HttpResponseEither<F,S>>` you can check its completion status by calling `isDone` on the resulting `Future`.  When the `Future` has finished, call its `get` method to retrieve the completed `HttpResponseEither<F,S>`.
 
 ```java
 final Future<HttpResponseEither<Exception,String>> future =
@@ -92,7 +86,7 @@ final Future<HttpResponseEither<Exception,String>> future =
   }.get("http://example.com"); // non-blocking, starts async request
 
 // Wait for the future to finish.
-// You would never "wait" like this in a real application, though.
+// However, you would never "wait" like this in a real application.
 while(!future.isDone()) {
   Thread.sleep(1000L);
 }
@@ -103,35 +97,43 @@ if(result.success()) {
 }
 ```
 
-#### Using HttpResponseEither<F,S>
+### Using HttpResponseEither&lt;F,S&gt;
 
-To extract the return value of type `S` on success, call `right` on the result.
-
-```java
-final String s = result.right();
-```
-
-To extract the return value of type `F` on failure, call `left` on the result.
+In either the synchronous or asynchronous case, when presented with an `HttpResponseEither<F,S>`, you can extract the return value of type `S` on success by calling `right`.
 
 ```java
-final Exception cause = result.left();
+final String s = either.right();
 ```
 
-Note that if you call `right` on a request that failed, expect a `null` return value.  Similarly, if you call `left` on a request that succeeded, also expect a `null` return value.
+On the other hand, to extract the return value of type `F` on failure, call `left`.
 
-A few other details:
+```java
+final Exception cause = either.left();
+```
+
+Note that if you call `right` on a request that failed, expect a `null` return value.  Likewise, if you call `left` on a request that succeeded, also expect a `null` return value.
+
+### Other Details
+
+A few other details you'll probably be interested in:
 
 * This library automatically releases/frees all connection resources when a request has finished, either successfully or unsuccessfully.  You don't have to worry about closing any internal entity streams, that's done for you.
 * All return types are developer-defined based on how you parameterize your `HttpResponseEither<F,S>`.  It's up to you to write a `success` method which converts an `HttpSuccess` object to your desired success type `S`.
 * The default definition of "success" is any request that 1) completes without `Exception` and 2) receives an HTTP status code that is less than (`<`) 400 Bad Request.  You can easily override this default behavior by implementing a custom `check` method as needed.
 * If you need to manipulate the request immediately before execution, you should override the `before` method.  This lets you do things like sign the request, or add the right authentication headers before the request is sent.
 
+## Asynchronous (Non-blocking)
+
+To be written.
+
+## Synchronous (Blocking)
+
 ### Get an HttpClient
 
 Before you can make HTTP requests, you need an `HttpClient` instance.  You can use your own `HttpClient` (as instantiated elsewhere by another method), or you can use my `KolichDefaultHttpClient` factory class packaged with this library to snag a pre-configured `HttpClient`.
 
 ```java
-import com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory;
+import com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory;
 
 final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector();
 ```
