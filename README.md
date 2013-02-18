@@ -439,7 +439,7 @@ if(result.success()) {
 
 ### Synchronous Helpers
 
-To ease development, a number of helper closures are available out-of-the-box as found in the <a href="https://github.com/markkolich/kolich-httpclient4-closure/tree/master/src/main/java/com/kolich/http/helpers">com.kolich.http.helpers</a> package.  These helpers are packaged and shipped with this library and are intended to help developers avoid much of the closure boiler plate for the most common operations.
+To ease development, a number of helper closures are available out-of-the-box as found in the <a href="https://github.com/markkolich/kolich-httpclient4-closure/tree/master/src/main/java/com/kolich/http/blocking/helpers">com.kolich.http.blocking.helpers</a> package.  These helpers are packaged and shipped with this library and are intended to help developers avoid much of the closure boiler plate for the most common operations.
 
 Below are several examples using these helper closures.
 
@@ -448,7 +448,7 @@ Below are several examples using these helper closures.
 Send a `GET` and if the request was successful extract the response body as a `UTF-8` encoded `String`.  If unsuccessful, return `null`.
 
 ```java
-import com.kolich.http.helpers.StringClosures.StringOrNullClosure;
+import com.kolich.http.blocking.helpers.StringClosures.StringOrNullClosure;
 
 final HttpResponseEither<Void,String> s = new StringOrNullClosure(client)
   .get("http://google.com");
@@ -464,7 +464,7 @@ if((html = s.right()) != null) {
 Send a `POST` and if the request was successful extract the response body as a `byte[]` array.  If unsuccessful, return an `HttpFailure` object.
 
 ```java
-import com.kolich.http.helpers.ByteArrayClosures.ByteArrayOrHttpFailureClosure;
+import com.kolich.http.blocking.helpers.ByteArrayClosures.ByteArrayOrHttpFailureClosure;
 
 final HttpResponseEither<HttpFailure,byte[]> r = new ByteArrayOrHttpFailureClosure(client)
   .post("http://api.example.com/resource");
@@ -477,7 +477,7 @@ final byte[] bytes = r.right();
 Send a `GET` and blindly ignore if the request was "successful" or not.  Extract the resulting HTTP status code and headers on the response &mdash; even if the server responded with an "unsuccessful" status code.
 
 ```java
-import com.kolich.http.helpers.StatusCodeAndHeaderClosures.StatusCodeAndHeadersClosure;
+import com.kolich.http.blocking.helpers.StatusCodeAndHeaderClosures.StatusCodeAndHeadersClosure;
 
 // Tip: Use URIBuilder to add query parameters to the URI of a GET.
 // (see example usage below)
@@ -507,7 +507,7 @@ Send a `POST` and if the request succeeded, use GSON to convert the response bod
 Note, `YourType` below is assumed to be an entity class (a domain object) defined by your application or schema.
 
 ```java
-import com.kolich.http.helpers.GsonClosures.GsonOrHttpFailureClosure;
+import com.kolich.http.blocking.helpers.GsonClosures.GsonOrHttpFailureClosure;
 
 import com.google.gson.Gson;
 
@@ -526,7 +526,7 @@ final YourType t = g.right();
 Or, use a GSON `TypeToken` if your expected successful type `S` is a generic type, and consequently, you cannot use `.class` due to Java's type erasure.
 
 ```java
-import com.kolich.http.helpers.GsonClosures.GsonOrHttpFailureClosure;
+import com.kolich.http.blocking.helpers.GsonClosures.GsonOrHttpFailureClosure;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
