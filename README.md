@@ -4,12 +4,12 @@ A convenient Java wrapper around the Apache Commons HttpClient 4.x libraries.
 
 This library supports two mechanisms for making HTTP requests:
 
-* <a href="#asynchronous-non-blocking">Asynchronous (non-blocking)</a> &ndash; Uses httpasyncclient-4.0-beta3 under-the-hood.
 * <a href="#synchronous-blocking">Synchronous (blocking)</a> &ndash; Uses httpclient-4.2.1 under-the-hood.
+* <a href="#asynchronous-non-blocking">Asynchronous (non-blocking)</a> &ndash; Uses httpasyncclient-4.0-beta3 under-the-hood.
 
 ## Overview
 
-As is, using `HttpClient` or `HttpAsyncClient` directly is often cumbersome and bulky for typical `HEAD`, `GET`, `POST`, `PUT` and `DELETE` requests.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any), and release the connection back into the connection pool.
+As is, using `HttpClient` or `HttpAsyncClient` directly is often cumbersome for vanilla `HEAD`, `GET`, `POST`, `PUT` and `DELETE` requests.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any), and release the connection back into the connection pool.
 
 In *most* implementations, the typical `HttpClient` or `HttpAsyncClient` usage pattern almost always involves:
 
@@ -227,13 +227,9 @@ A few other details you'll probably be interested in:
 * The default definition of "success" is any request that 1) completes without `Exception` and 2) receives an HTTP status code that is less than (`<`) 400 Bad Request.  You can easily override this default behavior by implementing a custom `check` method as needed.
 * If you need to manipulate the request immediately before execution, you should override the `before` method.  This lets you do things like sign the request, or add the right authentication headers before the request is sent.
 
-## Asynchronous (Non-blocking)
-
-To be written.
-
 ## Synchronous (Blocking)
 
-To be written.
+Synchronous, or blocking, HTTP requests "block" the current execution thread until the request has finished, either successfully or unsuccessfully.  When making synchronous requests, the execution thread "pauses" and waits for the HTTP transaction to complete.  In some environments, this may be suboptimal, given that the execution thread is blocked waiting on the HTTP transaction to finish, and consequently cannot do any additional work. 
 
 ### Synchronous Closure Examples
 
@@ -441,7 +437,7 @@ if(result.success()) {
 }
 ```
 
-### Helpers
+### Synchronous Helpers
 
 To ease development, a number of helper closures are available out-of-the-box as found in the <a href="https://github.com/markkolich/kolich-httpclient4-closure/tree/master/src/main/java/com/kolich/http/helpers">com.kolich.http.helpers</a> package.  These helpers are packaged and shipped with this library and are intended to help developers avoid much of the closure boiler plate for the most common operations.
 
@@ -547,6 +543,14 @@ final HttpResponseEither<HttpFailure,List<YourType>> g =
 // Will be null if the request failed.
 final List<YourType> lt = g.right();
 ```
+
+## Asynchronous (Non-blocking)
+
+Asynchronous, or non-blocking, HTTP requests do not block the current execution thread.  When making asynchronous requests, the requesting execution thread does not pause and wait for the HTTP transaction to complete.  As such, this library returns a `java.util.concurrent.Future` that contains an `HttpResponseEither<F,S>`.  The returned `Future` represents the result of an asynchronous unit of work &mdash; its used to track an asynchronous request and can be checked for transaction completion elsewhere in the application.  When the transaction has finished, the `Future` will contain a usable `HttpResponseEither<F,S>` which represents the result of that transaction.  The actual underlying request transaction is executed separately on another thread (as managed iternally by the `HttpAsyncClient`) such that the requesting thread does not block, and therefore does not wait for the transaction to finish. 
+
+### Asynchronous Closure Examples
+
+To be written.
 
 ## Building
 
