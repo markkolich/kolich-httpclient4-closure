@@ -4,14 +4,14 @@ A convenient Java wrapper around the Apache Commons HttpClient 4.x libraries.
 
 This library supports two mechanisms for making HTTP requests:
 
-* Asynchronous (non-blocking) &ndash; Uses httpasyncclient-4.0-beta3 under-the-hood.
-* Synchronous (blocking) &ndash; Uses httpclient-4.2.1 under-the-hood.
+* <a href="#asynchronous-non-blocking">Asynchronous (non-blocking)</a> &ndash; Uses httpasyncclient-4.0-beta3 under-the-hood.
+* <a href="#synchronous-blocking">Synchronous (blocking)</a> &ndash; Uses httpclient-4.2.1 under-the-hood.
 
 ## Overview
 
-As is, using HttpClient directly is often cumbersome and a bit bulky for typical `HEAD`, `GET`, `POST`, `PUT` and `DELETE` requests.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any), and release the connection back into the connection pool.
+As is, using `HttpClient` or `HttpAsyncClient` directly is often cumbersome and bulky for typical `HEAD`, `GET`, `POST`, `PUT` and `DELETE` requests.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any), and release the connection back into the connection pool.
 
-In *most* implementations, the typical `HttpClient` usage pattern almost always involves:
+In *most* implementations, the typical `HttpClient` or `HttpAsyncClient` usage pattern almost always involves:
 
 1. Creating a new `HttpHead`, `HttpGet`, `HttpPost`, `HttpPut`, or `HttpDelete` instance specific to the operation.
 2. Setting an request body ("entity") to be sent with the request, if any.
@@ -22,7 +22,7 @@ In *most* implementations, the typical `HttpClient` usage pattern almost always 
 
 The intent of this library is to let you do all of this in a cleaner, repeatable and more understandable manner.
 
-Many would argue that this library simply trades one set of "boiler plate" for another.  True.  However, the patterns used here are much easier to grasp and they help you prevent obvious mistakes &mdash; like forgetting to close an `InputStream` when you're done with a response, which almost always manifests itself as a nasty leak under a heavy load.
+Many would argue that this library simply trades one set of "boiler plate" for another.  True.  However, the patterns used here are much easier to grasp and they help you prevent obvious mistakes &mdash; like forgetting to close an `InputStream` when you're done with a response entity, which almost always manifests itself as a nasty leak under a heavy load.
 
 ## Latest Version
 
