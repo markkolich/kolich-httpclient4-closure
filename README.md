@@ -229,7 +229,7 @@ A few other details you'll probably be interested in:
 
 ## Synchronous (Blocking)
 
-Synchronous, or blocking, HTTP requests "block" the requesting thread until the request has finished, either successfully or unsuccessfully.  When making synchronous requests, the execution thread "pauses" and waits for the HTTP transaction to complete.  In some environments, this may be suboptimal, given that the requesting thread is blocked waiting on the HTTP transaction to finish, and consequently cannot do any additional work. 
+Synchronous, or blocking, HTTP requests "block" the thread of execution until the request has finished, either successfully or unsuccessfully.  When making synchronous requests, the execution thread "blocks" and waits for the HTTP transaction to complete.  In some environments, this may be suboptimal, given that the requesting thread is blocked waiting on the HTTP transaction to finish, and consequently cannot do any additional work. 
 
 ### Synchronous Closure Examples
 
@@ -546,7 +546,7 @@ final List<YourType> lt = g.right();
 
 ## Asynchronous (Non-blocking)
 
-Asynchronous, or non-blocking, HTTP requests do not block the requesting thread.  When making asynchronous requests, the requesting thread does not pause and wait for the HTTP transaction to complete.  As such, this library returns a `java.util.concurrent.Future` that contains an `HttpResponseEither<F,S>`.  The returned `Future` represents the result of an asynchronous unit of work &mdash; its used to track an asynchronous request and can be checked for completion elsewhere in the application.  When the transaction has finished, the `Future` will contain a usable `HttpResponseEither<F,S>` which represents the result of that transaction.  The actual underlying request transaction is executed separately on another thread (as managed internally by the `HttpAsyncClient`) such that the requesting thread does not block, and therefore does not wait for the transaction to finish.  In short, the requesting thread "fires-and-forgets" the asynchronous HTTP request and is then free to do additional work.
+Asynchronous, or non-blocking, HTTP requests do not block the thread of execution.  When making asynchronous requests, the requesting thread does not pause and wait for the HTTP transaction to complete.  As such, this library returns a `java.util.concurrent.Future` that contains an `HttpResponseEither<F,S>`.  The returned `Future` represents the "future" result of an asynchronous unit of work &mdash; its used to track an asynchronous request and can be "passed around" and checked for completion elsewhere in the application.  When the transaction has finished, the `Future` will contain a usable `HttpResponseEither<F,S>` which represents the result of that transaction.  The actual underlying request is executed separately on another thread (as managed internally by the `HttpAsyncClient`) such that the requesting thread does not block, and therefore does not wait for the transaction to finish.  In short, the requesting thread "fires-and-forgets" the asynchronous HTTP request and is then free to do additional work.
 
 ### Asynchronous Closure Examples
 
