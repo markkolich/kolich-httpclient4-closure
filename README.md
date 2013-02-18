@@ -102,16 +102,121 @@ if(result.success()) {
 In either the synchronous or asynchronous case, when presented with an `HttpResponseEither<F,S>`, you can extract the return value of type `S` on success by calling `right`.
 
 ```java
-final String s = either.right();
+final String s = result.right();
 ```
 
 On the other hand, to extract the return value of type `F` on failure, call `left`.
 
 ```java
-final Exception cause = either.left();
+final Exception cause = result.left();
 ```
 
 Note that if you call `right` on a request that failed, expect a `null` return value.  Likewise, if you call `left` on a request that succeeded, also expect a `null` return value.
+
+### Get an HttpClient
+
+Before you can make blocking HTTP requests, you need an `HttpClient` instance.  You can use your own `HttpClient` (as instantiated elsewhere by another method), or you can use my `KolichDefaultHttpClient` factory class packaged with this library to snag a pre-configured `HttpClient`.
+
+```java
+import com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory;
+
+final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector();
+```
+
+Or, pass a `String` to the factory method to set the HTTP `User-Agent` on your new `HttpClient` instance.
+
+```java
+final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector("IE6, srsly");
+```
+
+By default, the `KolichHttpClientFactory` always returns an `HttpClient` instance backed by a **thread-safe** `PoolingClientConnectionManager`.  There's currently no support for passing your own connection manager to my `KolichHttpClientFactory` &mdash; if you need to use your own connection manager, it's safest to just build your own `HttpClient` instance elsewhere. 
+
+#### HttpClient Factory for Beans
+
+You can use the `KolichHttpClientFactory` to also instantiate an `HttpClient` as a bean:
+
+```xml
+<bean id="YourHttpClient"
+  class="com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory"
+  factory-method="getNewInstanceWithProxySelector">
+  <!-- Set a custom User-Agent string too, if you want. -->
+  <constructor-arg><value>IE6, srsly</value></constructor-arg>
+</bean>
+
+<bean id="SomeBean" class="com.foo.bar.SomeBean">
+  <property name="httpClient" ref="YourHttpClient" />			    	
+</bean>
+```
+
+### Get an HttpAsyncClient
+
+Before you can make asynchronous HTTP requests, you need an `HttpAsyncClient` instance.  You can use your own `HttpAsyncClient` (as instantiated elsewhere by another method), or you can use my `KolichDefaultHttpAsyncClient` factory class packaged with this library to snag a pre-configured `HttpAsyncClient`.
+
+```java
+import com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichHttpAsyncClientFactory;
+
+final HttpAsyncClient client = KolichHttpAsyncClientFactory.getNewAsyncInstanceWithProxySelector();
+```
+
+Or, pass a `String` to the factory method to set the HTTP `User-Agent` on your new `HttpClient` instance.
+
+```java
+final HttpAsyncClient client = KolichHttpAsyncClientFactory.getNewAsyncInstanceWithProxySelector("IE6, srsly");
+```
+
+There's currently no support for passing your own connection manager to my `KolichHttpAsyncClientFactory` &mdash; if you need to use your own connection manager, it's safest to just build your own `HttpAsyncClient` instance elsewhere. 
+
+#### HttpAsyncClient Factory for Beans
+
+You can use the `KolichHttpAsyncClientFactory` to also instantiate an `HttpAsyncClient` as a bean:
+
+```xml
+<bean id="YourHttpAsyncClient"
+  class="com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichHttpAsyncClientFactory"
+  factory-method="getNewAsyncInstanceWithProxySelector">
+  <!-- Set a custom User-Agent string too, if you want. -->
+  <constructor-arg><value>IE6, srsly</value></constructor-arg>
+</bean>
+
+<bean id="SomeBean" class="com.foo.bar.SomeBean">
+  <property name="httpAsyncClient" ref="YourHttpAsyncClient" />			    	
+</bean>
+```
+
+### Web-Proxy Support
+
+Some environments require outgoing HTTP/HTTPS connections to use a web-proxy.
+
+Fortunately, `HttpClient` and `HttpAsyncClient` integrates nicely with `java.net.ProxySelector` which makes it possible to automatically detect proxy settings across platforms.
+
+That said, you can easily create a proxy-aware `HttpClient` or `HttpAsyncClient` instance using the right factory method.
+
+Get a new `HttpClient` from the `KolichHttpClientFactory`.
+
+```java
+import com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory;
+
+final HttpClient usesProxy = KolichHttpClientFactory.getNewInstanceWithProxySelector();
+
+final HttpClient noProxy = KolichHttpClientFactory.getNewInstanceNoProxySelector();
+```
+
+Or, get a new `HttpAsyncClient` from the `KolichHttpAsyncClientFactory`.
+
+```java
+import com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichHttpAsyncClientFactory;
+
+final HttpAsyncClient usesProxy = KolichHttpAsyncClientFactory.getNewAsyncInstanceWithProxySelector();
+
+final HttpAsyncClient noProxy = KolichHttpAsyncClientFactory.getNewAsyncInstanceNoProxySelector();
+```
+
+When using the `getNewInstanceWithProxySelector()` or `getNewAsyncInstanceNoProxySelector()` factory methods, the underlying client will automatically use the JVM's `java.net.ProxySelector` to discover what web-proxy to use when establishing outgoing HTTP connections.  On all platforms, you can manually tell the JVM default `java.net.ProxySelector` what web-proxy to use by setting the `http.proxyHost` and `http.proxyPort` VM arguments for vanilla HTTP connections.  For outgoing HTTPS connections, use `https.proxyHost` and `https.proxyPort`.
+
+```bash
+java -Dhttp.proxyHost=proxy.example.com -Dhttp.proxyPort=3128 \
+     -Dhttps.proxyHost=proxy.example.com -Dhttps.proxyPort=3128
+```
 
 ### Other Details
 
@@ -128,64 +233,9 @@ To be written.
 
 ## Synchronous (Blocking)
 
-### Get an HttpClient
+To be written.
 
-Before you can make HTTP requests, you need an `HttpClient` instance.  You can use your own `HttpClient` (as instantiated elsewhere by another method), or you can use my `KolichDefaultHttpClient` factory class packaged with this library to snag a pre-configured `HttpClient`.
-
-```java
-import com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory;
-
-final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector();
-```
-
-Or, pass a `String` to the factory method to set the HTTP `User-Agent` on your new `HttpClient` instance.
-
-```java
-final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector("IE6, srsly");
-```
-
-By default, the `KolichHttpClientFactory` always returns an `HttpClient` instance backed by a **thread-safe** `PoolingClientConnectionManager`.  There's currently no support for passing your own connection manager to my `KolichHttpClientFactory` &mdash; if you need to use your own connection manager, it's safest to just build your own `HttpClient` instance elsewhere. 
-
-### HttpClient Factory for Beans
-
-You can use the `KolichHttpClientFactory` to also instantiate an `HttpClient` for your beans:
-
-```xml
-<bean id="YourHttpClient"
-  class="com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory"
-  factory-method="getNewInstanceWithProxySelector">
-  <!-- Set a custom User-Agent string too, if you want. -->
-  <constructor-arg><value>IE6, srsly</value></constructor-arg>
-</bean>
-
-<bean id="SomeFooBarBean" class="com.foo.bar.SomeBean">
-  <property name="httpClient" ref="YourHttpClient" />			    	
-</bean>
-```
-
-### Web-Proxy Support
-
-Some environments require outgoing HTTP/HTTPS connections to use a web-proxy.
-
-Fortunately, `HttpClient` integrates nicely with `java.net.ProxySelector` which makes it possible to automatically detect proxy settings across platforms.
-
-That said, you can easily create a proxy-aware `HttpClient` instance using the right factory method from `KolichHttpClientFactory`.
-
-```java
-import com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory;
-
-final HttpClient usesProxy = KolichHttpClientFactory.getNewInstanceWithProxySelector();
-
-final HttpClient noProxy = KolichHttpClientFactory.getNewInstanceNoProxySelector();
-```
-
-When using the `getNewInstanceWithProxySelector()` factory method, the underlying `HttpClient` will automatically use the JVM's `java.net.ProxySelector` to discover what web-proxy to use when establishing outgoing HTTP connections.  On all platforms, you can manually tell the JVM default `java.net.ProxySelector` what web-proxy to use by setting the `http.proxyHost` and `http.proxyPort` VM arguments for vanilla HTTP connections.  For outgoing HTTPS connections, use `https.proxyHost` and `https.proxyPort`.
-
-```bash
-java -Dhttp.proxyHost=proxy.example.com -Dhttp.proxyPort=3128
-```
-
-### Examples
+### Synchronous Closure Examples
 
 #### HEAD
 
