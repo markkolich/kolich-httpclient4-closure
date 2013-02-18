@@ -4,8 +4,8 @@ A convenient Java wrapper around the Apache Commons HttpClient 4.x libraries.
 
 This library supports two mechanisms for making HTTP requests:
 
-* <a href="#synchronous-blocking">Synchronous (blocking)</a> &ndash; Uses httpclient-4.2.1 under-the-hood.
-* <a href="#asynchronous-non-blocking">Asynchronous (non-blocking)</a> &ndash; Uses httpasyncclient-4.0-beta3 under-the-hood.
+* <a href="#synchronous-blocking">Synchronous (blocking)</a> &ndash; Uses **httpclient-4.2.1** under-the-hood.
+* <a href="#asynchronous-non-blocking">Asynchronous (non-blocking)</a> &ndash; Uses **httpasyncclient-4.0-beta3** under-the-hood.
 
 ## Overview
 
@@ -229,7 +229,7 @@ A few other details you'll probably be interested in:
 
 ## Synchronous (Blocking)
 
-Synchronous, or blocking, HTTP requests "block" the requesting execution thread until the request has finished, either successfully or unsuccessfully.  When making synchronous requests, the execution thread "pauses" and waits for the HTTP transaction to complete.  In some environments, this may be suboptimal, given that the requesting thread is blocked waiting on the HTTP transaction to finish, and consequently cannot do any additional work. 
+Synchronous, or blocking, HTTP requests "block" the requesting thread until the request has finished, either successfully or unsuccessfully.  When making synchronous requests, the execution thread "pauses" and waits for the HTTP transaction to complete.  In some environments, this may be suboptimal, given that the requesting thread is blocked waiting on the HTTP transaction to finish, and consequently cannot do any additional work. 
 
 ### Synchronous Closure Examples
 
@@ -569,15 +569,15 @@ Run SBT from within kolich-httpclient4-closure.
     #~> cd kolich-httpclient4-closure
     #~/kolich-httpclient4-closure> sbt
     ...
-    kolich-httpclient4-closure:0.0.9.1>
+    kolich-httpclient4-closure:1.0>
 
 You will see a `kolich-httpclient4-closure` SBT prompt once all dependencies are resolved and the project is loaded.
 
 In SBT, run `package` to compile and package the JAR.
 
-    kolich-httpclient4-closure:0.0.9.1> package
+    kolich-httpclient4-closure:1.0> package
     [info] Compiling 12 Java sources to ~/kolich-httpclient4-closure/target/classes...
-    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-0.0.9.1.jar ...
+    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-1.0.jar ...
     [info] Done packaging.
     [success] Total time: 4 s, completed
 
@@ -585,7 +585,7 @@ Note the resulting JAR is placed into the **kolich-httpclient4-closure/dist** di
 
 To create an Eclipse Java project for kolich-httpclient4-closure, run `eclipse` in SBT.
 
-    kolich-httpclient4-closure:0.0.9.1> eclipse
+    kolich-httpclient4-closure:1.0> eclipse
     ...
     [info] Successfully created Eclipse project files for project(s):
     [info] kolich-httpclient4-closure
@@ -593,14 +593,6 @@ To create an Eclipse Java project for kolich-httpclient4-closure, run `eclipse` 
 You'll now have a real Eclipse **.project** file worthy of an Eclipse import.
 
 Note your new **.classpath** file as well &mdash; all source JAR's are fetched and injected into the Eclipse project automatically.
-
-## Dependencies
-
-Currently, this artifact is built around <a href="http://hc.apache.org/">Apache Commons HttpClient</a> version **4.2.2**.
-
-This library does **not** work with HttpClient 3.x.  If you are *still* using HttpClient 3.x you should really consider upgrading given that 3.x is past end-of-life and no longer supported. 
-
-It also firmly depends on my common package of utility classes, <a href="https://github.com/markkolich/kolich-common">kolich-common</a>.
 
 ## Licensing
 
