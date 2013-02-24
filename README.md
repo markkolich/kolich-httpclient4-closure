@@ -1,6 +1,6 @@
 # kolich-httpclient4-closure
 
-A convenient Java wrapper around the Apache Commons HttpClient 4.x libraries.
+A convenient Java wrapper around the synchronous *and* asynchronous Apache Commons HttpClient 4.x libraries.
 
 This library supports two mechanisms for making HTTP requests:
 
