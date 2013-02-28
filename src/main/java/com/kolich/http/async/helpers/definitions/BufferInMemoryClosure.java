@@ -97,7 +97,7 @@ public abstract class BufferInMemoryClosure<S>
 	
 	@Override
 	public final void releaseResources() {		
-		consumer_.releaseResources();		
+		consumer_.releaseResources();
 	}
 	
 	private static class WrappedBasicAsyncResponseConsumer
