@@ -140,7 +140,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 	}
 		
 	public abstract void onResponseReceived(final HttpResponse response)
-		throws HttpException, IOException;
+		throws IOException;
 	public abstract void onContentReceived(final ContentDecoder decoder,
 		final IOControl ioctrl) throws IOException;
 	public abstract void onEntityEnclosed(final HttpEntity entity,

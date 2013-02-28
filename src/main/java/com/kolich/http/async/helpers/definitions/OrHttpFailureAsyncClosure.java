@@ -24,26 +24,32 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.async.helpers;
+package com.kolich.http.async.helpers.definitions;
 
-import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
+import static com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichHttpAsyncClientFactory.getNewAsyncInstanceWithProxySelector;
 
 import org.apache.http.nio.client.HttpAsyncClient;
-import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.async.helpers.definitions.BufferInMemoryClosure;
-import com.kolich.http.common.response.HttpSuccess;
+import com.kolich.http.async.HttpAsyncClient4Closure;
+import com.kolich.http.common.response.HttpFailure;
 
-public abstract class InMemoryStringClosure
-	extends BufferInMemoryClosure<String> {
-	
-	public InMemoryStringClosure(final HttpAsyncClient client) {
+/**
+ * Abstract closure to return a proper {@link HttpFailure} on failure.
+ */
+public abstract class OrHttpFailureAsyncClosure<S>
+	extends HttpAsyncClient4Closure<HttpFailure,S> {
+
+	public OrHttpFailureAsyncClosure(final HttpAsyncClient client) {
 		super(client);
 	}
-
-	@Override
-	public final String success(final HttpSuccess success) throws Exception {
-		return EntityUtils.toString(success.getEntity(), UTF_8);
+	
+	public OrHttpFailureAsyncClosure() {
+		this(getNewAsyncInstanceWithProxySelector());
 	}
 	
+	@Override
+	public final HttpFailure failure(final HttpFailure failure) {
+		return failure;
+	}
+
 }

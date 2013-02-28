@@ -24,46 +24,24 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.blocking.helpers;
+package com.kolich.http.async.helpers;
 
-import org.apache.http.client.HttpClient;
+import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.blocking.helpers.definitions.OrHttpFailureClosure;
-import com.kolich.http.blocking.helpers.definitions.OrNullClosure;
+import com.kolich.http.async.helpers.definitions.BufferInMemoryClosure;
 import com.kolich.http.common.response.HttpSuccess;
 
-public final class ByteArrayClosures {
+public abstract class InMemoryByteArrayClosure
+	extends BufferInMemoryClosure<byte[]> {
 	
-	// Cannot instantiate.
-	private ByteArrayClosures() {}
-	
-	public static class ByteArrayOrHttpFailureClosure extends OrHttpFailureClosure<byte[]> {		
-		public ByteArrayOrHttpFailureClosure(final HttpClient client) {
-			super(client);
-		}
-		public ByteArrayOrHttpFailureClosure() {
-			super();
-		}
-		@Override
-		public final byte[] success(final HttpSuccess success) throws Exception {
-			return EntityUtils.toByteArray(success.getResponse().getEntity());
-		}
+	public InMemoryByteArrayClosure(final HttpAsyncClient client) {
+		super(client);
 	}
-	
-	public static class ByteArrayOrNullClosure extends OrNullClosure<byte[]> {		
-		public ByteArrayOrNullClosure(final HttpClient client) {
-			super(client);
-		}
-		public ByteArrayOrNullClosure() {
-			super();
-		}
-		@Override
-		public final byte[] success(final HttpSuccess success) throws Exception {
-			return EntityUtils.toByteArray(success.getResponse().getEntity());
-		}
+
+	@Override
+	public final byte[] success(final HttpSuccess success) throws Exception {
+		return EntityUtils.toByteArray(success.getEntity());
 	}
 	
 }
-
-

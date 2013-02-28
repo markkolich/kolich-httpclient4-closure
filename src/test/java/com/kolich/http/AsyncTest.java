@@ -20,21 +20,17 @@ public final class AsyncTest {
 		
 		try {
 			
-			final Future<HttpResponseEither<Exception,String>> future =
+			final Future<HttpResponseEither<HttpFailure,String>> future =
 				new InMemoryStringClosure(client) {
 				@Override
 				public void before(final HttpRequestBase request) {
 					request.addHeader("Authorization", "super-secret-password");
 				}
-				@Override
-				public Exception failure(final HttpFailure failure) {
-					return failure.getCause();
-				}
 			}.get("http://www.google.com");
 						
 			while(true) {
 				if(future.isDone()) {
-					final HttpResponseEither<Exception,String> either = future.get();
+					final HttpResponseEither<HttpFailure,String> either = future.get();
 					if(either.success()) {
 						System.out.println("Success!.. has " +
 							either.right().length() + " long String.");

@@ -24,75 +24,59 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.async.helpers;
-
-import static com.kolich.http.common.response.ResponseUtils.consumeQuietly;
+package com.kolich.http.async.helpers.definitions;
 
 import java.io.IOException;
 
-import org.apache.http.ContentTooLongException;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.IOControl;
 import org.apache.http.nio.client.HttpAsyncClient;
-import org.apache.http.nio.entity.ContentBufferEntity;
-import org.apache.http.nio.util.HeapByteBufferAllocator;
-import org.apache.http.nio.util.SimpleInputBuffer;
+import org.apache.http.nio.protocol.BasicAsyncResponseConsumer;
 import org.apache.http.protocol.HttpContext;
 
-import com.kolich.http.async.HttpAsyncClient4Closure;
 import com.kolich.http.common.either.HttpResponseEither;
 import com.kolich.http.common.either.Left;
 import com.kolich.http.common.either.Right;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
-public abstract class BufferInMemoryClosure<F,S>
-	extends HttpAsyncClient4Closure<F,S> {
+public abstract class BufferInMemoryClosure<S>
+	extends OrHttpFailureAsyncClosure<S> {
 	
-	private volatile HttpResponse response_;
-    private volatile SimpleInputBuffer buf_;
-
+	private WrappedBasicAsyncResponseConsumer consumer_;
+	
 	public BufferInMemoryClosure(final HttpAsyncClient client) {
 		super(client);
+		consumer_ = new WrappedBasicAsyncResponseConsumer();
 	}
 	
 	@Override
 	public final void onResponseReceived(final HttpResponse response)
-		throws HttpException, IOException {
-		response_ = response;
+		throws IOException {
+		consumer_.onResponseReceived(response);
 	}
 	
 	@Override
 	public final void onContentReceived(final ContentDecoder decoder,
 		final IOControl ioctrl) throws IOException {
-		if(buf_ == null) {
-            throw new IllegalStateException("Content buffer is null?");
-        }
-        buf_.consumeContent(decoder);
+		consumer_.onContentReceived(decoder, ioctrl);
 	}
 	
 	@Override
 	public final void onEntityEnclosed(final HttpEntity entity,
 		final ContentType contentType) throws IOException {
-		long len = entity.getContentLength();
-        if (len > Integer.MAX_VALUE) {
-            throw new ContentTooLongException("Entity content is too long: " + len);
-        } else if (len < 0) {
-            len = 4096;
-        }
-        buf_ = new SimpleInputBuffer((int) len, new HeapByteBufferAllocator());
-        response_.setEntity(new ContentBufferEntity(entity, buf_));
+		consumer_.onEntityEnclosed(entity, contentType);
 	}
 	
 	@Override
-	public final HttpResponseEither<F,S> buildResult(final HttpContext context)
+	public final HttpResponseEither<HttpFailure,S> buildResult(final HttpContext context)
 		throws Exception {
-		HttpResponseEither<F,S> result = null;
+		HttpResponseEither<HttpFailure,S> result = null;
 		try {
+			final HttpResponse response = consumer_.buildResult(context);
 			// Check if the response was "successful".  The definition of
 			// success is arbitrary based on what's defined in the check()
 			// method.  The default success check is simply checking the
@@ -100,10 +84,10 @@ public abstract class BufferInMemoryClosure<F,S>
 			// it's considered "good". If the user wants evaluate this response
 			// against some custom criteria, they should override this
 			// check() method.
-			if(check(response_, context)) {
-				result = Right.right(success(new HttpSuccess(response_, context)));
+			if(check(response, context)) {
+				result = Right.right(success(new HttpSuccess(response, context)));
 			} else {
-				result = Left.left(failure(new HttpFailure(response_, context)));
+				result = Left.left(failure(new HttpFailure(response, context)));
 			}
 		} catch (Exception e) {
 			result = Left.left(failure(new HttpFailure(e)));
@@ -112,10 +96,45 @@ public abstract class BufferInMemoryClosure<F,S>
 	}
 	
 	@Override
-	public final void releaseResources() {
-		consumeQuietly(response_);
-		buf_ = null;
-		response_ = null;		
+	public final void releaseResources() {		
+		consumer_.releaseResources();		
+	}
+	
+	private static class WrappedBasicAsyncResponseConsumer
+		extends BasicAsyncResponseConsumer {
+		
+		public WrappedBasicAsyncResponseConsumer() {
+			super();
+		}
+		
+		@Override
+		public final void onResponseReceived(final HttpResponse response)
+			throws IOException {
+			super.onResponseReceived(response);
+		}
+		
+		@Override
+		public final void onContentReceived(final ContentDecoder decoder,
+			final IOControl ioctrl) throws IOException {
+			super.onContentReceived(decoder, ioctrl);
+		}
+		
+		@Override
+		public final void onEntityEnclosed(final HttpEntity entity,
+			final ContentType contentType) throws IOException {
+			super.onEntityEnclosed(entity, contentType);
+		}
+		
+		@Override
+		public final HttpResponse buildResult(final HttpContext context) {
+			return super.buildResult(context);
+		}
+		
+		@Override
+		public final void releaseResources() {
+			super.releaseResources();
+		}
+		
 	}
 	
 }
