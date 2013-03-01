@@ -46,7 +46,7 @@ import com.kolich.http.common.response.HttpSuccess;
 public abstract class BufferInMemoryClosure<S>
 	extends OrHttpFailureAsyncClosure<S> {
 	
-	private WrappedBasicAsyncResponseConsumer consumer_;
+	private final WrappedBasicAsyncResponseConsumer consumer_;
 	
 	public BufferInMemoryClosure(final HttpAsyncClient client) {
 		super(client);
@@ -100,7 +100,7 @@ public abstract class BufferInMemoryClosure<S>
 		consumer_.releaseResources();
 	}
 	
-	private static class WrappedBasicAsyncResponseConsumer
+	private class WrappedBasicAsyncResponseConsumer
 		extends BasicAsyncResponseConsumer {
 		
 		public WrappedBasicAsyncResponseConsumer() {
