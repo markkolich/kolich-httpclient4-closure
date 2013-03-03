@@ -7,6 +7,8 @@ This library supports two mechanisms for making HTTP requests:
 * <a href="#synchronous-blocking">Synchronous (blocking)</a> &ndash; Uses **httpclient-4.2.1** under-the-hood.
 * <a href="#asynchronous-non-blocking">Asynchronous (non-blocking)</a> &ndash; Uses **httpasyncclient-4.0-beta3** under-the-hood.
 
+For most applications, the synchronous (blocking) `HttpClient` backed closure is acceptable.  However, if you are building a highly scalable, asynchronous, non-blocking application or API, then the asynchronous `AsyncHttpClient` backed closure is likely a better choice. 
+
 ## Overview
 
 As is, using `HttpClient` or `HttpAsyncClient` directly is often cumbersome for vanilla `HEAD`, `GET`, `POST`, `PUT` and `DELETE` requests.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any), and release the connection back into the connection pool.
