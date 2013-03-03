@@ -29,13 +29,13 @@ package com.kolich.http.async.helpers;
 import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.async.helpers.definitions.BufferInMemoryClosure;
+import com.kolich.http.async.helpers.definitions.AsyncBufferInMemoryClosure;
 import com.kolich.http.common.response.HttpSuccess;
 
-public abstract class InMemoryByteArrayClosure
-	extends BufferInMemoryClosure<byte[]> {
+public abstract class InMemoryAsyncByteArrayClosure
+	extends AsyncBufferInMemoryClosure<byte[]> {
 	
-	public InMemoryByteArrayClosure(final HttpAsyncClient client) {
+	public InMemoryAsyncByteArrayClosure(final HttpAsyncClient client) {
 		super(client);
 	}
 

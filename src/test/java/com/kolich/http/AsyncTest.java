@@ -7,7 +7,7 @@ import java.util.concurrent.Future;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.nio.client.HttpAsyncClient;
 
-import com.kolich.http.async.helpers.InMemoryStringClosure;
+import com.kolich.http.async.helpers.InMemoryAsyncStringClosure;
 import com.kolich.http.common.either.HttpResponseEither;
 import com.kolich.http.common.response.HttpFailure;
 
@@ -21,7 +21,7 @@ public final class AsyncTest {
 		try {
 			
 			final Future<HttpResponseEither<HttpFailure,String>> future =
-				new InMemoryStringClosure(client) {
+				new InMemoryAsyncStringClosure(client) {
 				@Override
 				public void before(final HttpRequestBase request) {
 					request.addHeader("Authorization", "super-secret-password");

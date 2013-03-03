@@ -43,12 +43,12 @@ import com.kolich.http.common.either.Right;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
-public abstract class BufferInMemoryClosure<S>
+public abstract class AsyncBufferInMemoryClosure<S>
 	extends OrHttpFailureAsyncClosure<S> {
 	
 	private final WrappedBasicAsyncResponseConsumer consumer_;
 	
-	public BufferInMemoryClosure(final HttpAsyncClient client) {
+	public AsyncBufferInMemoryClosure(final HttpAsyncClient client) {
 		super(client);
 		consumer_ = new WrappedBasicAsyncResponseConsumer();
 	}

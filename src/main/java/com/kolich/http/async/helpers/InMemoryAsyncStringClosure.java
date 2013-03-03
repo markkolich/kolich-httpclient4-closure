@@ -31,13 +31,13 @@ import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
 import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.async.helpers.definitions.BufferInMemoryClosure;
+import com.kolich.http.async.helpers.definitions.AsyncBufferInMemoryClosure;
 import com.kolich.http.common.response.HttpSuccess;
 
-public abstract class InMemoryStringClosure
-	extends BufferInMemoryClosure<String> {
+public abstract class InMemoryAsyncStringClosure
+	extends AsyncBufferInMemoryClosure<String> {
 	
-	public InMemoryStringClosure(final HttpAsyncClient client) {
+	public InMemoryAsyncStringClosure(final HttpAsyncClient client) {
 		super(client);
 	}
 
