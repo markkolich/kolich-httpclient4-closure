@@ -7,7 +7,7 @@ This library supports two mechanisms for making HTTP requests:
 * <a href="#synchronous-blocking">Synchronous (blocking)</a> &ndash; Uses **httpclient-4.2.1** under-the-hood.
 * <a href="#asynchronous-non-blocking">Asynchronous (non-blocking)</a> &ndash; Uses **httpasyncclient-4.0-beta3** under-the-hood.
 
-For most applications, the synchronous `HttpClient` closure is acceptable &mdash; the JVM thread making the request will wait for the request to finish before continuing execution.  However, if you are building a highly scalable, asynchronous, non-blocking application or API, then the asynchronous `HttpAsyncClient` closure is likely a better choice. 
+For most applications, the synchronous `HttpClient` closure is acceptable &mdash; the thread making the request will block, waiting for the request to complete before continuing.  However, if you are building a highly scalable, asynchronous, non-blocking application or API, then the asynchronous `HttpAsyncClient` closure is likely a better choice. 
 
 ## Overview
 
