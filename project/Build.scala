@@ -83,12 +83,14 @@ object HttpClient extends Build {
       autoScalaLibrary := false,
       // Only add src/main/java and src/test/java as source folders in the project.
       // Not a "Scala" project at this time.
-      unmanagedSourceDirectories in Compile <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
-      unmanagedSourceDirectories in Test <<= baseDirectory(new File(_, "src/test/java"))(Seq(_)),
+      unmanagedSourceDirectories in Compile <<= baseDirectory(_ / "src/main/java")(Seq(_)),
+      unmanagedSourceDirectories in Test <<= baseDirectory(_ / "src/test/java")(Seq(_)),
+      // Also append the "examples" package to the classpath.
+      unmanagedSourceDirectories in Test <+= baseDirectory(_ / "src/examples/java"),
       // Tell SBT to include our .java files when packaging up the source JAR.
-      unmanagedSourceDirectories in Compile in packageSrc <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
+      unmanagedSourceDirectories in Compile in packageSrc <<= baseDirectory(_ / "src/main/java")(Seq(_)),
       // Override the SBT default "target" directory for compiled classes.
-      classDirectory in Compile <<= baseDirectory(new File(_, "target/classes")),
+      classDirectory in Compile <<= baseDirectory(_ / "target/classes"),
       // Tweaks the name of the resulting JAR on a "publish" or "publish-local".
       artifact in packageBin in Compile <<= (artifact in packageBin in Compile, version) apply ((artifact, ver) => {
         val newName = artifact.name + "-" + ver
