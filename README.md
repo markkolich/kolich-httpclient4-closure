@@ -4,14 +4,14 @@ A Java wrapper around the synchronous and asynchronous Apache Commons HttpClient
 
 This library supports two mechanisms for making HTTP requests:
 
-* <a href="#synchronous-blocking">Synchronous (blocking)</a> &ndash; Uses **httpclient-4.2.1** under-the-hood.
-* <a href="#asynchronous-non-blocking">Asynchronous (non-blocking)</a> &ndash; Uses **httpasyncclient-4.0-beta3** under-the-hood.
+* <a href="#synchronous-blocking">Synchronous (blocking)</a> &ndash; Uses *httpclient-4.2.1* under-the-hood.
+* <a href="#asynchronous-non-blocking">Asynchronous (non-blocking)</a> &ndash; Uses *httpasyncclient-4.0-beta3* under-the-hood.
 
-For most applications, the synchronous `HttpClient` closure is acceptable &mdash; the thread making the request will block, waiting for the request to complete before continuing.  However, if you are building a highly scalable, asynchronous, non-blocking application or API, then the asynchronous `HttpAsyncClient` closure is likely a better choice. 
+For most applications, the synchronous `HttpClient` closure is acceptable &mdash; the thread making the request will block, waiting for the request to complete before continuing.  However, if you are building a highly scalable, non-blocking application or API, then the asynchronous `HttpAsyncClient` closure is likely a better fit. 
 
 ## Overview
 
-As is, using `HttpClient` or `HttpAsyncClient` directly is often cumbersome for vanilla `HEAD`, `GET`, `POST`, `PUT` and `DELETE` requests.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any), and release the connection back into the connection pool.
+Using `HttpClient` or `HttpAsyncClient` directly is often cumbersome for vanilla `HEAD`, `GET`, `POST`, `PUT` and `DELETE` requests.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any), and release the connection back into the connection pool.
 
 In *most* implementations, the typical `HttpClient` or `HttpAsyncClient` usage pattern almost always involves:
 
@@ -62,7 +62,7 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "1.
 
 ## Functional Concepts
 
-Technically speaking, this library does not use "closures" (Lambda expressions) but rather a well defined pattern with **anonymous classes**.
+Formally speaking, this library does not use "closures" (Lambda expressions) but rather a well defined pattern with **anonymous classes**.
 
 Some concepts in this library, like the `HttpResponseEither<F,S>`, were borrowed directly from Scala.  In this case, `HttpResponseEither<F,S>` uses Java generics so that this library can return *either* a left type `F` indicating failure, or a right type `S` indicating success.  It's up to you, the developer, to define what these types are when you define your (anonymous) class &mdash; the definition of a "successful" return type varies from application to application.
 
