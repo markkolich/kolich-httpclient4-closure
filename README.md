@@ -115,6 +115,18 @@ final Exception cause = result.left();
 
 Note that if you call `right` on a request that failed, expect a `null` return value.  Likewise, if you call `left` on a request that succeeded, also expect a `null` return value.
 
+### Usage Details
+
+A few other details you'll probably be interested in:
+
+* This library automatically releases/frees all connection resources allocated/opened by the underlying HTTP client when a request has finished, either successfully or unsuccessfully.  You don't have to worry about closing any internal HTTP client entity streams, that's done for you.
+* All return types are developer-defined based on how you parameterize your `HttpResponseEither<F,S>`.  It's up to you to write a `success` method which converts an `HttpSuccess` object to your desired success type `S`.
+* The default definition of "success" is any request that 1) completes without `Exception` and 2) receives an HTTP status code that is less than (`<`) 400 Bad Request.  You can easily override this default behavior by implementing a custom `check` method as needed.
+* If you need to manipulate the request immediately before execution, you should override the `before` method.  This lets you do things like sign the request, or add the right authentication headers before the request is sent.
+* If you need to examine the raw response immediately after execution, before the result is checked for success, you should override the `after` method.
+
+There are a number of examples highlighting these closure entry points in the content below.
+
 ### Get an HttpClient
 
 Before you can make blocking HTTP requests, you need an `HttpClient` instance.  You can use your own `HttpClient` (as instantiated elsewhere by another method), or you can use my `KolichDefaultHttpClient` factory class packaged with this library to snag a pre-configured `HttpClient`.
@@ -220,18 +232,9 @@ java -Dhttp.proxyHost=proxy.example.com -Dhttp.proxyPort=3128 \
      -Dhttps.proxyHost=proxy.example.com -Dhttps.proxyPort=3128
 ```
 
-### Other Details
-
-A few other details you'll probably be interested in:
-
-* This library automatically releases/frees all connection resources when a request has finished, either successfully or unsuccessfully.  You don't have to worry about closing any internal entity streams, that's done for you.
-* All return types are developer-defined based on how you parameterize your `HttpResponseEither<F,S>`.  It's up to you to write a `success` method which converts an `HttpSuccess` object to your desired success type `S`.
-* The default definition of "success" is any request that 1) completes without `Exception` and 2) receives an HTTP status code that is less than (`<`) 400 Bad Request.  You can easily override this default behavior by implementing a custom `check` method as needed.
-* If you need to manipulate the request immediately before execution, you should override the `before` method.  This lets you do things like sign the request, or add the right authentication headers before the request is sent.
-
 ## Synchronous (Blocking)
 
-Synchronous, or blocking, HTTP requests "block" the thread of execution until the request has finished, either successfully or unsuccessfully.  When making synchronous requests, the execution thread "blocks" and waits for the HTTP transaction to complete.  In some environments, this may be suboptimal, given that the requesting thread is blocked waiting on the HTTP transaction to finish, and consequently cannot do any additional work. 
+Synchronous, or blocking, HTTP requests "block" the thread of execution until the request has finished, either successfully or unsuccessfully.  When making synchronous requests, the execution thread "blocks" and waits for the HTTP transaction to complete.  Generally speaking, this model is acceptable for your everyday "vanilla" application.  However, in some applications this may be suboptimal, given that the requesting thread is blocked waiting on the HTTP transaction to finish, and consequently cannot do any additional work. 
 
 ### Synchronous Closure Examples
 
