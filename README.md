@@ -129,7 +129,7 @@ There are a number of examples highlighting these closure entry points in the co
 
 ### Get an HttpClient
 
-Before you can make blocking HTTP requests, you need an `HttpClient` instance.  You can use your own `HttpClient` (as instantiated elsewhere by another method), or you can use my `KolichDefaultHttpClient` factory class packaged with this library to snag a pre-configured `HttpClient`.
+Before you can make blocking HTTP requests, you need an `HttpClient` instance.  You can use your own `HttpClient` (as instantiated elsewhere by another class), or you can use my `KolichDefaultHttpClient` factory class packaged with this library to snag a pre-configured `HttpClient`.
 
 ```java
 import com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory;
@@ -164,7 +164,7 @@ You can use the `KolichHttpClientFactory` to also instantiate an `HttpClient` as
 
 ### Get an HttpAsyncClient
 
-Before you can make asynchronous HTTP requests, you need an `HttpAsyncClient` instance.  You can use your own `HttpAsyncClient` (as instantiated elsewhere by another method), or you can use my `KolichDefaultHttpAsyncClient` factory class packaged with this library to snag a pre-configured `HttpAsyncClient`.
+Before you can make non-blocking HTTP requests, you need an `HttpAsyncClient` instance.  You can use your own `HttpAsyncClient` (as instantiated elsewhere by another class), or you can use my `KolichDefaultHttpAsyncClient` factory class packaged with this library to snag a pre-configured `HttpAsyncClient`.
 
 ```java
 import com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichHttpAsyncClientFactory;
