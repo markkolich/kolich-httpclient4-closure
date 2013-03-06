@@ -86,7 +86,21 @@ public abstract class HttpAsyncClient4Closure<F,S>
 					@Override
 					protected void onResponseReceived(final HttpResponse response)
 						throws HttpException, IOException {
-						HttpAsyncClient4Closure.this.onResponseReceived(response);
+						// Gosh, this feels wrong but in order to inject the
+						// consumer's call to the after() method, we have to
+						// double wrap the onResponseReceived() call in a
+						// separate, internal try catch. Bah!
+						try {
+							after(response, context);
+							HttpAsyncClient4Closure.this.onResponseReceived(response);
+						} catch (HttpException e) {
+							throw e;
+						} catch (IOException e) {
+							throw e;
+						} catch (Exception e) {
+							throw new HttpException("Unexpected exception " +
+								"occurred while handling response.", e);
+						}
 					}
 					@Override
 					protected void onContentReceived(final ContentDecoder decoder,

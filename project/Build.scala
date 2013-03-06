@@ -86,7 +86,7 @@ object HttpClient extends Build {
       unmanagedSourceDirectories in Compile <<= baseDirectory(_ / "src/main/java")(Seq(_)),
       unmanagedSourceDirectories in Test <<= baseDirectory(_ / "src/test/java")(Seq(_)),
       // Also append the "examples" package to the classpath.
-      unmanagedSourceDirectories in Test <+= baseDirectory(_ / "src/examples/java"),
+      //unmanagedSourceDirectories in Test <+= baseDirectory(_ / "src/examples/java"),
       // Tell SBT to include our .java files when packaging up the source JAR.
       unmanagedSourceDirectories in Compile in packageSrc <<= baseDirectory(_ / "src/main/java")(Seq(_)),
       // Override the SBT default "target" directory for compiled classes.
