@@ -225,16 +225,17 @@ final HttpAsyncClient usesProxy = KolichHttpAsyncClientFactory.getNewAsyncInstan
 final HttpAsyncClient noProxy = KolichHttpAsyncClientFactory.getNewAsyncInstanceNoProxySelector();
 ```
 
-When using the `getNewInstanceWithProxySelector()` or `getNewAsyncInstanceNoProxySelector()` factory methods, the underlying client will automatically use the JVM's `java.net.ProxySelector` to discover what web-proxy to use when establishing outgoing HTTP connections.  On all platforms, you can manually tell the JVM default `java.net.ProxySelector` what web-proxy to use by setting the `http.proxyHost` and `http.proxyPort` VM arguments for vanilla HTTP connections.  For outgoing HTTPS connections, use `https.proxyHost` and `https.proxyPort`.
+When using the `getNewInstanceWithProxySelector` or `getNewAsyncInstanceNoProxySelector` static factory methods, the underlying client will automatically use the JVM's `java.net.ProxySelector` to discover what web-proxy to use when establishing outgoing HTTP connections.  On all platforms, you can manually tell the JVM's default `java.net.ProxySelector` what web-proxy to use by setting the `http.proxyHost` and `http.proxyPort` VM arguments for vanilla HTTP connections.  For outgoing HTTPS connections, use `https.proxyHost` and `https.proxyPort`.
 
 ```bash
 java -Dhttp.proxyHost=proxy.example.com -Dhttp.proxyPort=3128 \
-     -Dhttps.proxyHost=proxy.example.com -Dhttps.proxyPort=3128
+     -Dhttps.proxyHost=proxy.example.com -Dhttps.proxyPort=3128 \
+     -jar runme.jar
 ```
 
 ## Synchronous (Blocking)
 
-Synchronous, or blocking, HTTP requests "block" the thread of execution until the request has finished, either successfully or unsuccessfully.  When making synchronous requests, the execution thread "blocks" and waits for the HTTP transaction to complete.  Generally speaking, this model is acceptable for your everyday "vanilla" application.  However, in some applications this may be suboptimal, given that the requesting thread is blocked waiting on the HTTP transaction to finish, and consequently cannot do any additional work. 
+Synchronous, or blocking, HTTP requests block the thread of execution until the request has finished, either successfully or unsuccessfully.  When making synchronous requests, the execution thread waits for the HTTP transaction to complete.  Generally speaking, this model is acceptable for your everyday "vanilla" application.  However, in some applications this may be suboptimal, given that the requesting thread is blocked waiting on the HTTP transaction to finish, and consequently cannot do any additional work. 
 
 ### Synchronous Closure Examples
 
