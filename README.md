@@ -582,12 +582,10 @@ Many of the concepts covered in the synchronous closure examples above also appl
 
 #### GET
 
-Send a `GET` and if the request was successful extract the response body as a `UTF-8` encoded `String`.  If unsuccessful, return `null`.
-
-Note, this example NIO buffers the entire response body into memory.
+Send a `GET` and if the request was successful extract the response body as a `UTF-8` encoded `String`.  If unsuccessful, return `null`.  Note, this example NIO buffers the entire response body into memory.
 
 ```java
-final Future<HttpResponseEither<Void,String>> request =
+final Future<HttpResponseEither<Void,String>> future =
   new HttpAsyncClient4Closure<Void,String>(client) {
   private HttpResponse response_;
   private SimpleInputBuffer buffer_;
@@ -640,6 +638,20 @@ final Future<HttpResponseEither<Void,String>> request =
     return EntityUtils.toString(success.getEntity(), UTF_8);
   }
 }.get("http://www.example.com");
+
+// You would never "wait" like this in a real asynchronous driven application
+// but is only used to show how to handle Future's.
+while(!future.isDone()) {
+  Thread.sleep(1000L);
+}
+
+final HttpResponseEither<Void,String> result = future.get();
+if(result.success()) {
+  System.out.println("Yay, it worked! And, I have a string: " +
+    future.right().length());
+} else {
+  System.out.println("Hmm, something went wrong.");
+}
 ```
 
 ## Building
