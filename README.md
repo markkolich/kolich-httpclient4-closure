@@ -578,7 +578,69 @@ Note that if you do not call `start`, your `HttpAsyncClient` will not process an
 
 ### Asynchronous Closure Examples
 
-To be written.
+Many of the concepts covered in the synchronous closure examples above also apply to asynchronous requests.  As such, only a simple non-blocking `GET` request example is shown below &mdash; asynchronous examples highlighting the other HTTP request methods are left as an exercise for the reader.
+
+#### GET
+
+Send a `GET` and if the request was successful extract the response body as a `UTF-8` encoded `String`.  If unsuccessful, return `null`.
+
+Note, this example NIO buffers the entire response body into memory.
+
+```java
+final Future<HttpResponseEither<Void,String>> request =
+  new HttpAsyncClient4Closure<Void,String>(client) {
+  private HttpResponse response_;
+  private SimpleInputBuffer buffer_;
+  @Override
+  public void onResponseReceived(final HttpResponse response) throws IOException {
+    response_ = response;
+  }  
+  @Override
+  public void onContentReceived(final ContentDecoder decoder,
+    final IOControl ioctrl) throws IOException {
+    if(buffer_ == null) {
+      throw new IllegalStateException("Content buffer is null.");
+    }
+    buffer_.consumeContent(decoder);
+  }  
+  @Override
+  public void onEntityEnclosed(final HttpEntity entity, final ContentType contentType)
+    throws IOException {
+    long len = entity.getContentLength();
+    if(len > Integer.MAX_VALUE) {
+      throw new ContentTooLongException("Entity content is too long: " + len);
+    } else if(len < 0) {
+      len = 4096;
+    }
+    buffer_ = new SimpleInputBuffer((int) len, new HeapByteBufferAllocator());
+    response_.setEntity(new ContentBufferEntity(entity, buffer_));
+  }  
+  @Override
+  public void releaseResources() {
+    response_ = null;
+    buffer_ = null;
+  }  
+  @Override
+  public HttpResponseEither<HttpFailure,String> buildResult(
+    final HttpContext context) throws Exception {
+    HttpResponseEither<HttpFailure,String> result = null;
+    try {
+      if(check(response_, context)) {
+        result = Right.right(success(new HttpSuccess(response_, context)));
+      } else {
+        result = Left.left(failure(new HttpFailure(response_, context)));
+      }
+    } catch (Exception e) {
+      result = Left.left(failure(new HttpFailure(e)));
+    }
+    return result;
+  }  
+  @Override
+  public String success(final HttpSuccess success) throws Exception {
+    return EntityUtils.toString(success.getEntity(), UTF_8);
+  }
+}.get("http://www.example.com");
+```
 
 ## Building
 
