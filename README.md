@@ -556,29 +556,25 @@ Asynchronous, or non-blocking, HTTP requests do not block the thread of executio
 
 ### Important Note on Using HttpAsyncClient
 
-Internally, `HttpAsyncClient` executes requests asynchronously on separate threads, one request context per thread.  That said, before you can make asynchronous requests using an `HttpAsyncClient` instance, you need to tell its underlying connection queue and thread pool to “start” before any asynchronous requests will be processed.
+Internally, `HttpAsyncClient` executes requests asynchronously on separate threads, one request context per thread.  That said, before you can make asynchronous requests using an `HttpAsyncClient` instance, you need to tell its underlying connection queue and thread pool to “start” before any requests will be processed.
 
-You can tell an `HttpAsyncClient` to start by calling its `start` method.
+You can ask an `HttpAsyncClient` to start by calling its `start` method.
 
 ```java
-import org.apache.http.nio.client.HttpAsyncClient;
-
 final HttpAsyncClient client = ...;
 
 client.start();
 ```
 
-Similarly, you can tell an `HttpAsyncClient` to shutdown by calling its `shutdown` method.
+Similarly, you can ask an `HttpAsyncClient` to shutdown by calling its `shutdown` method.
 
 ```java
-import org.apache.http.nio.client.HttpAsyncClient;
-
 final HttpAsyncClient client = ...;
 
 client.shutdown();
 ```
 
-Note that if you do not call `start`, your `HttpAsyncClient` will not process any asynchronous requests.  And consequently, you will not be unable to make requests using the closures defined in this library.
+Note that if you do not call `start`, your `HttpAsyncClient` will not process any asynchronous requests.  And consequently, you will not be unable to make requests using this library.
 
 ### Asynchronous Closure Examples
 
