@@ -554,6 +554,32 @@ final List<YourType> lt = g.right();
 
 Asynchronous, or non-blocking, HTTP requests do not block the thread of execution.  When making asynchronous requests, the requesting thread does not pause and wait for the HTTP transaction to complete.  As such, this library returns a `java.util.concurrent.Future` that encapsulates an `HttpResponseEither<F,S>`.  The returned `Future` represents the future result of an asynchronous unit of work &mdash; it's used to track an asynchronous request and can be "passed around" and checked for completion elsewhere in the application.  When the transaction has finished, the `Future` will contain a usable `HttpResponseEither<F,S>` which represents the result of that transaction.  The actual underlying request is executed separately on another thread (as managed internally by the `HttpAsyncClient`) such that the requesting thread does not block, and therefore does not wait for the transaction to finish.  In short, the requesting thread "fires-and-forgets" the asynchronous HTTP request and is then free to do additional work.
 
+### Important Note on Using HttpAsyncClient
+
+Internally, `HttpAsyncClient` executes requests asynchronously on separate threads, one request context per thread.  That said, before you can make asynchronous requests using an `HttpAsyncClient` instance, you need to tell its underlying connection queue and thread pool to “start” before any asynchronous requests will be processed.
+
+You can tell an `HttpAsyncClient` to start by calling its `start` method.
+
+```java
+import org.apache.http.nio.client.HttpAsyncClient;
+
+final HttpAsyncClient client = ...;
+
+client.start();
+```
+
+Similarly, you can tell an `HttpAsyncClient` to shutdown by calling its `shutdown` method.
+
+```java
+import org.apache.http.nio.client.HttpAsyncClient;
+
+final HttpAsyncClient client = ...;
+
+client.shutdown();
+```
+
+Note that if you do not call `start`, your `HttpAsyncClient` will not process any asynchronous requests.  And consequently, you will not be unable to make requests using the closures defined in this library.
+
 ### Asynchronous Closure Examples
 
 To be written.
