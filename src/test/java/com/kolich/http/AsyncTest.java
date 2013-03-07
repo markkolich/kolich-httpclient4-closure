@@ -99,8 +99,6 @@ public final class AsyncTest {
 					}
 			}.get("http://www.example.com");
 			
-			
-			
 			final Future<HttpResponseEither<HttpFailure,String>> future =
 				new InMemoryAsyncStringClosure(client) {
 				@Override
@@ -110,7 +108,7 @@ public final class AsyncTest {
 			}.get("http://www.google.com");
 						
 			while(true) {
-				if(future.isDone()) {
+				if(future.isDone() && request.isDone()) {
 					final HttpResponseEither<HttpFailure,String> either = future.get();
 					if(either.success()) {
 						System.out.println("Success!.. has " +
