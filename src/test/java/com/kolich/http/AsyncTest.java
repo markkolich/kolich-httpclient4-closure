@@ -20,11 +20,11 @@ import org.apache.http.nio.util.SimpleInputBuffer;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
+import com.kolich.common.either.Either;
+import com.kolich.common.either.Left;
+import com.kolich.common.either.Right;
 import com.kolich.http.async.HttpAsyncClient4Closure;
 import com.kolich.http.async.helpers.InMemoryAsyncStringClosure;
-import com.kolich.http.common.either.HttpResponseEither;
-import com.kolich.http.common.either.Left;
-import com.kolich.http.common.either.Right;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
@@ -37,7 +37,7 @@ public final class AsyncTest {
 		
 		try {
 			
-			final Future<HttpResponseEither<HttpFailure,String>> request =
+			final Future<Either<HttpFailure,String>> request =
 				new HttpAsyncClient4Closure<HttpFailure,String>(client) {
 					private HttpResponse response_;
 					private SimpleInputBuffer buffer_;
@@ -77,9 +77,9 @@ public final class AsyncTest {
 					}
 					
 					@Override
-					public HttpResponseEither<HttpFailure,String> buildResult(
+					public Either<HttpFailure,String> buildResult(
 						final HttpContext context) throws Exception {
-						HttpResponseEither<HttpFailure,String> result = null;
+						Either<HttpFailure,String> result = null;
 						try {
 							if(check(response_, context)) {
 								result = Right.right(success(new HttpSuccess(
@@ -99,7 +99,7 @@ public final class AsyncTest {
 					}
 			}.get("http://www.example.com");
 			
-			final Future<HttpResponseEither<HttpFailure,String>> future =
+			final Future<Either<HttpFailure,String>> future =
 				new InMemoryAsyncStringClosure(client) {
 				@Override
 				public void before(final HttpRequestBase request) {
@@ -109,7 +109,7 @@ public final class AsyncTest {
 						
 			while(true) {
 				if(future.isDone() && request.isDone()) {
-					final HttpResponseEither<HttpFailure,String> either = future.get();
+					final Either<HttpFailure,String> either = future.get();
 					if(either.success()) {
 						System.out.println("Success!.. has " +
 							either.right().length() + " long String.");

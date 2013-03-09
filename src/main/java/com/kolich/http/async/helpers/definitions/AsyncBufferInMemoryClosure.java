@@ -37,9 +37,9 @@ import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.nio.protocol.BasicAsyncResponseConsumer;
 import org.apache.http.protocol.HttpContext;
 
-import com.kolich.http.common.either.HttpResponseEither;
-import com.kolich.http.common.either.Left;
-import com.kolich.http.common.either.Right;
+import com.kolich.common.either.Either;
+import com.kolich.common.either.Left;
+import com.kolich.common.either.Right;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
@@ -72,9 +72,9 @@ public abstract class AsyncBufferInMemoryClosure<S>
 	}
 	
 	@Override
-	public final HttpResponseEither<HttpFailure,S> buildResult(final HttpContext context)
+	public final Either<HttpFailure,S> buildResult(final HttpContext context)
 		throws Exception {
-		HttpResponseEither<HttpFailure,S> result = null;
+		Either<HttpFailure,S> result = null;
 		try {
 			final HttpResponse response = consumer_.buildResult(context);
 			// Check if the response was "successful".  The definition of

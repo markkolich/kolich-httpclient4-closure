@@ -33,15 +33,15 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.protocol.HttpContext;
 
+import com.kolich.common.either.Either;
+import com.kolich.common.either.Left;
+import com.kolich.common.either.Right;
 import com.kolich.http.common.HttpClient4ClosureBase;
-import com.kolich.http.common.either.HttpResponseEither;
-import com.kolich.http.common.either.Left;
-import com.kolich.http.common.either.Right;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
 public abstract class HttpClient4Closure<F,S>
-	extends HttpClient4ClosureBase<HttpResponseEither<F,S>> {
+	extends HttpClient4ClosureBase<Either<F,S>> {
 				
 	private final HttpClient client_;
 	
@@ -50,14 +50,13 @@ public abstract class HttpClient4Closure<F,S>
 	}
 	
 	@Override
-	public final HttpResponseEither<F,S> doit(final HttpRequestBase request,
+	public final Either<F,S> doit(final HttpRequestBase request,
 		final HttpContext context) {
-		HttpResponseEither<F,S> result = null;
+		Either<F,S> result = null;
 		// Any failures/exceptions encountered during request execution
 		// (in a call to execute) are wrapped up as a Left() and are delt
 		// with in the failure path below.
-		final HttpResponseEither<HttpFailure,HttpSuccess> response =
-			execute(request, context);
+		final Either<HttpFailure,HttpSuccess> response = execute(request, context);
 		try {
 			if(response.success()) {
 				result = Right.right(success(((Right<HttpFailure,HttpSuccess>)
@@ -82,7 +81,7 @@ public abstract class HttpClient4Closure<F,S>
 		return result;
 	}
 	
-	private final HttpResponseEither<HttpFailure,HttpSuccess> execute(
+	private final Either<HttpFailure,HttpSuccess> execute(
 		final HttpRequestBase request, final HttpContext context) {
 		HttpResponse response = null;
 		try {

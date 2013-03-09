@@ -19,9 +19,9 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
+import com.kolich.common.either.Either;
 import com.kolich.http.blocking.HttpClient4Closure;
 import com.kolich.http.blocking.helpers.StringClosures.StringOrNullClosure;
-import com.kolich.http.common.either.HttpResponseEither;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
@@ -31,7 +31,7 @@ public final class BlockingTest {
 				
 		final HttpClient client = getNewInstanceWithProxySelector("foobar");
 		
-		final HttpResponseEither<Integer,String> result = new HttpClient4Closure<Integer,String>(client) {
+		final Either<Integer,String> result = new HttpClient4Closure<Integer,String>(client) {
 			@Override
 			public void before(final HttpRequestBase request) {
 				request.addHeader("Authorization", "super-secret-password");
@@ -51,7 +51,7 @@ public final class BlockingTest {
 			System.out.println(result.left());
 		}
 		
-		final HttpResponseEither<Void,Header[]> hResult = new HttpClient4Closure<Void,Header[]>(client) {
+		final Either<Void,Header[]> hResult = new HttpClient4Closure<Void,Header[]>(client) {
 			@Override
 			public Header[] success(final HttpSuccess success) throws Exception {
 				return success.getResponse().getAllHeaders();
@@ -61,7 +61,7 @@ public final class BlockingTest {
 			System.out.println("Fetched " + hResult.right().length + " request headers.");
 		}
 		
-		final HttpResponseEither<Void,String> sResult =
+		final Either<Void,String> sResult =
 			new StringOrNullClosure(client)
 				.get("http://mark.koli.ch");
 		if(sResult.success()) {
@@ -70,7 +70,7 @@ public final class BlockingTest {
 			System.out.println(sResult.left());
 		}
 		
-		final HttpResponseEither<Exception,String> eResult = new HttpClient4Closure<Exception,String>(client) {
+		final Either<Exception,String> eResult = new HttpClient4Closure<Exception,String>(client) {
 			@Override
 			public String success(final HttpSuccess success) throws Exception {
 				return EntityUtils.toString(success.getResponse().getEntity(), UTF_8);
@@ -85,7 +85,7 @@ public final class BlockingTest {
 		}
 		
 		// Custom check for "success".
-		final HttpResponseEither<Exception,String> cResult = new HttpClient4Closure<Exception,String>(client) {
+		final Either<Exception,String> cResult = new HttpClient4Closure<Exception,String>(client) {
 			@Override
 			public boolean check(final HttpResponse response, final HttpContext context) {
 				return (response.getStatusLine().getStatusCode() == 405);
@@ -99,7 +99,7 @@ public final class BlockingTest {
 			System.out.println(eResult.right());
 		}
 		
-		final HttpResponseEither<Exception,OutputStream> bResult = new HttpClient4Closure<Exception,OutputStream>(client) {
+		final Either<Exception,OutputStream> bResult = new HttpClient4Closure<Exception,OutputStream>(client) {
 			@Override
 			public OutputStream success(final HttpSuccess success) throws Exception {
 				final OutputStream os = new ByteArrayOutputStream();
@@ -116,7 +116,7 @@ public final class BlockingTest {
 		}
 		
 		final OutputStream os = new ByteArrayOutputStream();
-		final HttpResponseEither<Exception,Integer> stResult = new HttpClient4Closure<Exception,Integer>(client) {
+		final Either<Exception,Integer> stResult = new HttpClient4Closure<Exception,Integer>(client) {
 			@Override
 			public Integer success(final HttpSuccess success) throws Exception {
 				return IOUtils.copy(success.getResponse().getEntity().getContent(), os);
@@ -137,7 +137,7 @@ public final class BlockingTest {
 		// Setup a basic cookie store so that the response can fetch
 		// any cookies returned by the server in the response.
 		context.setAttribute(COOKIE_STORE, new BasicCookieStore());
-		final HttpResponseEither<Void,String> cookieResult =
+		final Either<Void,String> cookieResult =
 			new HttpClientClosureExpectString(client)
 				.get(new HttpGet("http://google.com"), context);
 		if(cookieResult.success()) {
@@ -148,7 +148,7 @@ public final class BlockingTest {
 			}
 		}*/
 		
-		final HttpResponseEither<Integer,List<Cookie>> mmmmm =
+		final Either<Integer,List<Cookie>> mmmmm =
 			new HttpClient4Closure<Integer,List<Cookie>>(client) {
 			@Override
 			public void before(final HttpRequestBase request, final HttpContext context) {
@@ -175,7 +175,7 @@ public final class BlockingTest {
 			System.out.println("Failed miserably: " + mmmmm.left());
 		}
 		
-		final HttpResponseEither<Void,Header[]> haResult =
+		final Either<Void,Header[]> haResult =
 			new HttpClient4Closure<Void, Header[]>(client) {
 			@Override
 			public Header[] success(final HttpSuccess success) {

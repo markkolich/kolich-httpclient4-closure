@@ -28,7 +28,7 @@ Many would argue that this library simply trades one set of "boiler plate" for a
 
 ## Latest Version
 
-The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/1.1">1.1</a>.
+The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/1.2">1.2</a>.
 
 ## Resolvers
 
@@ -39,7 +39,7 @@ If you wish to use this artifact, you can easily add it to your existing Maven o
 ```scala
 resolvers += "Kolich repo" at "http://markkolich.github.com/repo"
 
-val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "1.1" % "compile"
+val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "1.2" % "compile"
 ```
 
 ### Maven
@@ -55,7 +55,7 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "1.
 <dependency>
   <groupId>com.kolich</groupId>
   <artifactId>kolich-httpclient4-closure</artifactId>
-  <version>1.1</version>
+  <version>1.2</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -64,12 +64,12 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "1.
 
 Formally speaking, this library does not use "closures" (Lambda expressions) but rather a well defined pattern with **anonymous classes**.
 
-Some concepts in this library, like the `HttpResponseEither<F,S>`, were borrowed directly from Scala.  In this case, `HttpResponseEither<F,S>` uses Java generics so that this library can return *either* a left type `F` indicating failure, or a right type `S` indicating success.  It's up to you, the developer, to define what these types are when you define your (anonymous) class &mdash; the definition of a "successful" return type varies from application to application.
+Some concepts in this library, like the `com.kolich.common.either.Either<F,S>`, were borrowed directly from Scala.  In this case, `Either<F,S>` uses Java generics so that this library can return *either* a left type `F` indicating failure, or a right type `S` indicating success.  It's up to you, the developer, to define what these types are when you define your (anonymous) class &mdash; the definition of a "successful" return type varies from application to application.
 
-If using the synchronous closure, when you receive an `HttpResponseEither<F,S>` you can check for success by calling the `success` method on the result.
+If using the synchronous closure, when you receive an `Either<F,S>` you can check for success by calling the `success` method on the result.
 
 ```java
-final HttpResponseEither<Exception,String> result =
+final Either<Exception,String> result =
   new HttpClient4Closure<Exception,String>(client) {
     // ...
   }.get("http://example.com"); // blocks
@@ -79,10 +79,10 @@ if(result.success()) {
 }
 ```
 
-If using the non-blocking asynchronous closure, when you receive a `Future<HttpResponseEither<F,S>>` you can check its completion status by calling `isDone` on the resulting `Future`.  When the `Future` has finished, call its `get` method to retrieve the completed `HttpResponseEither<F,S>`.
+If using the non-blocking asynchronous closure, when you receive a `Future<Either<F,S>>` you can check its completion status by calling `isDone` on the resulting `Future`.  When the `Future` has finished, call its `get` method to retrieve the completed `Either<F,S>`.
 
 ```java
-final Future<HttpResponseEither<Exception,String>> future =
+final Future<Either<Exception,String>> future =
   new HttpAsyncClient4Closure<Exception,String>(client) {
     // ...
   }.get("http://example.com"); // non-blocking, starts async request
@@ -93,15 +93,15 @@ while(!future.isDone()) {
   Thread.sleep(1000L);
 }
 
-final HttpResponseEither<Exception,String> result = future.get();
+final Either<Exception,String> result = future.get();
 if(result.success()) {
   // It worked!
 }
 ```
 
-### Using HttpResponseEither&lt;F,S&gt;
+### Using Either&lt;F,S&gt;
 
-In either the synchronous or asynchronous case, when presented with an `HttpResponseEither<F,S>`, you can extract the return value of type `S` on success by calling `right`.
+In either the synchronous or asynchronous case, when presented with an `Either<F,S>`, you can extract the return value of type `S` on success by calling `right`.
 
 ```java
 final String s = result.right();
@@ -120,7 +120,7 @@ Note that if you call `right` on a request that failed, expect a `null` return v
 A few other details you'll probably be interested in:
 
 * This library automatically releases/frees all connection resources allocated/opened by the underlying HTTP client when a request has finished, either successfully or unsuccessfully.  You don't have to worry about closing any internal HTTP client entity streams, that's done for you.
-* All return types are developer-defined based on how you parameterize your `HttpResponseEither<F,S>`.  It's up to you to write a `success` method which converts an `HttpSuccess` object to your desired success type `S`.
+* All return types are developer-defined based on how you parameterize your `Either<F,S>`.  It's up to you to write a `success` method which converts an `HttpSuccess` object to your desired success type `S`.
 * The default definition of "success" is any request that 1) completes without `Exception` and 2) receives an HTTP status code that is less than (`<`) 400 Bad Request.  You can easily override this default behavior by implementing a custom `check` method as needed.
 * If you need to manipulate the request immediately before execution, you should override the `before` method.  This lets you do things like sign the request, or add the right authentication headers before the request is sent.
 * If you need to examine the raw response immediately after execution, before the result is checked for success, you should override the `after` method.
@@ -244,7 +244,7 @@ Synchronous, or blocking, HTTP requests block the thread of execution until the 
 Send a `HEAD` request and expect back an array of HTTP response headers on success.  Drop any failures on the floor &mdash; expect a `null` return value in place of success type `S` if anything went wrong.
 
 ```java
-final HttpResponseEither<Void,Header[]> result =
+final Either<Void,Header[]> result =
   new HttpClient4Closure<Void,Header[]>(client) {
   @Override
   public Header[] success(final HttpSuccess success) {
@@ -257,10 +257,10 @@ final Header[] headers = result.right();
 
 #### GET
 
-Send a `GET` request expecting either a `String` back on success, or an `Exception` on failure &mdash; this is represented by the `HttpResponseEither<Exception,String>` return type.
+Send a `GET` request expecting either a `String` back on success, or an `Exception` on failure &mdash; this is represented by the `Either<Exception,String>` return type.
 
 ```java
-final HttpResponseEither<Exception,String> result =
+final Either<Exception,String> result =
   new HttpClient4Closure<Exception,String>(client) {
   @Override
   public String success(final HttpSuccess success) throws Exception {
@@ -276,7 +276,7 @@ final HttpResponseEither<Exception,String> result =
 Or, send a `GET` request still expecting a `String` on success, but drop any failures on the floor &mdash; expect a `null` return value in place of success type `S` if anything went wrong.
 
 ```java
-final HttpResponseEither<Void,String> result =
+final Either<Void,String> result =
   new HttpClient4Closure<Void,String>(client) {
   @Override
   public String success(final HttpSuccess success) throws Exception {
@@ -294,7 +294,7 @@ import org.apache.commons.io.IOUtils;
 
 final OutputStream os = ...; // Existing and open output stream
 
-final HttpResponseEither<Void,Long> result =
+final Either<Void,Long> result =
   new HttpClient4Closure<Void,Long>(client) {
   @Override
   public Long success(final HttpSuccess success) throws Exception {
@@ -313,7 +313,7 @@ import static org.apache.http.client.protocol.ClientContext.COOKIE_STORE;
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 
-final HttpResponseEither<Integer,List<Cookie>> mmmm =
+final Either<Integer,List<Cookie>> mmmm =
   new HttpClient4Closure<Integer,List<Cookie>>(client) {
   @Override
   public void before(final HttpRequestBase request, final HttpContext context) {
@@ -347,7 +347,7 @@ if((cookies = mmmm.right()) != null) {
 Send a `POST` request but manipulate the `HttpBaseRequest` object before execution by overriding the `before` method.  Expect a `String` on success, and an `Integer` on failure.
 
 ```java
-final HttpResponseEither<Integer,String> result =
+final Either<Integer,String> result =
   new HttpClient4Closure<Integer,String>(client) {
   @Override
   public void before(final HttpRequestBase request) {
@@ -377,7 +377,7 @@ params.add(new BasicNameValuePair("foo", "bar"));
 params.add(new BasicNameValuePair("cat", "dog"));
 request.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
 
-final HttpResponseEither<Void,MyClazz> result =
+final Either<Void,MyClazz> result =
   new HttpClient4Closure<Void,MyClazz>(client) {
   @Override
   public MyClazz success(final HttpSuccess success) throws Exception {
@@ -398,7 +398,7 @@ Send a `PUT` request with an existing and open `InputStream` from another source
 ```java
 final InputStream is = ...; // Existing and open input stream
 
-final HttpResponseEither<Void,Integer> result =
+final Either<Void,Integer> result =
   new HttpClient4Closure<Void,Integer>(client) {
   @Override
   public void before(final HttpRequestBase request) {
@@ -420,7 +420,7 @@ if(result.success()) {
 Send a `DELETE` request with a custom `success` check &mdash; in this example, the server returns a `410 Gone` when the resource is deleted successfully but we don't want a 410 response to indicate failure. 
 
 ```java
-final HttpResponseEither<Integer,Void> result =
+final Either<Integer,Void> result =
   new HttpClient4Closure<Integer,Void>(client) {
   @Override
   public boolean check(final HttpResponse response, final HttpContext context) {
@@ -456,7 +456,7 @@ Send a `GET` and if the request was successful extract the response body as a `U
 ```java
 import com.kolich.http.blocking.helpers.StringClosures.StringOrNullClosure;
 
-final HttpResponseEither<Void,String> s = new StringOrNullClosure(client)
+final Either<Void,String> s = new StringOrNullClosure(client)
   .get("http://google.com");
 
 final String html;
@@ -472,7 +472,7 @@ Send a `POST` and if the request was successful extract the response body as a `
 ```java
 import com.kolich.http.blocking.helpers.ByteArrayClosures.ByteArrayOrHttpFailureClosure;
 
-final HttpResponseEither<HttpFailure,byte[]> r = new ByteArrayOrHttpFailureClosure(client)
+final Either<HttpFailure,byte[]> r = new ByteArrayOrHttpFailureClosure(client)
   .post("http://api.example.com/resource");
 
 final byte[] bytes = r.right();
@@ -521,7 +521,7 @@ final Gson gson = ...; // Get a GSON instance.
 
 // Send the POST, and if the request is successful, use the GSON instance
 // to unmarshall the response body to a valid YourType object.
-final HttpResponseEither<HttpFailure,YourType> g =
+final Either<HttpFailure,YourType> g =
   new GsonOrHttpFailureClosure<YourType>(client, gson, YourType.class)
     .post("https://api.example.com/resource.json");
 
@@ -541,7 +541,7 @@ final Gson gson = ...; // Get a GSON instance.
 
 // Send the POST, and if the request is successful, use the GSON instance
 // to unmarshall the response body to a valid List<YourType> object.
-final HttpResponseEither<HttpFailure,List<YourType>> g =
+final Either<HttpFailure,List<YourType>> g =
   new GsonOrHttpFailureClosure<List<YourType>>(
     client, gson, new TypeToken<List<YourType>>(){}.getType()
   ).post("https://api.example.com/resource.json");
@@ -552,7 +552,7 @@ final List<YourType> lt = g.right();
 
 ## Asynchronous (Non-blocking)
 
-Asynchronous, or non-blocking, HTTP requests do not block the thread of execution.  When making asynchronous requests, the requesting thread does not pause and wait for the HTTP transaction to complete.  As such, this library returns a `java.util.concurrent.Future` that encapsulates an `HttpResponseEither<F,S>`.  The returned `Future` represents the future result of an asynchronous unit of work &mdash; it's used to track an asynchronous request and can be "passed around" and checked for completion elsewhere in the application.  When the transaction has finished, the `Future` will contain a usable `HttpResponseEither<F,S>` which represents the result of that transaction.  The actual underlying request is executed separately on another thread (as managed internally by the `HttpAsyncClient`) such that the requesting thread does not block, and therefore does not wait for the transaction to finish.  In short, the requesting thread "fires-and-forgets" the asynchronous HTTP request and is then free to do additional work.
+Asynchronous, or non-blocking, HTTP requests do not block the thread of execution.  When making asynchronous requests, the requesting thread does not pause and wait for the HTTP transaction to complete.  As such, this library returns a `java.util.concurrent.Future` that encapsulates an `Either<F,S>`.  The returned `Future` represents the future result of an asynchronous unit of work &mdash; it's used to track an asynchronous request and can be "passed around" and checked for completion elsewhere in the application.  When the transaction has finished, the `Future` will contain a usable `Either<F,S>` which represents the result of that transaction.  The actual underlying request is executed separately on another thread (as managed internally by the `HttpAsyncClient`) such that the requesting thread does not block, and therefore does not wait for the transaction to finish.  In short, the requesting thread "fires-and-forgets" the asynchronous HTTP request and is then free to do additional work.
 
 ### Important Note on Using HttpAsyncClient
 
@@ -585,7 +585,7 @@ Many of the concepts covered in the synchronous closure examples above also appl
 Send a `GET` and if the request was successful extract the response body as a `UTF-8` encoded `String`.  If unsuccessful, return `null`.  Note, this example NIO buffers the entire response body into memory.
 
 ```java
-final Future<HttpResponseEither<Void,String>> future =
+final Future<Either<Void,String>> future =
   new HttpAsyncClient4Closure<Void,String>(client) {
   private HttpResponse response_;
   private SimpleInputBuffer buffer_;
@@ -619,9 +619,9 @@ final Future<HttpResponseEither<Void,String>> future =
     buffer_ = null;
   }  
   @Override
-  public HttpResponseEither<HttpFailure,String> buildResult(
+  public Either<HttpFailure,String> buildResult(
     final HttpContext context) throws Exception {
-    HttpResponseEither<HttpFailure,String> result = null;
+    Either<HttpFailure,String> result = null;
     try {
       if(check(response_, context)) {
         result = Right.right(success(new HttpSuccess(response_, context)));
@@ -645,7 +645,7 @@ while(!future.isDone()) {
   Thread.sleep(1000L);
 }
 
-final HttpResponseEither<Void,String> result = future.get();
+final Either<Void,String> result = future.get();
 if(result.success()) {
   System.out.println("Yay, it worked! And, I have a string: " +
     future.right().length());
@@ -671,15 +671,15 @@ Run SBT from within kolich-httpclient4-closure.
     #~> cd kolich-httpclient4-closure
     #~/kolich-httpclient4-closure> sbt
     ...
-    kolich-httpclient4-closure:1.1>
+    kolich-httpclient4-closure:1.2>
 
 You will see a `kolich-httpclient4-closure` SBT prompt once all dependencies are resolved and the project is loaded.
 
 In SBT, run `package` to compile and package the JAR.
 
-    kolich-httpclient4-closure:1.1> package
-    [info] Compiling 12 Java sources to ~/kolich-httpclient4-closure/target/classes...
-    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-1.1.jar ...
+    kolich-httpclient4-closure:1.2> package
+    [info] Compiling 27 Java sources to ~/kolich-httpclient4-closure/target/classes...
+    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-1.2.jar ...
     [info] Done packaging.
     [success] Total time: 4 s, completed
 
@@ -687,7 +687,7 @@ Note the resulting JAR is placed into the **kolich-httpclient4-closure/dist** di
 
 To create an Eclipse Java project for kolich-httpclient4-closure, run `eclipse` in SBT.
 
-    kolich-httpclient4-closure:1.1> eclipse
+    kolich-httpclient4-closure:1.2> eclipse
     ...
     [info] Successfully created Eclipse project files for project(s):
     [info] kolich-httpclient4-closure

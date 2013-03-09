@@ -45,14 +45,14 @@ import org.apache.http.nio.client.methods.HttpAsyncMethods;
 import org.apache.http.nio.protocol.AbstractAsyncResponseConsumer;
 import org.apache.http.protocol.HttpContext;
 
+import com.kolich.common.either.Either;
+import com.kolich.common.either.Left;
 import com.kolich.http.common.HttpClient4ClosureBase;
-import com.kolich.http.common.either.HttpResponseEither;
-import com.kolich.http.common.either.Left;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 
 public abstract class HttpAsyncClient4Closure<F,S>
-	extends HttpClient4ClosureBase<Future<HttpResponseEither<F,S>>> {
+	extends HttpClient4ClosureBase<Future<Either<F,S>>> {
 					
 	private final HttpAsyncClient client_;
 	
@@ -61,9 +61,9 @@ public abstract class HttpAsyncClient4Closure<F,S>
 	}
 	
 	@Override
-	public Future<HttpResponseEither<F,S>> doit(
+	public Future<Either<F,S>> doit(
 		final HttpRequestBase request, final HttpContext context) {
-		Future<HttpResponseEither<F,S>> result = null;
+		Future<Either<F,S>> result = null;
 		try {
 			// Before the request is "executed" give the consumer an entry
 			// point into the raw request object to tweak as necessary first.
@@ -82,7 +82,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 				// Load the asynchronous response consumer; this is the
 				// "class" that will be responsible for doing the real work
 				// asynchronously under-the-hood to process the response.
-				new AbstractAsyncResponseConsumer<HttpResponseEither<F,S>>() {
+				new AbstractAsyncResponseConsumer<Either<F,S>>() {
 					@Override
 					protected void onResponseReceived(final HttpResponse response)
 						throws HttpException, IOException {
@@ -113,7 +113,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 						HttpAsyncClient4Closure.this.onEntityEnclosed(entity, contentType);
 					}
 					@Override
-					protected HttpResponseEither<F,S> buildResult(
+					protected Either<F,S> buildResult(
 						final HttpContext context) throws Exception {
 						return HttpAsyncClient4Closure.this.buildResult(context);
 					}
@@ -130,8 +130,8 @@ public abstract class HttpAsyncClient4Closure<F,S>
 			// If something went wrong, create a new future that's already
 			// "done" and contains an Either<F,S> where the Left error type is
 			// immeaditely set to indicate failure.
-			final HttpResponseEither<F,S> either = Left.left(failure(new HttpFailure(e)));
-			result = new Future<HttpResponseEither<F,S>>() {
+			final Either<F,S> either = Left.left(failure(new HttpFailure(e)));
+			result = new Future<Either<F,S>>() {
 				@Override
 				public boolean cancel(boolean mayInterruptIfRunning) { return false; }
 				@Override
@@ -139,12 +139,12 @@ public abstract class HttpAsyncClient4Closure<F,S>
 				@Override
 				public boolean isDone() { return true; }
 				@Override
-				public HttpResponseEither<F,S> get()
+				public Either<F,S> get()
 					throws InterruptedException, ExecutionException {
 					return either;
 				}
 				@Override
-				public HttpResponseEither<F,S> get(long timeout, TimeUnit unit)
+				public Either<F,S> get(long timeout, TimeUnit unit)
 					throws InterruptedException, ExecutionException, TimeoutException {
 					return either;
 				}
@@ -159,7 +159,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 		final IOControl ioctrl) throws IOException;
 	public abstract void onEntityEnclosed(final HttpEntity entity,
 		final ContentType contentType) throws IOException;
-	public abstract HttpResponseEither<F,S> buildResult(final HttpContext context)
+	public abstract Either<F,S> buildResult(final HttpContext context)
 		throws Exception;
 	public abstract void releaseResources();
 	
@@ -189,9 +189,9 @@ public abstract class HttpAsyncClient4Closure<F,S>
 	}
 	
 	private final class InternalBasicFutureWrapper implements 
-		Future<HttpResponseEither<F,S>>, Cancellable {		
-		private final Future<HttpResponseEither<F,S>> future_;		
-		private InternalBasicFutureWrapper(final Future<HttpResponseEither<F,S>> future) {
+		Future<Either<F,S>>, Cancellable {		
+		private final Future<Either<F,S>> future_;		
+		private InternalBasicFutureWrapper(final Future<Either<F,S>> future) {
 			future_ = future;
 		}
 		@Override
@@ -211,7 +211,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 			return future_.isDone();
 		}
 		@Override
-		public HttpResponseEither<F,S> get() throws InterruptedException,
+		public Either<F,S> get() throws InterruptedException,
 			ExecutionException {
 			try {
 				return future_.get();
@@ -220,7 +220,7 @@ public abstract class HttpAsyncClient4Closure<F,S>
 			}
 		}
 		@Override
-		public HttpResponseEither<F,S> get(long timeout, TimeUnit unit)
+		public Either<F,S> get(long timeout, TimeUnit unit)
 			throws InterruptedException, ExecutionException, TimeoutException {
 			try {
 				return future_.get(timeout, unit);
