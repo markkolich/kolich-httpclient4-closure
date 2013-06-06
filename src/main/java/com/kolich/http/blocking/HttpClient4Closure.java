@@ -33,9 +33,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.protocol.HttpContext;
 
-import com.kolich.common.either.Either;
-import com.kolich.common.either.Left;
-import com.kolich.common.either.Right;
+import com.kolich.common.functional.either.Either;
+import com.kolich.common.functional.either.Left;
+import com.kolich.common.functional.either.Right;
 import com.kolich.http.common.HttpClient4ClosureBase;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;

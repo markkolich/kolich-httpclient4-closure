@@ -37,9 +37,9 @@ import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.nio.protocol.BasicAsyncResponseConsumer;
 import org.apache.http.protocol.HttpContext;
 
-import com.kolich.common.either.Either;
-import com.kolich.common.either.Left;
-import com.kolich.common.either.Right;
+import com.kolich.common.functional.either.Either;
+import com.kolich.common.functional.either.Left;
+import com.kolich.common.functional.either.Right;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 

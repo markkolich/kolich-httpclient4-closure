@@ -19,7 +19,7 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
-import com.kolich.common.either.Either;
+import com.kolich.common.functional.either.Either;
 import com.kolich.http.blocking.HttpClient4Closure;
 import com.kolich.http.blocking.helpers.StringClosures.StringOrNullClosure;
 import com.kolich.http.common.response.HttpFailure;

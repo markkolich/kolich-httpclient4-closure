@@ -20,9 +20,9 @@ import org.apache.http.nio.util.SimpleInputBuffer;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
-import com.kolich.common.either.Either;
-import com.kolich.common.either.Left;
-import com.kolich.common.either.Right;
+import com.kolich.common.functional.either.Either;
+import com.kolich.common.functional.either.Left;
+import com.kolich.common.functional.either.Right;
 import com.kolich.http.async.HttpAsyncClient4Closure;
 import com.kolich.http.async.helpers.InMemoryAsyncStringClosure;
 import com.kolich.http.common.response.HttpFailure;
