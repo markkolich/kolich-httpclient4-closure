@@ -27,8 +27,6 @@
 import sbt._
 import sbt.Keys._
 
-import com.typesafe.sbteclipse.plugin.EclipsePlugin._
-
 object Dependencies {
   
   // Internal dependencies
@@ -61,7 +59,7 @@ object HttpClient4Closure extends Build {
   import Resolvers._
 
   private val aName = "kolich-httpclient4-closure"
-  private val aVer = "1.2.2"
+  private val aVer = "1.2.3"
   private val aOrg = "com.kolich"
 
   lazy val httpClient4Closure: Project = Project(
@@ -135,12 +133,7 @@ object HttpClient4Closure extends Build {
         file("dist") / "test" / defaultPath.getName
       },
       libraryDependencies ++= deps,
-      retrieveManaged := true) ++
-      Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
-        // Make sure SBT also fetches/loads the "src" (source) JAR's for
-        // all declared dependencies.
-        EclipseKeys.withSource := true,
-        // This is a Java project, only.
-        EclipseKeys.projectFlavor := EclipseProjectFlavor.Java))
+      retrieveManaged := true)
+  )
 
 }
