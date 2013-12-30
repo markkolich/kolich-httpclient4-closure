@@ -31,7 +31,7 @@ object Dependencies {
   
   // Internal dependencies
 
-  private val kolichCommon = "com.kolich" % "kolich-common" % "0.1.0" % "compile"
+  private val kolichCommon = "com.kolich" % "kolich-common" % "0.1.1" % "compile"
 
   // External dependencies
   
@@ -59,7 +59,7 @@ object HttpClient4Closure extends Build {
   import Resolvers._
 
   private val aName = "kolich-httpclient4-closure"
-  private val aVer = "1.2.3"
+  private val aVer = "1.2.4"
   private val aOrg = "com.kolich"
 
   lazy val httpClient4Closure: Project = Project(
