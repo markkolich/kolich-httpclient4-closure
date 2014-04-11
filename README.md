@@ -23,7 +23,7 @@ Many would argue that this library simply trades one set of "boiler plate" for a
 
 ## Latest Version
 
-The latest stable version of this library is <a href="http://markkolich.github.io/repo/com/kolich/kolich-httpclient4-closure/2.0">2.0</a>.
+The latest stable version of this library is <a href="http://markkolich.github.io/repo/com/kolich/kolich-httpclient4-closure/2.1">2.1</a>.
 
 ## Resolvers
 
@@ -34,7 +34,7 @@ If you wish to use this artifact, you can easily add it to your existing Maven o
 ```scala
 resolvers += "Kolich repo" at "http://markkolich.github.io/repo"
 
-val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "2.0" % "compile"
+val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "2.1" % "compile"
 ```
 
 ### Maven
@@ -50,7 +50,7 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "2.
 <dependency>
   <groupId>com.kolich</groupId>
   <artifactId>kolich-httpclient4-closure</artifactId>
-  <version>2.0</version>
+  <version>2.1</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -495,15 +495,15 @@ Run SBT from within kolich-httpclient4-closure.
     #~> cd kolich-httpclient4-closure
     #~/kolich-httpclient4-closure> sbt
     ...
-    kolich-httpclient4-closure:2.0>
+    kolich-httpclient4-closure:2.1>
 
 You will see a `kolich-httpclient4-closure` SBT prompt once all dependencies are resolved and the project is loaded.
 
 In SBT, run `package` to compile and package the JAR.
 
-    kolich-httpclient4-closure:2.0> package
+    kolich-httpclient4-closure:2.1> package
     [info] Compiling 27 Java sources to ~/kolich-httpclient4-closure/target/classes...
-    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-2.0.jar ...
+    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-2.1.jar ...
     [info] Done packaging.
     [success] Total time: 4 s, completed
 
@@ -511,7 +511,7 @@ Note the resulting JAR is placed into the **kolich-httpclient4-closure/dist** di
 
 To create an Eclipse Java project for kolich-httpclient4-closure, run `eclipse` in SBT.
 
-    kolich-httpclient4-closure:2.0> eclipse
+    kolich-httpclient4-closure:2.1> eclipse
     ...
     [info] Successfully created Eclipse project files for project(s):
     [info] kolich-httpclient4-closure
@@ -522,7 +522,7 @@ Note your new **.classpath** file as well &mdash; all source JAR's are fetched a
 
 ## Licensing
 
-Copyright (c) 2012 <a href="http://mark.koli.ch">Mark S. Kolich</a>
+Copyright (c) 2014 <a href="http://mark.koli.ch">Mark S. Kolich</a>
 
 All code in this artifact is freely available for use and redistribution under the <a href="http://opensource.org/comment/991">MIT License</a>.
 
