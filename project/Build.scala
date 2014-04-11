@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012 Mark S. Kolich
+ * Copyright (c) 2014 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -59,7 +59,7 @@ object HttpClient4Closure extends Build {
   import Resolvers._
 
   private val aName = "kolich-httpclient4-closure"
-  private val aVer = "2.0"
+  private val aVer = "2.1"
   private val aOrg = "com.kolich"
 
   lazy val httpClient4Closure: Project = Project(
