@@ -1,19 +1,14 @@
 # kolich-httpclient4-closure
 
-A Java wrapper around the synchronous and asynchronous Apache Commons HttpClient 4.
+A Java wrapper around the **synchronous** Apache Commons HttpClient 4.
 
-This library supports two mechanisms for making HTTP requests:
-
-* <a href="#synchronous-blocking">Synchronous (blocking)</a> &ndash; Uses *httpclient-4.2.1* under-the-hood.
-* <a href="#asynchronous-non-blocking">Asynchronous (non-blocking)</a> &ndash; Uses *httpasyncclient-4.0-beta3* under-the-hood.
-
-For most applications, the synchronous `HttpClient` closure is acceptable &mdash; the thread making the request will block, waiting for the request to complete before continuing.  However, if you are building a highly scalable, non-blocking application or API, then the asynchronous `HttpAsyncClient` closure is likely a better fit. 
+For most applications, the synchronous `HttpClient` closure is acceptable &mdash; the thread making the request will block, waiting for the request to complete before continuing.  If you need a pure asynchronous solution, please see the [Async Http Client](https://github.com/AsyncHttpClient/async-http-client).
 
 ## Overview
 
-Using `HttpClient` or `HttpAsyncClient` directly is often cumbersome for vanilla `HEAD`, `GET`, `POST`, `PUT` and `DELETE` requests.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any), and release the connection back into the connection pool.
+Using `HttpClient` directly is often cumbersome for vanilla `HEAD`, `GET`, `POST`, `PUT` and `DELETE` requests.  For example, it often takes multiple lines of boiler plate Java to send a simple `GET` request, check the resulting status code, read a response (if any), and release the connection back into the connection pool.
 
-In *most* implementations, the typical `HttpClient` or `HttpAsyncClient` usage pattern almost always involves:
+In *most* implementations, the typical `HttpClient` usage pattern almost always involves:
 
 1. Creating a new `HttpHead`, `HttpGet`, `HttpPost`, `HttpPut`, or `HttpDelete` instance specific to the operation.
 2. Setting an request body ("entity") to be sent with the request, if any.
@@ -28,7 +23,7 @@ Many would argue that this library simply trades one set of "boiler plate" for a
 
 ## Latest Version
 
-The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/1.2.2">1.2.2</a>.
+The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/2.0">2.0</a>.
 
 ## Resolvers
 
@@ -39,7 +34,7 @@ If you wish to use this artifact, you can easily add it to your existing Maven o
 ```scala
 resolvers += "Kolich repo" at "http://markkolich.github.com/repo"
 
-val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "1.2.2" % "compile"
+val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "2.0" % "compile"
 ```
 
 ### Maven
@@ -55,7 +50,7 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "1.
 <dependency>
   <groupId>com.kolich</groupId>
   <artifactId>kolich-httpclient4-closure</artifactId>
-  <version>1.2.2</version>
+  <version>2.0</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -66,7 +61,7 @@ Formally speaking, this library does not use "closures" (Lambda expressions) but
 
 Some concepts in this library, like the `com.kolich.common.either.Either<F,S>`, were borrowed directly from Scala.  In this case, `Either<F,S>` uses Java generics so that this library can return *either* a left type `F` indicating failure, or a right type `S` indicating success.  It's up to you, the developer, to define what these types are when you define your (anonymous) class &mdash; the definition of a "successful" return type varies from application to application.
 
-If using the synchronous closure, when you receive an `Either<F,S>` you can check for success by calling the `success` method on the result.
+When you receive an `Either<F,S>` you can check for success by calling the `success` method on the result.
 
 ```java
 final Either<Exception,String> result =
@@ -79,29 +74,9 @@ if(result.success()) {
 }
 ```
 
-If using the non-blocking asynchronous closure, when you receive a `Future<Either<F,S>>` you can check its completion status by calling `isDone` on the resulting `Future`.  When the `Future` has finished, call its `get` method to retrieve the completed `Either<F,S>`.
-
-```java
-final Future<Either<Exception,String>> future =
-  new HttpAsyncClient4Closure<Exception,String>(client) {
-    // ...
-  }.get("http://example.com"); // non-blocking, starts async request
-
-// Wait for the future to finish.
-// However, you would never "wait" like this in a real application.
-while(!future.isDone()) {
-  Thread.sleep(1000L);
-}
-
-final Either<Exception,String> result = future.get();
-if(result.success()) {
-  // It worked!
-}
-```
-
 ### Using Either&lt;F,S&gt;
 
-In either the synchronous or asynchronous case, when presented with an `Either<F,S>`, you can extract the return value of type `S` on success by calling `right`.
+When presented with an `Either<F,S>`, you can extract the return value of type `S` on success by calling `right`.
 
 ```java
 final String s = result.right();
@@ -129,10 +104,10 @@ There are a number of examples highlighting these closure entry points in the co
 
 ### Get an HttpClient
 
-Before you can make blocking HTTP requests, you need an `HttpClient` instance.  You can use your own `HttpClient` (as instantiated elsewhere by another class), or you can use my `KolichDefaultHttpClient` factory class packaged with this library to snag a pre-configured `HttpClient`.
+Before you can make HTTP requests, you need an `HttpClient` instance.  You can use your own `HttpClient` (as instantiated elsewhere by another class), or you can use my `KolichDefaultHttpClient` factory class packaged with this library to snag a pre-configured `HttpClient`.
 
 ```java
-import com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory;
+import com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory;
 
 final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector();
 ```
@@ -151,7 +126,7 @@ You can use the `KolichHttpClientFactory` to also instantiate an `HttpClient` as
 
 ```xml
 <bean id="YourHttpClient"
-  class="com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory"
+  class="com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory"
   factory-method="getNewInstanceWithProxySelector">
   <!-- Set a custom User-Agent string too, if you want. -->
   <constructor-arg><value>IE6, srsly</value></constructor-arg>
@@ -162,70 +137,25 @@ You can use the `KolichHttpClientFactory` to also instantiate an `HttpClient` as
 </bean>
 ```
 
-### Get an HttpAsyncClient
-
-Before you can make non-blocking HTTP requests, you need an `HttpAsyncClient` instance.  You can use your own `HttpAsyncClient` (as instantiated elsewhere by another class), or you can use my `KolichDefaultHttpAsyncClient` factory class packaged with this library to snag a pre-configured `HttpAsyncClient`.
-
-```java
-import com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichHttpAsyncClientFactory;
-
-final HttpAsyncClient client = KolichHttpAsyncClientFactory.getNewAsyncInstanceWithProxySelector();
-```
-
-Or, pass a `String` to the factory method to set the HTTP `User-Agent` on your new `HttpClient` instance.
-
-```java
-final HttpAsyncClient client = KolichHttpAsyncClientFactory.getNewAsyncInstanceWithProxySelector("IE6, srsly");
-```
-
-There's currently no support for passing your own connection manager to my `KolichHttpAsyncClientFactory` &mdash; if you need to use your own connection manager, it's safest to just build your own `HttpAsyncClient` instance elsewhere. 
-
-#### HttpAsyncClient Factory for Beans
-
-You can use the `KolichHttpAsyncClientFactory` to also instantiate an `HttpAsyncClient` as a bean:
-
-```xml
-<bean id="YourHttpAsyncClient"
-  class="com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichHttpAsyncClientFactory"
-  factory-method="getNewAsyncInstanceWithProxySelector">
-  <!-- Set a custom User-Agent string too, if you want. -->
-  <constructor-arg><value>IE6, srsly</value></constructor-arg>
-</bean>
-
-<bean id="SomeBean" class="com.foo.bar.SomeBean">
-  <property name="httpAsyncClient" ref="YourHttpAsyncClient" />			    	
-</bean>
-```
-
 ### Web-Proxy Support
 
 Some environments require outgoing HTTP/HTTPS connections to use a web-proxy.
 
-Fortunately, `HttpClient` and `HttpAsyncClient` integrates nicely with `java.net.ProxySelector` which makes it possible to automatically detect proxy settings across platforms.
+Fortunately, `HttpClient` integrates nicely with `java.net.ProxySelector` which makes it possible to automatically detect proxy settings across platforms.
 
-That said, you can easily create a proxy-aware `HttpClient` or `HttpAsyncClient` instance using the right factory method.
+That said, you can easily create a proxy-aware `HttpClient` instance using the right factory method.
 
 Get a new `HttpClient` from the `KolichHttpClientFactory`.
 
 ```java
-import com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory;
+import com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory;
 
 final HttpClient usesProxy = KolichHttpClientFactory.getNewInstanceWithProxySelector();
 
 final HttpClient noProxy = KolichHttpClientFactory.getNewInstanceNoProxySelector();
 ```
 
-Or, get a new `HttpAsyncClient` from the `KolichHttpAsyncClientFactory`.
-
-```java
-import com.kolich.http.async.KolichDefaultHttpAsyncClient.KolichHttpAsyncClientFactory;
-
-final HttpAsyncClient usesProxy = KolichHttpAsyncClientFactory.getNewAsyncInstanceWithProxySelector();
-
-final HttpAsyncClient noProxy = KolichHttpAsyncClientFactory.getNewAsyncInstanceNoProxySelector();
-```
-
-When using the `getNewInstanceWithProxySelector` or `getNewAsyncInstanceNoProxySelector` static factory methods, the underlying client will automatically use the JVM's `java.net.ProxySelector` to discover what web-proxy to use when establishing outgoing HTTP connections.  On all platforms, you can manually tell the JVM's default `java.net.ProxySelector` what web-proxy to use by setting the `http.proxyHost` and `http.proxyPort` VM arguments for vanilla HTTP connections.  For outgoing HTTPS connections, use `https.proxyHost` and `https.proxyPort`.
+When using the `getNewInstanceWithProxySelector` static factory methods, the underlying client will automatically use the JVM's `java.net.ProxySelector` to discover what web-proxy to use when establishing outgoing HTTP connections.  On all platforms, you can manually tell the JVM's default `java.net.ProxySelector` what web-proxy to use by setting the `http.proxyHost` and `http.proxyPort` VM arguments for vanilla HTTP connections.  For outgoing HTTPS connections, use `https.proxyHost` and `https.proxyPort`.
 
 ```bash
 java -Dhttp.proxyHost=proxy.example.com -Dhttp.proxyPort=3128 \
@@ -233,13 +163,11 @@ java -Dhttp.proxyHost=proxy.example.com -Dhttp.proxyPort=3128 \
      -jar runme.jar
 ```
 
-## Synchronous (Blocking)
+## Examples
 
 Synchronous, or blocking, HTTP requests block the thread of execution until the request has finished, either successfully or unsuccessfully.  When making synchronous requests, the execution thread waits for the HTTP transaction to complete.  Generally speaking, this model is acceptable for your everyday "vanilla" application.  However, in some applications this may be suboptimal, given that the requesting thread is blocked waiting on the HTTP transaction to finish, and consequently cannot do any additional work. 
 
-### Synchronous Closure Examples
-
-#### HEAD
+### HEAD
 
 Send a `HEAD` request and expect back an array of HTTP response headers on success.  Drop any failures on the floor &mdash; expect a `null` return value in place of success type `S` if anything went wrong.
 
@@ -255,7 +183,7 @@ final Either<Void,Header[]> result =
 final Header[] headers = result.right();
 ```
 
-#### GET
+### GET
 
 Send a `GET` request expecting either a `String` back on success, or an `Exception` on failure &mdash; this is represented by the `Either<Exception,String>` return type.
 
@@ -342,7 +270,7 @@ if((cookies = mmmm.right()) != null) {
 }
 ```
 
-#### POST
+### POST
 
 Send a `POST` request but manipulate the `HttpBaseRequest` object before execution by overriding the `before` method.  Expect a `String` on success, and an `Integer` on failure.
 
@@ -391,7 +319,7 @@ final Either<Void,MyClazz> result =
 final MyClazz entity = result.right(); // Kewl
 ```
 
-#### PUT
+### PUT
 
 Send a `PUT` request with an existing and open `InputStream` from another source.  Expect an `Integer` back on success and nothing on failure.
 
@@ -415,7 +343,7 @@ if(result.success()) {
 }
 ```
 
-#### DELETE
+### DELETE
 
 Send a `DELETE` request with a custom `success` check &mdash; in this example, the server returns a `410 Gone` when the resource is deleted successfully but we don't want a 410 response to indicate failure. 
 
@@ -443,18 +371,18 @@ if(result.success()) {
 }
 ```
 
-### Synchronous Helpers
+## Helpers
 
-To ease development, a number of helper closures are available out-of-the-box as found in the <a href="https://github.com/markkolich/kolich-httpclient4-closure/tree/master/src/main/java/com/kolich/http/blocking/helpers">com.kolich.http.blocking.helpers</a> package.  These helpers are packaged and shipped with this library and are intended to help developers avoid much of the closure boiler plate for the most common operations.
+To ease development, a number of helper closures are available out-of-the-box as found in the <a href="https://github.com/markkolich/kolich-httpclient4-closure/tree/master/src/main/java/com/kolich/http/helpers">com.kolich.http.helpers</a> package.  These helpers are packaged and shipped with this library and are intended to help developers avoid much of the closure boiler plate for the most common operations.
 
 Below are several examples using these helper closures.
 
-#### StringOrNullClosure
+### StringOrNullClosure
 
 Send a `GET` and if the request was successful extract the response body as a `UTF-8` encoded `String`.  If unsuccessful, return `null`.
 
 ```java
-import com.kolich.http.blocking.helpers.StringClosures.StringOrNullClosure;
+import com.kolich.http.helpers.StringClosures.StringOrNullClosure;
 
 final Either<Void,String> s = new StringOrNullClosure(client)
   .get("http://google.com");
@@ -465,12 +393,12 @@ if((html = s.right()) != null) {
 }
 ```
 
-#### ByteArrayOrHttpFailureClosure
+### ByteArrayOrHttpFailureClosure
 
 Send a `POST` and if the request was successful extract the response body as a `byte[]` array.  If unsuccessful, return an `HttpFailure` object.
 
 ```java
-import com.kolich.http.blocking.helpers.ByteArrayClosures.ByteArrayOrHttpFailureClosure;
+import com.kolich.http.helpers.ByteArrayClosures.ByteArrayOrHttpFailureClosure;
 
 final Either<HttpFailure,byte[]> r = new ByteArrayOrHttpFailureClosure(client)
   .post("http://api.example.com/resource");
@@ -478,12 +406,12 @@ final Either<HttpFailure,byte[]> r = new ByteArrayOrHttpFailureClosure(client)
 final byte[] bytes = r.right();
 ```
 
-#### StatusCodeAndHeadersClosure
+### StatusCodeAndHeadersClosure
 
 Send a `GET` and blindly ignore if the request was "successful" or not.  Extract the resulting HTTP status code and headers on the response &mdash; even if the server responded with an "unsuccessful" status code.
 
 ```java
-import com.kolich.http.blocking.helpers.StatusCodeAndHeaderClosures.StatusCodeAndHeadersClosure;
+import com.kolich.http.helpers.StatusCodeAndHeaderClosures.StatusCodeAndHeadersClosure;
 
 // Tip: Use URIBuilder to add query parameters to the URI of a GET.
 // (see example usage below)
@@ -506,14 +434,14 @@ System.out.println("Got status " + sah.getStatusCode());
 System.out.println("Found " + sah.getHeaderList().size() + " headers too!");
 ```
 
-#### GsonOrHttpFailureClosure&lt;S&gt;
+### GsonOrHttpFailureClosure&lt;S&gt;
 
 Send a `POST` and if the request succeeded, use GSON to convert the response body (a blob of JSON) to successful type `S`.  If the request failed, expect an `HttpFailure` object.
 
 Note, `YourType` below is assumed to be an entity class (a domain object) defined by your application or schema.
 
 ```java
-import com.kolich.http.blocking.helpers.GsonClosures.GsonOrHttpFailureClosure;
+import com.kolich.http.helpers.GsonClosures.GsonOrHttpFailureClosure;
 
 import com.google.gson.Gson;
 
@@ -532,7 +460,7 @@ final YourType t = g.right();
 Or, use a GSON `TypeToken` if your expected successful type `S` is a generic type, and consequently, you cannot use `.class` due to Java's type erasure.
 
 ```java
-import com.kolich.http.blocking.helpers.GsonClosures.GsonOrHttpFailureClosure;
+import com.kolich.http.helpers.GsonClosures.GsonOrHttpFailureClosure;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -550,113 +478,9 @@ final Either<HttpFailure,List<YourType>> g =
 final List<YourType> lt = g.right();
 ```
 
-## Asynchronous (Non-blocking)
-
-Asynchronous, or non-blocking, HTTP requests do not block the thread of execution.  When making asynchronous requests, the requesting thread does not pause and wait for the HTTP transaction to complete.  As such, this library returns a `java.util.concurrent.Future` that encapsulates an `Either<F,S>`.  The returned `Future` represents the future result of an asynchronous unit of work &mdash; it's used to track an asynchronous request and can be "passed around" and checked for completion elsewhere in the application.  When the transaction has finished, the `Future` will contain a usable `Either<F,S>` which represents the result of that transaction.  The actual underlying request is executed separately on another thread (as managed internally by the `HttpAsyncClient`) such that the requesting thread does not block, and therefore does not wait for the transaction to finish.  In short, the requesting thread "fires-and-forgets" the asynchronous HTTP request and is then free to do additional work.
-
-### Important Note on Using HttpAsyncClient
-
-Internally, `HttpAsyncClient` executes requests asynchronously on separate threads, one request context per thread.  That said, before you can make asynchronous requests using an `HttpAsyncClient` instance, you need to tell its underlying connection queue and thread pool to “start” before any requests will be processed.
-
-You can ask an `HttpAsyncClient` to start by calling its `start` method.
-
-```java
-final HttpAsyncClient client = ...;
-
-client.start();
-```
-
-Similarly, you can ask an `HttpAsyncClient` to shutdown by calling its `shutdown` method.
-
-```java
-final HttpAsyncClient client = ...;
-
-client.shutdown();
-```
-
-Note that if you do not call `start`, your `HttpAsyncClient` will not process any asynchronous requests.  And consequently, you will not be unable to make requests using this library.
-
-### Asynchronous Closure Examples
-
-Many of the concepts covered in the synchronous closure examples above also apply to asynchronous requests.  As such, only a simple non-blocking `GET` request example is shown below &mdash; asynchronous examples highlighting the other HTTP request methods are left as an exercise for the reader.
-
-#### GET
-
-Send a `GET` and if the request was successful extract the response body as a `UTF-8` encoded `String`.  If unsuccessful, return `null`.  Note, this example NIO buffers the entire response body into memory.
-
-```java
-final Future<Either<Void,String>> future =
-  new HttpAsyncClient4Closure<Void,String>(client) {
-  private HttpResponse response_;
-  private SimpleInputBuffer buffer_;
-  @Override
-  public void onResponseReceived(final HttpResponse response) throws IOException {
-    response_ = response;
-  }  
-  @Override
-  public void onContentReceived(final ContentDecoder decoder,
-    final IOControl ioctrl) throws IOException {
-    if(buffer_ == null) {
-      throw new IllegalStateException("Content buffer is null.");
-    }
-    buffer_.consumeContent(decoder);
-  }  
-  @Override
-  public void onEntityEnclosed(final HttpEntity entity, final ContentType contentType)
-    throws IOException {
-    long len = entity.getContentLength();
-    if(len > Integer.MAX_VALUE) {
-      throw new ContentTooLongException("Entity content is too long: " + len);
-    } else if(len < 0) {
-      len = 4096;
-    }
-    buffer_ = new SimpleInputBuffer((int) len, new HeapByteBufferAllocator());
-    response_.setEntity(new ContentBufferEntity(entity, buffer_));
-  }  
-  @Override
-  public void releaseResources() {
-    response_ = null;
-    buffer_ = null;
-  }  
-  @Override
-  public Either<HttpFailure,String> buildResult(
-    final HttpContext context) throws Exception {
-    Either<HttpFailure,String> result = null;
-    try {
-      if(check(response_, context)) {
-        result = Right.right(success(new HttpSuccess(response_, context)));
-      } else {
-        result = Left.left(failure(new HttpFailure(response_, context)));
-      }
-    } catch (Exception e) {
-      result = Left.left(failure(new HttpFailure(e)));
-    }
-    return result;
-  }  
-  @Override
-  public String success(final HttpSuccess success) throws Exception {
-    return EntityUtils.toString(success.getEntity(), UTF_8);
-  }
-}.get("http://www.example.com");
-
-// You would never "wait" like this in a real asynchronous driven application
-// but is only used to show how to handle Future's.
-while(!future.isDone()) {
-  Thread.sleep(1000L);
-}
-
-final Either<Void,String> result = future.get();
-if(result.success()) {
-  System.out.println("Yay, it worked! And, I have a string: " +
-    future.right().length());
-} else {
-  System.out.println("Hmm, something went wrong.");
-}
-```
-
 ## Building
 
-This Java library and its dependencies are built and managed using <a href="https://github.com/harrah/xsbt">SBT 0.12.2</a>.
+This Java library and its dependencies are built and managed using <a href="https://github.com/harrah/xsbt">SBT</a>.
 
 To clone and build kolich-httpclient4-closure, you must have <a href="http://www.scala-sbt.org/release/docs/Getting-Started/Setup">SBT installed and configured on your computer</a>.
 
@@ -671,15 +495,15 @@ Run SBT from within kolich-httpclient4-closure.
     #~> cd kolich-httpclient4-closure
     #~/kolich-httpclient4-closure> sbt
     ...
-    kolich-httpclient4-closure:1.2.2>
+    kolich-httpclient4-closure:2.0>
 
 You will see a `kolich-httpclient4-closure` SBT prompt once all dependencies are resolved and the project is loaded.
 
 In SBT, run `package` to compile and package the JAR.
 
-    kolich-httpclient4-closure:1.2.2> package
+    kolich-httpclient4-closure:2.0> package
     [info] Compiling 27 Java sources to ~/kolich-httpclient4-closure/target/classes...
-    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-1.2.2.jar ...
+    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-2.0.jar ...
     [info] Done packaging.
     [success] Total time: 4 s, completed
 
@@ -687,7 +511,7 @@ Note the resulting JAR is placed into the **kolich-httpclient4-closure/dist** di
 
 To create an Eclipse Java project for kolich-httpclient4-closure, run `eclipse` in SBT.
 
-    kolich-httpclient4-closure:1.2.2> eclipse
+    kolich-httpclient4-closure:2.0> eclipse
     ...
     [info] Successfully created Eclipse project files for project(s):
     [info] kolich-httpclient4-closure
