@@ -1,6 +1,6 @@
 # kolich-httpclient4-closure
 
-A Java wrapper around the **synchronous** Apache Commons HttpClient 4.
+A Java 7+ wrapper around the **synchronous** Apache Commons HttpClient 4.
 
 For most applications, the synchronous `HttpClient` closure is acceptable &mdash; the thread making the request will block, waiting for the request to complete before continuing.  If you need a pure asynchronous solution, please see the [Async Http Client](https://github.com/AsyncHttpClient/async-http-client).
 
