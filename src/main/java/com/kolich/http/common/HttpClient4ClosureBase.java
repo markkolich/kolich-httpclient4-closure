@@ -26,24 +26,18 @@
 
 package com.kolich.http.common;
 
-import static java.net.URI.create;
-import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.*;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpTrace;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
+import static java.net.URI.create;
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 
 public abstract class HttpClient4ClosureBase<T> {
 	

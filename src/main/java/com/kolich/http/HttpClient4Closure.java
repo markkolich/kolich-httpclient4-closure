@@ -24,14 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.blocking;
-
-import static com.kolich.http.common.response.ResponseUtils.consumeQuietly;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.protocol.HttpContext;
+package com.kolich.http;
 
 import com.kolich.common.functional.either.Either;
 import com.kolich.common.functional.either.Left;
@@ -39,6 +32,12 @@ import com.kolich.common.functional.either.Right;
 import com.kolich.http.common.HttpClient4ClosureBase;
 import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.protocol.HttpContext;
+
+import static com.kolich.http.common.response.ResponseUtils.consumeQuietly;
 
 public abstract class HttpClient4Closure<F,S>
 	extends HttpClient4ClosureBase<Either<F,S>> {

@@ -24,19 +24,18 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.blocking.helpers;
+package com.kolich.http.helpers;
 
-import java.util.Arrays;
-import java.util.List;
-
+import com.kolich.http.common.response.HttpSuccess;
+import com.kolich.http.helpers.definitions.IgnoreResultClosure;
+import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.protocol.HttpContext;
 
-import com.kolich.http.blocking.helpers.definitions.IgnoreResultClosure;
-import com.kolich.http.blocking.helpers.definitions.OrHttpFailureClosure;
-import com.kolich.http.common.response.HttpSuccess;
+import java.util.Arrays;
+import java.util.List;
 
 public final class StatusCodeAndHeaderClosures {
 	

@@ -26,10 +26,10 @@
 
 package com.kolich.http.common.response;
 
-import static org.apache.http.util.EntityUtils.consume;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+
+import static org.apache.http.util.EntityUtils.consume;
 
 public final class ResponseUtils {
 	

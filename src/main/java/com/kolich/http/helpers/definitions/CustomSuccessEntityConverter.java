@@ -1,4 +1,4 @@
-package com.kolich.http.blocking.helpers.definitions;
+package com.kolich.http.helpers.definitions;
 
 import com.kolich.http.common.response.HttpSuccess;
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Mark S. Kolich
+ * Copyright (c) 2012 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,24 +24,37 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.async.helpers;
+package com.kolich.http.helpers.definitions;
 
-import org.apache.http.nio.client.HttpAsyncClient;
-import org.apache.http.util.EntityUtils;
-
-import com.kolich.http.async.helpers.definitions.AsyncBufferInMemoryClosure;
+import com.kolich.http.HttpClient4Closure;
+import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
+import org.apache.http.client.HttpClient;
 
-public abstract class InMemoryAsyncByteArrayClosure
-	extends AsyncBufferInMemoryClosure<byte[]> {
-	
-	public InMemoryAsyncByteArrayClosure(final HttpAsyncClient client) {
+import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceNoProxySelector;
+
+/**
+ * This abstract closure is used when you don't care whether
+ * the request completed successfully or not, just that it completed.
+ */
+public abstract class IgnoreResultClosure extends HttpClient4Closure<Void,Void> {
+
+	public IgnoreResultClosure(final HttpClient client) {
 		super(client);
 	}
-
+	
+	public IgnoreResultClosure() {
+		this(getNewInstanceNoProxySelector());
+	}
+	
 	@Override
-	public final byte[] success(final HttpSuccess success) throws Exception {
-		return EntityUtils.toByteArray(success.getEntity());
+	public final Void success(final HttpSuccess success) {
+		return null;
+	}
+	
+	@Override
+	public final Void failure(final HttpFailure failure) {
+		return null;
 	}
 	
 }

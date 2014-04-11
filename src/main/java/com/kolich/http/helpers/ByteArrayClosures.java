@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012 Mark S. Kolich
+ * Copyright (c) 2013 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,31 +24,45 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.blocking.helpers.definitions;
+package com.kolich.http.helpers;
 
-import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
-
+import com.kolich.http.common.response.HttpSuccess;
+import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
+import com.kolich.http.helpers.definitions.OrNullClosure;
 import org.apache.http.client.HttpClient;
+import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.blocking.HttpClient4Closure;
-import com.kolich.http.common.response.HttpFailure;
-
-/**
- * Abstract closure to return null on failure.
- */
-public abstract class OrNullClosure<S> extends HttpClient4Closure<Void,S> {
-
-	public OrNullClosure(final HttpClient client) {
-		super(client);
+public final class ByteArrayClosures {
+	
+	// Cannot instantiate.
+	private ByteArrayClosures() {}
+	
+	public static class ByteArrayOrHttpFailureClosure extends OrHttpFailureClosure<byte[]> {		
+		public ByteArrayOrHttpFailureClosure(final HttpClient client) {
+			super(client);
+		}
+		public ByteArrayOrHttpFailureClosure() {
+			super();
+		}
+		@Override
+		public final byte[] success(final HttpSuccess success) throws Exception {
+			return EntityUtils.toByteArray(success.getResponse().getEntity());
+		}
 	}
 	
-	public OrNullClosure() {
-		this(getNewInstanceWithProxySelector());
+	public static class ByteArrayOrNullClosure extends OrNullClosure<byte[]> {		
+		public ByteArrayOrNullClosure(final HttpClient client) {
+			super(client);
+		}
+		public ByteArrayOrNullClosure() {
+			super();
+		}
+		@Override
+		public final byte[] success(final HttpSuccess success) throws Exception {
+			return EntityUtils.toByteArray(success.getResponse().getEntity());
+		}
 	}
 	
-	@Override
-	public final Void failure(final HttpFailure failure) {
-		return null;
-	}
-
 }
+
+

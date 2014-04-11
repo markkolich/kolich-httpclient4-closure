@@ -26,16 +26,16 @@
 
 package com.kolich.http.common.response;
 
-import static org.apache.http.HttpHeaders.ETAG;
-
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.protocol.HttpContext;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.apache.http.HttpHeaders.ETAG;
 
 public abstract class HttpClientClosureResponse {
 	

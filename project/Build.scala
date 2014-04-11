@@ -31,17 +31,17 @@ object Dependencies {
   
   // Internal dependencies
 
-  private val kolichCommon = "com.kolich" % "kolich-common" % "0.1.1" % "compile"
+  private val kolichCommon = "com.kolich" % "kolich-common" % "0.2" % "compile"
 
   // External dependencies
   
-  private val httpAsyncClient = "org.apache.httpcomponents" % "httpasyncclient" % "4.0-beta3" % "compile"
+  private val httpClient = "org.apache.httpcomponents" % "httpclient" % "4.3.3" % "compile"
 
   val deps = Seq(
     // Internal.
     kolichCommon,
     // External.
-    httpAsyncClient)
+    httpClient)
 
 }
 
@@ -59,7 +59,7 @@ object HttpClient4Closure extends Build {
   import Resolvers._
 
   private val aName = "kolich-httpclient4-closure"
-  private val aVer = "1.2.4"
+  private val aVer = "2.0"
   private val aOrg = "com.kolich"
 
   lazy val httpClient4Closure: Project = Project(
@@ -68,7 +68,7 @@ object HttpClient4Closure extends Build {
     settings = Defaults.defaultSettings ++ Seq(resolvers := depResolvers) ++ Seq(
       version := aVer,
       organization := aOrg,
-      scalaVersion := "2.10.1",
+      scalaVersion := "2.10.2",
       javacOptions ++= Seq("-Xlint", "-g"),
       shellPrompt := {(state: State) => {"%s:%s> ".format(aName, aVer)}},
       // True to export the packaged JAR instead of just the compiled .class files.

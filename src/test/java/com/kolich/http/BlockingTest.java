@@ -1,13 +1,9 @@
 package com.kolich.http;
 
-import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
-import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
-import static org.apache.http.client.protocol.ClientContext.COOKIE_STORE;
-
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.util.List;
-
+import com.kolich.common.functional.either.Either;
+import com.kolich.http.common.response.HttpFailure;
+import com.kolich.http.common.response.HttpSuccess;
+import com.kolich.http.helpers.StringClosures.StringOrNullClosure;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -19,11 +15,13 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
-import com.kolich.common.functional.either.Either;
-import com.kolich.http.blocking.HttpClient4Closure;
-import com.kolich.http.blocking.helpers.StringClosures.StringOrNullClosure;
-import com.kolich.http.common.response.HttpFailure;
-import com.kolich.http.common.response.HttpSuccess;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.util.List;
+
+import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
+import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static org.apache.http.client.protocol.ClientContext.COOKIE_STORE;
 
 public final class BlockingTest {
 	
@@ -79,7 +77,7 @@ public final class BlockingTest {
 			public Exception failure(final HttpFailure failure) {
 				return failure.getCause();
 			}
-		}.put("http://lskdjflksdfjslkf.vmwaresdfsdf.com");
+		}.put("http://lskdjflksdfjslkf.jfjkfhddfgsdfsdf.com");
 		if(!eResult.success()) {
 			System.out.println(eResult.left());
 		}
@@ -96,7 +94,7 @@ public final class BlockingTest {
 			}
 		}.put("http://google.com");
 		if(cResult.success()) {
-			System.out.println(eResult.right());
+			System.out.println(cResult.right());
 		}
 		
 		final Either<Exception,OutputStream> bResult = new HttpClient4Closure<Exception,OutputStream>(client) {
@@ -127,7 +125,7 @@ public final class BlockingTest {
 				return failure.getCause();
 			}
 			*/
-		}.get("http://kolich.mobi");
+		}.get("http://mark.koli.ch");
 		if(stResult.success()) {
 			System.out.println("Loaded " + stResult.right() + " bytes.");
 		}

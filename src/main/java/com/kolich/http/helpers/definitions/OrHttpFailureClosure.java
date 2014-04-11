@@ -24,46 +24,30 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.blocking.helpers;
+package com.kolich.http.helpers.definitions;
 
+import com.kolich.http.HttpClient4Closure;
+import com.kolich.http.common.response.HttpFailure;
 import org.apache.http.client.HttpClient;
-import org.apache.http.util.EntityUtils;
 
-import com.kolich.http.blocking.helpers.definitions.OrHttpFailureClosure;
-import com.kolich.http.blocking.helpers.definitions.OrNullClosure;
-import com.kolich.http.common.response.HttpSuccess;
+import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
 
-public final class ByteArrayClosures {
-	
-	// Cannot instantiate.
-	private ByteArrayClosures() {}
-	
-	public static class ByteArrayOrHttpFailureClosure extends OrHttpFailureClosure<byte[]> {		
-		public ByteArrayOrHttpFailureClosure(final HttpClient client) {
-			super(client);
-		}
-		public ByteArrayOrHttpFailureClosure() {
-			super();
-		}
-		@Override
-		public final byte[] success(final HttpSuccess success) throws Exception {
-			return EntityUtils.toByteArray(success.getResponse().getEntity());
-		}
+/**
+ * Abstract closure to return a proper {@link HttpFailure} on failure.
+ */
+public abstract class OrHttpFailureClosure<S> extends HttpClient4Closure<HttpFailure,S> {
+
+	public OrHttpFailureClosure(final HttpClient client) {
+		super(client);
 	}
 	
-	public static class ByteArrayOrNullClosure extends OrNullClosure<byte[]> {		
-		public ByteArrayOrNullClosure(final HttpClient client) {
-			super(client);
-		}
-		public ByteArrayOrNullClosure() {
-			super();
-		}
-		@Override
-		public final byte[] success(final HttpSuccess success) throws Exception {
-			return EntityUtils.toByteArray(success.getResponse().getEntity());
-		}
+	public OrHttpFailureClosure() {
+		this(getNewInstanceWithProxySelector());
 	}
 	
+	@Override
+	public final HttpFailure failure(final HttpFailure failure) {
+		return failure;
+	}
+
 }
-
-

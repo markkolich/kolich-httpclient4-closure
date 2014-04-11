@@ -24,26 +24,25 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.http.blocking.helpers;
+package com.kolich.http.helpers;
 
-import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
-import static com.kolich.common.entities.KolichCommonEntity.getDefaultGsonBuilder;
-import static com.kolich.http.blocking.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.kolich.http.common.response.HttpSuccess;
+import com.kolich.http.helpers.definitions.OrHttpFailureClosure;
+import com.kolich.http.helpers.definitions.OrNullClosure;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.HttpClient;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.HttpClient;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import com.kolich.http.blocking.helpers.definitions.OrHttpFailureClosure;
-import com.kolich.http.blocking.helpers.definitions.OrNullClosure;
-import com.kolich.http.common.response.HttpSuccess;
+import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
+import static com.kolich.common.entities.KolichCommonEntity.getDefaultGsonBuilder;
+import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 public final class GsonClosures {
 	
