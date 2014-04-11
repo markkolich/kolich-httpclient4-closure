@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012 Mark S. Kolich
+ * Copyright (c) 2014 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -45,12 +45,11 @@ public final class EntityConverterClosures {
 		extends HttpClient4Closure<F,S> {
 		private final CustomEntityConverter<F,S> converter_;
 		public CustomEntityConverterClosure(final HttpClient client,
-			final CustomEntityConverter<F,S> converter) {
+                                            final CustomEntityConverter<F,S> converter) {
 			super(client);
 			converter_ = converter;
 		}
-		public CustomEntityConverterClosure(
-			final CustomEntityConverter<F,S> converter) {
+		public CustomEntityConverterClosure(final CustomEntityConverter<F,S> converter) {
 			this(getNewInstanceWithProxySelector(), converter);
 		}
 		@Override
@@ -66,8 +65,8 @@ public final class EntityConverterClosures {
 	public static class CustomEntitySeparateConverterClosure<F,S>
 		extends CustomEntityConverterClosure<F,S> {
 		public CustomEntitySeparateConverterClosure(final HttpClient client,
-			final CustomSuccessEntityConverter<S> success,
-			final CustomFailureEntityConverter<F> failure) {
+                                                    final CustomSuccessEntityConverter<S> success,
+                                                    final CustomFailureEntityConverter<F> failure) {
 			super(client, new CustomEntityConverter<F,S>() {
 				@Override
 				public S success(final HttpSuccess hSuccess) throws Exception {
@@ -79,9 +78,8 @@ public final class EntityConverterClosures {
 				}
 			});
 		}
-		public CustomEntitySeparateConverterClosure(
-			final CustomSuccessEntityConverter<S> success,
-			final CustomFailureEntityConverter<F> failure) {
+		public CustomEntitySeparateConverterClosure(final CustomSuccessEntityConverter<S> success,
+                                                    final CustomFailureEntityConverter<F> failure) {
 			this(getNewInstanceWithProxySelector(), success, failure);
 		}
 	}

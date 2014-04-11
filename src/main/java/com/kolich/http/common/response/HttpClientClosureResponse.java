@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Mark S. Kolich
+ * Copyright (c) 2014 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -42,8 +42,8 @@ public abstract class HttpClientClosureResponse {
 	private final HttpResponse response_;
 	private final HttpContext context_;
 	
-	public HttpClientClosureResponse(HttpResponse response,
-		HttpContext context) {
+	public HttpClientClosureResponse(final HttpResponse response,
+                                     final HttpContext context) {
 		response_ = response;
 		context_ = context;
 	}

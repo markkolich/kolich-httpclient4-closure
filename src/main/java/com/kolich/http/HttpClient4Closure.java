@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Mark S. Kolich
+ * Copyright (c) 2014 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -50,14 +50,16 @@ public abstract class HttpClient4Closure<F,S>
 	
 	@Override
 	public final Either<F,S> doit(final HttpRequestBase request,
-		final HttpContext context) {
+                                  final HttpContext context) {
 		Either<F,S> result = null;
 		// Any failures/exceptions encountered during request execution
 		// (in a call to execute) are wrapped up as a Left() and are delt
 		// with in the failure path below.
-		final Either<HttpFailure,HttpSuccess> response = execute(request, context);
+		final Either<HttpFailure,HttpSuccess> response = execute(request,
+            context);
+        final boolean success = response.success();
 		try {
-			if(response.success()) {
+			if(success) {
 				result = Right.right(success(((Right<HttpFailure,HttpSuccess>)
 					response).right_));
 			} else {
@@ -69,7 +71,7 @@ public abstract class HttpClient4Closure<F,S>
 			// while processing the response.
 			result = Left.left(failure(new HttpFailure(e)));
 		} finally {
-			if(response.success()) {
+			if(success) {
 				consumeQuietly(((Right<HttpFailure,HttpSuccess>)
 					response).right_.getResponse());
 			} else {
@@ -80,8 +82,8 @@ public abstract class HttpClient4Closure<F,S>
 		return result;
 	}
 	
-	private final Either<HttpFailure,HttpSuccess> execute(
-		final HttpRequestBase request, final HttpContext context) {
+	private final Either<HttpFailure,HttpSuccess> execute(final HttpRequestBase request,
+                                                          final HttpContext context) {
 		HttpResponse response = null;
 		try {
 			// Before the request is "executed" give the consumer an entry
@@ -122,8 +124,7 @@ public abstract class HttpClient4Closure<F,S>
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract S success(final HttpSuccess success)
-		throws Exception;
+	public abstract S success(final HttpSuccess success) throws Exception;
 	
 	/**
 	 * Called only if the request is unsuccessful.  The default behavior,

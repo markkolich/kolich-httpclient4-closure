@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Mark S. Kolich
+ * Copyright (c) 2014 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -36,6 +36,7 @@ import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 
 import java.net.ProxySelector;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Runtime.getRuntime;
 
 public final class KolichDefaultHttpClient {
@@ -54,6 +55,8 @@ public final class KolichDefaultHttpClient {
 	
 	public KolichDefaultHttpClient(int maxTotalConnections,
                                    int maxConnectionsPerRoute) {
+        checkArgument(maxTotalConnections > 0, "Max total connections " +
+            "must be greater than zero.");
 		maxTotalConnections_ = maxTotalConnections;
 		maxConnectionsPerRoute_ = maxConnectionsPerRoute;
 	}
@@ -142,21 +145,20 @@ public final class KolichDefaultHttpClient {
 		private static final int DEFAULT_MAX_TOTAL_CONNECTIONS =
 			DEFAULT_MAX_CONNECTIONS_PER_ROUTE * AVAILABLE_CORES;
 		
-		public static final HttpClient getNewInstanceNoProxySelector(
-			final String userAgent, int maxTotalConnections,
-			int maxConnectionsPerRoute) {
+		public static final HttpClient getNewInstanceNoProxySelector(final String userAgent,
+                                                                     int maxTotalConnections,
+                                                                     int maxConnectionsPerRoute) {
 			return new KolichDefaultHttpClient(maxTotalConnections,
 				maxConnectionsPerRoute).getNewInstanceNoProxySelector(userAgent);
 		}
 		
-		public static final HttpClient getNewInstanceNoProxySelector(
-			int maxTotalConnections, int maxConnectionsPerRoute) {
+		public static final HttpClient getNewInstanceNoProxySelector(int maxTotalConnections,
+                                                                     int maxConnectionsPerRoute) {
 			return getNewInstanceNoProxySelector(null,
 				maxTotalConnections, maxConnectionsPerRoute);
 		}
 		
-		public static final HttpClient getNewInstanceNoProxySelector(
-			final String userAgent) {
+		public static final HttpClient getNewInstanceNoProxySelector(final String userAgent) {
 			return getNewInstanceNoProxySelector(userAgent,
 				DEFAULT_MAX_TOTAL_CONNECTIONS,
 				DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
@@ -166,21 +168,20 @@ public final class KolichDefaultHttpClient {
 			return getNewInstanceNoProxySelector(null);
 		}
 		
-		public static final HttpClient getNewInstanceWithProxySelector(
-			final String userAgent, int maxTotalConnections,
-			int maxConnectionsPerRoute) {
+		public static final HttpClient getNewInstanceWithProxySelector(final String userAgent,
+                                                                       int maxTotalConnections,
+                                                                       int maxConnectionsPerRoute) {
 			return new KolichDefaultHttpClient(maxTotalConnections,
 				maxConnectionsPerRoute).getNewInstanceWithProxySelector(userAgent);
 		}
 		
-		public static final HttpClient getNewInstanceWithProxySelector(
-			int maxTotalConnections, int maxConnectionsPerRoute) {
+		public static final HttpClient getNewInstanceWithProxySelector(int maxTotalConnections,
+                                                                       int maxConnectionsPerRoute) {
 			return getNewInstanceWithProxySelector(null,
 				maxTotalConnections, maxConnectionsPerRoute);
 		}
 		
-		public static final HttpClient getNewInstanceWithProxySelector(
-			final String userAgent) {
+		public static final HttpClient getNewInstanceWithProxySelector(final String userAgent) {
 			return getNewInstanceWithProxySelector(userAgent,
 				DEFAULT_MAX_TOTAL_CONNECTIONS,
 				DEFAULT_MAX_CONNECTIONS_PER_ROUTE);

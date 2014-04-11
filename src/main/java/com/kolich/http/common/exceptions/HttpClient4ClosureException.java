@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Mark S. Kolich
+ * Copyright (c) 2014 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -32,15 +32,16 @@ public final class HttpClient4ClosureException extends KolichCommonException {
 
 	private static final long serialVersionUID = 7587397932824406826L;
 
-	public HttpClient4ClosureException(String message, Throwable cause) {
+	public HttpClient4ClosureException(final String message,
+                                       final Throwable cause) {
 		super(message, cause);
 	}
 	
-	public HttpClient4ClosureException(Throwable cause) {
+	public HttpClient4ClosureException(final Throwable cause) {
 		super(cause);
 	}
 	
-	public HttpClient4ClosureException(String message) {
+	public HttpClient4ClosureException(final String message) {
 		super(message);
 	}
 	

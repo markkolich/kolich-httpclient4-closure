@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Mark S. Kolich
+ * Copyright (c) 2014 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -31,7 +31,8 @@ import org.apache.http.protocol.HttpContext;
 
 public final class HttpSuccess extends HttpClientClosureResponse {
 	
-	public HttpSuccess(HttpResponse response, HttpContext context) {
+	public HttpSuccess(final HttpResponse response,
+                       final HttpContext context) {
 		super(response, context);
 	}
 	

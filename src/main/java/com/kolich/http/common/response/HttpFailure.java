@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Mark S. Kolich
+ * Copyright (c) 2014 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -33,17 +33,19 @@ public final class HttpFailure extends HttpClientClosureResponse {
 	
 	private final Exception cause_;
 	
-	public HttpFailure(Exception cause, HttpResponse response,
-		HttpContext context) {
+	public HttpFailure(final Exception cause,
+                       final HttpResponse response,
+                       final HttpContext context) {
 		super(response, context);
 		cause_ = cause;
 	}
 	
-	public HttpFailure(HttpResponse response, HttpContext context) {
+	public HttpFailure(final HttpResponse response,
+                       final HttpContext context) {
 		this(null, response, context);
 	}
 	
-	public HttpFailure(Exception cause) {
+	public HttpFailure(final Exception cause) {
 		this(cause, null, null);
 	}
 	
