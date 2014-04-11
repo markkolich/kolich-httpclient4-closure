@@ -54,7 +54,7 @@ public abstract class HttpClient4ClosureBase<T> {
 	}
 	
 	public T head(final HttpHead head,
-		final HttpContext context) {
+                  final HttpContext context) {
 		return request(head, context);
 	}
 	
@@ -71,7 +71,7 @@ public abstract class HttpClient4ClosureBase<T> {
 	}
 	
 	public T get(final HttpGet get,
-		final HttpContext context) {
+                 final HttpContext context) {
 		return request(get, context);
 	}
 	
@@ -88,7 +88,8 @@ public abstract class HttpClient4ClosureBase<T> {
 	}
 	
 	public T post(final HttpPost post,
-		final byte[] body, final String contentType) {
+                  final byte[] body,
+                  final String contentType) {
 		return post(post,
 			(body != null) ? new ByteArrayInputStream(body) : null,
 			(body != null) ? (long)body.length : 0L,
@@ -96,13 +97,17 @@ public abstract class HttpClient4ClosureBase<T> {
 	}
 	
 	public T post(final HttpPost post,
-		final InputStream is, final long length, final String contentType) {
+                  final InputStream is,
+                  final long length,
+                  final String contentType) {
 		return post(post, is, length, contentType, null);
 	}
 	
 	public T post(final HttpPost post,
-		final InputStream is, final long length, final String contentType,
-		final HttpContext context) {
+                  final InputStream is,
+                  final long length,
+                  final String contentType,
+                  final HttpContext context) {
 		if(is != null) {
 			final InputStreamEntity entity = new InputStreamEntity(is, length);			
 			if(contentType != null) {
@@ -126,12 +131,14 @@ public abstract class HttpClient4ClosureBase<T> {
 	}
 	
 	public T put(final HttpPut put,
-		final byte[] body) {
+                 final byte[] body) {
 		return put(put, body, null, new BasicHttpContext());
 	}
 	
 	public T put(final HttpPut put,
-		final byte[] body, final String contentType, final HttpContext context) {
+                 final byte[] body,
+                 final String contentType,
+                 final HttpContext context) {
 		return put(put,
 			(body != null) ? new ByteArrayInputStream(body) : null,
 			(body != null) ? (long)body.length : 0L,
@@ -139,13 +146,17 @@ public abstract class HttpClient4ClosureBase<T> {
 	}
 	
 	public T put(final HttpPut put,
-		final InputStream is, final long length, final String contentType) {
+                 final InputStream is,
+                 final long length,
+                 final String contentType) {
 		return put(put, is, length, contentType, null);
 	}
 	
 	public T put(final HttpPut put,
-		final InputStream is, final long length, final String contentType,
-		final HttpContext context) {
+                 final InputStream is,
+                 final long length,
+                 final String contentType,
+                 final HttpContext context) {
 		if(is != null) {
 			final InputStreamEntity entity = new InputStreamEntity(is, length);			
 			if(contentType != null) {
@@ -169,7 +180,7 @@ public abstract class HttpClient4ClosureBase<T> {
 	}
 	
 	public T delete(final HttpDelete delete,
-		final HttpContext context) {
+                    final HttpContext context) {
 		return request(delete, context);
 	}
 
@@ -186,7 +197,7 @@ public abstract class HttpClient4ClosureBase<T> {
 	}
 	
 	public T trace(final HttpTrace trace,
-		final HttpContext context) {
+                   final HttpContext context) {
 		return request(trace, context);
 	}
 	
@@ -195,7 +206,7 @@ public abstract class HttpClient4ClosureBase<T> {
 	}
 	
 	public final T request(final HttpRequestBase request,
-		final HttpContext context) {
+                           final HttpContext context) {
 		return doit(request, (context == null) ?
 			new BasicHttpContext() : context);
 	}
@@ -207,8 +218,8 @@ public abstract class HttpClient4ClosureBase<T> {
 	 * @param request
 	 * @throws Exception
 	 */
-	public void before(final HttpRequestBase request, final HttpContext context)
-		throws Exception {
+	public void before(final HttpRequestBase request,
+                       final HttpContext context) throws Exception {
 		before(request);
 	}
 	public void before(final HttpRequestBase request) throws Exception {
@@ -224,8 +235,8 @@ public abstract class HttpClient4ClosureBase<T> {
 	 * @param context
 	 * @throws Exception
 	 */
-	public void after(final HttpResponse response, final HttpContext context)
-		throws Exception {
+	public void after(final HttpResponse response,
+                      final HttpContext context) throws Exception {
 		// Default, do nothing.
 	}
 	
@@ -241,8 +252,8 @@ public abstract class HttpClient4ClosureBase<T> {
 	 * @param context
 	 * @return
 	 */
-	public boolean check(final HttpResponse response, final HttpContext context)
-		throws Exception {
+	public boolean check(final HttpResponse response,
+                         final HttpContext context) throws Exception {
 		return check(response);
 	}
 	public boolean check(final HttpResponse response) throws Exception {
@@ -250,6 +261,6 @@ public abstract class HttpClient4ClosureBase<T> {
 	}
 	
 	public abstract T doit(final HttpRequestBase request,
-		final HttpContext context);
+                           final HttpContext context);
 	
 }

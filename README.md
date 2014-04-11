@@ -23,7 +23,7 @@ Many would argue that this library simply trades one set of "boiler plate" for a
 
 ## Latest Version
 
-The latest stable version of this library is <a href="http://markkolich.github.com/repo/com/kolich/kolich-httpclient4-closure/2.0">2.0</a>.
+The latest stable version of this library is <a href="http://markkolich.github.io/repo/com/kolich/kolich-httpclient4-closure/2.0">2.0</a>.
 
 ## Resolvers
 
@@ -32,7 +32,7 @@ If you wish to use this artifact, you can easily add it to your existing Maven o
 ### SBT
 
 ```scala
-resolvers += "Kolich repo" at "http://markkolich.github.com/repo"
+resolvers += "Kolich repo" at "http://markkolich.github.io/repo"
 
 val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "2.0" % "compile"
 ```
@@ -43,7 +43,7 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "2.
 <repository>
   <id>Kolichrepo</id>
   <name>Kolich repo</name>
-  <url>http://markkolich.github.com/repo/</url>
+  <url>http://markkolich.github.io/repo/</url>
   <layout>default</layout>
 </repository>
 
