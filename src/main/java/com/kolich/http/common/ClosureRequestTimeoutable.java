@@ -23,7 +23,7 @@ abstract class ClosureRequestTimeoutable {
     private static final String HTTPCLIENT4_CLOSURE_TIMEOUT_MGR_THREAD_NAME =
         "kolich-httpclient4-closure-timeout-manager";
 
-    protected static final DelayQueue<ClosureDelayable> timeoutQueue__;
+    protected static final DelayQueue<ClosureDelayable<HttpRequestBase>> timeoutQueue__;
     static {
         timeoutQueue__ = new DelayQueue<>();
         newSingleThreadExecutor(new ThreadFactoryBuilder()
@@ -70,5 +70,18 @@ abstract class ClosureRequestTimeoutable {
             return Long.compare(expiresAt_, ((ClosureDelayable)d).expiresAt_);
         }
     }
+
+    /**
+     * The request timeout is defined here as the time it takes for the
+     * request to be sent until a ~complete~ response is received.  That is,
+     * even if a request is sent and response bytes are trickling in from the
+     * server if this client hasn't received a "full" response when this
+     * timeout is hit, then the entire request is aborted and all streams
+     * are forcibly closed.
+     *
+     * A timeout value of zero is interpreted as an infinite timeout
+     * (e.g., never timeout).
+     */
+    protected long requestTimeoutMs_ = DEFAULT_REQUEST_TIMEOUT_MS;
 
 }

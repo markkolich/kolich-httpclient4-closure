@@ -52,19 +52,6 @@ public abstract class HttpClient4Closure<F,S>
      */
 	private final HttpClient client_;
 
-    /**
-     * The request timeout is defined here as the time it takes for the
-     * request to be sent until a ~complete~ response is received.  That is,
-     * even if a request is sent and response bytes are trickling in from the
-     * server if this client hasn't received a "full" response when this
-     * timeout is hit, then the entire request is aborted and all streams
-     * are forcibly closed.
-     *
-     * A timeout value of zero is interpreted as an infinite timeout
-     * (e.g., never timeout).
-     */
-    protected long requestTimeoutMs_ = DEFAULT_REQUEST_TIMEOUT_MS;
-
 	public HttpClient4Closure(final HttpClient client) {
 		client_ = checkNotNull(client, "HttpClient cannot be null.");
 	}
@@ -138,7 +125,7 @@ public abstract class HttpClient4Closure<F,S>
 
     private final HttpResponse clientExecute(final HttpRequestBase request,
                                              final HttpContext context) throws IOException {
-        ClosureDelayable delayable = null;
+        ClosureDelayable<HttpRequestBase> delayable = null;
         HttpResponse response = null;
         try {
             // If the request timeout is something greater than zero, that means
@@ -179,10 +166,7 @@ public abstract class HttpClient4Closure<F,S>
 	 * Called only if the request is successful.  Success is defined by
 	 * the boolean state that the {@link #check} method returns.  If
 	 * {@link #check} returns true, the request is considered to be
-	 * successful. If it returns false, the request failed.  
-	 * @param success
-	 * @return
-	 * @throws Exception
+	 * successful. If it returns false, the request failed.
 	 */
 	public abstract S success(final HttpSuccess success) throws Exception;
 	
@@ -192,7 +176,6 @@ public abstract class HttpClient4Closure<F,S>
 	 * Consumers should override this default behavior if they need to extract
 	 * more granular information about the failure, like an {@link Exception}
 	 * or status code.
-	 * @param failure
 	 * @return null by default, override this if you want to return something else
 	 */
 	public F failure(final HttpFailure failure) {
