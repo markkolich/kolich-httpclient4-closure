@@ -37,15 +37,36 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.protocol.HttpContext;
 
-import static com.kolich.http.common.response.ResponseUtils.consumeQuietly;
+import java.io.IOException;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.kolich.http.common.response.ResponseUtils.consumeResponseQuietly;
+import static java.lang.System.currentTimeMillis;
 
 public abstract class HttpClient4Closure<F,S>
 	extends HttpClient4ClosureBase<Either<F,S>> {
-				
+
+    /**
+     * The underlying {@link HttpClient} doing all the work.
+     */
 	private final HttpClient client_;
-	
+
+    /**
+     * The request timeout is defined here as the time it takes for the
+     * request to be sent until a ~complete~ response is received.  That is,
+     * even if a request is sent and response bytes are trickling in from the
+     * server if this client hasn't received a "full" response when this
+     * timeout is hit, then the entire request is aborted and all streams
+     * are forcibly closed.
+     *
+     * A timeout value of zero is interpreted as an infinite timeout
+     * (e.g., never timeout).
+     */
+    protected long requestTimeoutMs_ = DEFAULT_REQUEST_TIMEOUT_MS;
+
 	public HttpClient4Closure(final HttpClient client) {
-		client_ = client;
+		client_ = checkNotNull(client, "HttpClient cannot be null.");
 	}
 	
 	@Override
@@ -53,7 +74,7 @@ public abstract class HttpClient4Closure<F,S>
                                   final HttpContext context) {
 		Either<F,S> result = null;
 		// Any failures/exceptions encountered during request execution
-		// (in a call to execute) are wrapped up as a Left() and are delt
+		// (in a call to execute) are wrapped up as a Left() and are dealt
 		// with in the failure path below.
 		final Either<HttpFailure,HttpSuccess> response = execute(request,
             context);
@@ -72,11 +93,11 @@ public abstract class HttpClient4Closure<F,S>
 			result = Left.left(failure(new HttpFailure(e)));
 		} finally {
 			if(success) {
-				consumeQuietly(((Right<HttpFailure,HttpSuccess>)
-					response).right_.getResponse());
+                consumeResponseQuietly(((Right<HttpFailure, HttpSuccess>)
+                    response).right_.getResponse());
 			} else {
-				consumeQuietly(((Left<HttpFailure,HttpSuccess>)
-					response).left_.getResponse());
+                consumeResponseQuietly(((Left<HttpFailure, HttpSuccess>)
+                    response).left_.getResponse());
 			}
 		}
 		return result;
@@ -92,7 +113,7 @@ public abstract class HttpClient4Closure<F,S>
 			// destination host are done here.
 			before(request, context);
 			// Actually execute the request, get a response.
-			response = client_.execute(request, context);
+            response = clientExecute(request, context);
 			// Immediately after execution, only if the request was executed.
 			after(response, context);
 			// Check if the response was "successful".  The definition of
@@ -114,6 +135,45 @@ public abstract class HttpClient4Closure<F,S>
 			return Left.left(new HttpFailure(e, response, context));
 		}
 	}
+
+    private final HttpResponse clientExecute(final HttpRequestBase request,
+                                             final HttpContext context) throws IOException {
+        ClosureDelayable delayable = null;
+        HttpResponse response = null;
+        try {
+            // If the request timeout is something greater than zero, that means
+            // we have a timeout value that needs to be enforced.  Otherwise,
+            // don't bother creating a delayable and adding it to the delay queue.
+            // A request timeout of zero means never timeout.
+            if(requestTimeoutMs_ > 0L) {
+                delayable = new ClosureDelayable<>(request,
+                    // The request will "timeout" and be aborted at now
+                    // plus some delta.
+                    currentTimeMillis() + requestTimeoutMs_);
+                // Add the delayable to the internal timeout queue.
+                timeoutQueue__.add(delayable);
+            }
+            // Actually execute the request.
+            response = client_.execute(request, context);
+        } finally {
+            // If we get here, we must have either finished or bailed out in
+            // error.  Regardless, remove the delayable from the monitor queue.
+            // This effectively "cancels" the monitoring of the delayable.
+            if(delayable != null) {
+                // Only remove the delayable from the queue if it was
+                // established before the request/context was sent.
+                timeoutQueue__.remove(delayable);
+            }
+        }
+        return response;
+    }
+
+    public final HttpClient4Closure<F,S> timeout(final long requestTimeoutMs) {
+        checkState(requestTimeoutMs >= 0L, "Request timeout in milliseconds " +
+            "must be >= 0L.");
+        requestTimeoutMs_ = requestTimeoutMs;
+        return this;
+    }
 	
 	/**
 	 * Called only if the request is successful.  Success is defined by

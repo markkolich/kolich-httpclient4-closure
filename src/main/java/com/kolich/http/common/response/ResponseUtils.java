@@ -29,29 +29,34 @@ package com.kolich.http.common.response;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 
-import static org.apache.http.util.EntityUtils.consume;
+import java.io.Closeable;
+
+import static org.apache.commons.io.IOUtils.closeQuietly;
+import static org.apache.http.util.EntityUtils.consumeQuietly;
 
 public final class ResponseUtils {
 	
 	// Cannot instantiate
 	private ResponseUtils() { }
 	
-	public static final void consumeQuietly(final HttpEntity entity) {
-		try {
-			consume(entity);
-		} catch (Exception e) {}
-	}
-	
 	/**
 	 * Quietly closes any {@link HttpEntity} in the provided
 	 * {@link HttpResponse}, suppressing any exceptions. Ensures that
 	 * the entity content is fully consumed and the content stream, if exists,
-	 * is closed.
+	 * is closed.  Also attempts to close the underlying {@link HttpResponse}
+     * entity as well, if supported.
 	 */
-	public static final void consumeQuietly(final HttpResponse response) {
+	public static final void consumeResponseQuietly(final HttpResponse response) {
 		if(response != null) {
-			consumeQuietly(response.getEntity());
-		}
+            // Consume the response entity, closing any associated streams.
+            consumeQuietly(response.getEntity());
+            // If the response itself is an instance of Closable, cannot hurt
+            // to also close the higher order response too in the event that
+            // request pools are waiting for a free connection.
+            if(response instanceof Closeable) {
+                closeQuietly(((Closeable)response));
+            }
+        }
 	}
 
 }

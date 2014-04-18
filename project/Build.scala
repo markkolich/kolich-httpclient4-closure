@@ -59,7 +59,7 @@ object HttpClient4Closure extends Build {
   import Resolvers._
 
   private val aName = "kolich-httpclient4-closure"
-  private val aVer = "2.1"
+  private val aVer = "2.2"
   private val aOrg = "com.kolich"
 
   lazy val httpClient4Closure: Project = Project(
@@ -83,6 +83,7 @@ object HttpClient4Closure extends Build {
       // Not a "Scala" project at this time.
       unmanagedSourceDirectories in Compile <<= baseDirectory(_ / "src/main/java")(Seq(_)),
       unmanagedSourceDirectories in Test <<= baseDirectory(_ / "src/test/java")(Seq(_)),
+      //fork in run := true,
       // Also append the "examples" package to the classpath.
       //unmanagedSourceDirectories in Test <+= baseDirectory(_ / "src/examples/java"),
       // Tell SBT to include our .java files when packaging up the source JAR.
@@ -115,13 +116,6 @@ object HttpClient4Closure extends Build {
           }
           newName + "." + artifact.extension
       },
-      /*
-      // Not used; just here to document how you can override the path, name
-      // and location of the packaged JAR file.
-      artifactPath in Compile in packageBin <<= baseDirectory {
-        base => base / "dist" / "scala-app.jar"
-      },
-      */
       // Override the default 'package' path used by SBT. Places the resulting
       // JAR into a more meaningful location.
       artifactPath in (Compile, packageBin) ~= { defaultPath =>
