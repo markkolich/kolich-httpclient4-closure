@@ -95,8 +95,12 @@ public final class KolichDefaultHttpClient {
         return RequestConfig.custom()
             .setSocketTimeout(socketTimeout_)
             .setConnectTimeout(connectTimeout_)
-            // This config tunable is performance related.
-            .setStaleConnectionCheckEnabled(false)
+            .setConnectionRequestTimeout(connectTimeout_)
+            // When this is set to false, this apparently causes bugs
+            // with the PoolingHttpClientConnectionManager in 4.3.3. It's
+            // unclear to me why, but I'm leaving this enabled although
+            // claims are made it adds 30ms of lag time to every request.
+            .setStaleConnectionCheckEnabled(true)
             .build();
     }
 		
