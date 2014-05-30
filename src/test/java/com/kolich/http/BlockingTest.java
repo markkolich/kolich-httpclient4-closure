@@ -46,7 +46,7 @@ import java.io.OutputStream;
 import java.util.List;
 
 import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.http.HttpClient4ClosureBuilder.Factory.getNewInstanceWithProxySelector;
 import static org.apache.http.client.protocol.ClientContext.COOKIE_STORE;
 
 public final class BlockingTest {

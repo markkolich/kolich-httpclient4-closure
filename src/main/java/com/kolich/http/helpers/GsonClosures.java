@@ -41,7 +41,7 @@ import java.lang.reflect.Type;
 
 import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
 import static com.kolich.common.entities.KolichCommonEntity.getDefaultGsonBuilder;
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.http.HttpClient4ClosureBuilder.Factory.getNewInstanceWithProxySelector;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
 public final class GsonClosures {

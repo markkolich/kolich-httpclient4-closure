@@ -34,7 +34,7 @@ import com.kolich.http.helpers.definitions.CustomFailureEntityConverter;
 import com.kolich.http.helpers.definitions.CustomSuccessEntityConverter;
 import org.apache.http.client.HttpClient;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.http.HttpClient4ClosureBuilder.Factory.getNewInstanceWithProxySelector;
 
 public final class EntityConverterClosures {
 	

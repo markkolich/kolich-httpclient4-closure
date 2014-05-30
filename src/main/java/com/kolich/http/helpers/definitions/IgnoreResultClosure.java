@@ -31,7 +31,7 @@ import com.kolich.http.common.response.HttpFailure;
 import com.kolich.http.common.response.HttpSuccess;
 import org.apache.http.client.HttpClient;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceNoProxySelector;
+import static com.kolich.http.HttpClient4ClosureBuilder.Factory.getNewInstanceNoProxySelector;
 
 /**
  * This abstract closure is used when you don't care whether

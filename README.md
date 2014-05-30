@@ -104,29 +104,29 @@ There are a number of examples highlighting these closure entry points in the co
 
 ### Get an HttpClient
 
-Before you can make HTTP requests, you need an `HttpClient` instance.  You can use your own `HttpClient` (as instantiated elsewhere by another class), or you can use my `KolichDefaultHttpClient` factory class packaged with this library to snag a pre-configured `HttpClient`.
+Before you can make HTTP requests, you need an `HttpClient` instance.  You can use your own `HttpClient` (as instantiated elsewhere by another class), or you can use the `HttpClient4ClosureBuilder.Factory` class packaged with this library to snag a pre-configured `HttpClient`.
 
 ```java
-import com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory;
+import com.kolich.http.HttpClient4ClosureBuilder.Factory;
 
-final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector();
+final HttpClient client = HttpClient4ClosureBuilder.Factory.getNewInstanceWithProxySelector();
 ```
 
 Or, pass a `String` to the factory method to set the HTTP `User-Agent` on your new `HttpClient` instance.
 
 ```java
-final HttpClient client = KolichHttpClientFactory.getNewInstanceWithProxySelector("IE6, srsly");
+final HttpClient client = HttpClient4ClosureBuilder.Factory.getNewInstanceWithProxySelector("IE6, srsly");
 ```
 
-By default, the `KolichHttpClientFactory` always returns an `HttpClient` instance backed by a **thread-safe** `PoolingClientConnectionManager`.  There's currently no support for passing your own connection manager to my `KolichHttpClientFactory` &mdash; if you need to use your own connection manager, it's safest to just build your own `HttpClient` instance elsewhere. 
+By default, the `HttpClient4ClosureBuilder.Factory` always returns an `HttpClient` instance backed by a **thread-safe** `PoolingClientConnectionManager`.  There's currently no support for passing your own connection manager to the `HttpClient4ClosureBuilder.Factory` &mdash; if you need to use your own connection manager, it's safest to just build your own `HttpClient` instance elsewhere. 
 
 #### HttpClient Factory for Beans
 
-You can use the `KolichHttpClientFactory` to also instantiate an `HttpClient` as a bean:
+You can use the `HttpClient4ClosureBuilder.Factory` to also instantiate an `HttpClient` as a bean:
 
 ```xml
 <bean id="YourHttpClient"
-  class="com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory"
+  class="com.kolich.http.HttpClient4ClosureBuilder.Factory"
   factory-method="getNewInstanceWithProxySelector">
   <!-- Set a custom User-Agent string too, if you want. -->
   <constructor-arg><value>IE6, srsly</value></constructor-arg>
@@ -148,11 +148,11 @@ That said, you can easily create a proxy-aware `HttpClient` instance using the r
 Get a new `HttpClient` from the `KolichHttpClientFactory`.
 
 ```java
-import com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory;
+import com.kolich.http.HttpClient4ClosureBuilder.Factory;
 
-final HttpClient usesProxy = KolichHttpClientFactory.getNewInstanceWithProxySelector();
+final HttpClient usesProxy = HttpClient4ClosureBuilder.Factory.getNewInstanceWithProxySelector();
 
-final HttpClient noProxy = KolichHttpClientFactory.getNewInstanceNoProxySelector();
+final HttpClient noProxy = HttpClient4ClosureBuilder.Factory.getNewInstanceNoProxySelector();
 ```
 
 When using the `getNewInstanceWithProxySelector` static factory methods, the underlying client will automatically use the JVM's `java.net.ProxySelector` to discover what web-proxy to use when establishing outgoing HTTP connections.  On all platforms, you can manually tell the JVM's default `java.net.ProxySelector` what web-proxy to use by setting the `http.proxyHost` and `http.proxyPort` VM arguments for vanilla HTTP connections.  For outgoing HTTPS connections, use `https.proxyHost` and `https.proxyPort`.
@@ -495,30 +495,26 @@ Run SBT from within kolich-httpclient4-closure.
     #~> cd kolich-httpclient4-closure
     #~/kolich-httpclient4-closure> sbt
     ...
-    kolich-httpclient4-closure:2.3>
+    kolich-httpclient4-closure>
 
 You will see a `kolich-httpclient4-closure` SBT prompt once all dependencies are resolved and the project is loaded.
 
 In SBT, run `package` to compile and package the JAR.
 
-    kolich-httpclient4-closure:2.3> package
+    kolich-httpclient4-closure> package
     [info] Compiling 27 Java sources to ~/kolich-httpclient4-closure/target/classes...
-    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure-2.3.jar ...
+    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure.jar ...
     [info] Done packaging.
     [success] Total time: 4 s, completed
 
-Note the resulting JAR is placed into the **kolich-httpclient4-closure/dist** directory.
+Note the resulting JAR is placed into the `kolich-httpclient4-closure/dist` directory.
 
-To create an Eclipse Java project for kolich-httpclient4-closure, run `eclipse` in SBT.
+Run `gen-idea` in SBT to create an IntelliJ IDEA project:
 
-    kolich-httpclient4-closure:2.3> eclipse
+    kolich-httpclient4-closure> gen-idea
     ...
-    [info] Successfully created Eclipse project files for project(s):
-    [info] kolich-httpclient4-closure
 
-You'll now have a real Eclipse **.project** file worthy of an Eclipse import.
-
-Note your new **.classpath** file as well &mdash; all source JAR's are fetched and injected into the Eclipse project automatically.
+In IntelliJ, navigate to your checkout directory, and open this project as an "Existing project".
 
 ## Licensing
 

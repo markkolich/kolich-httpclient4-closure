@@ -30,7 +30,7 @@ import com.kolich.http.HttpClient4Closure;
 import com.kolich.http.common.response.HttpFailure;
 import org.apache.http.client.HttpClient;
 
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.http.HttpClient4ClosureBuilder.Factory.getNewInstanceWithProxySelector;
 
 /**
  * Abstract closure to return a proper {@link HttpFailure} on failure.

@@ -33,7 +33,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.util.EntityUtils;
 
 import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
-import static com.kolich.http.KolichDefaultHttpClient.KolichHttpClientFactory.getNewInstanceWithProxySelector;
+import static com.kolich.http.HttpClient4ClosureBuilder.Factory.getNewInstanceWithProxySelector;
 
 public final class StringClosures {
 	
