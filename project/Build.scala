@@ -47,7 +47,7 @@ object Dependencies {
 
 object Resolvers {
 
-  private val kolichRepo = "Kolich repo" at "http://markkolich.github.com/repo"
+  private val kolichRepo = "Kolich repo" at "http://markkolich.github.io/repo"
 
   val depResolvers = Seq(kolichRepo)
 
