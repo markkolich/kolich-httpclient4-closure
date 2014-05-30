@@ -145,7 +145,7 @@ Fortunately, `HttpClient` integrates nicely with `java.net.ProxySelector` which 
 
 That said, you can easily create a proxy-aware `HttpClient` instance using the right factory method.
 
-Get a new `HttpClient` from the `KolichHttpClientFactory`.
+Get a new `HttpClient` from the `HttpClient4ClosureBuilder.Factory`.
 
 ```java
 import com.kolich.http.HttpClient4ClosureBuilder.Factory;
