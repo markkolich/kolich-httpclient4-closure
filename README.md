@@ -23,7 +23,7 @@ Many would argue that this library simply trades one set of "boiler plate" for a
 
 ## Latest Version
 
-The latest stable version of this library is <a href="http://markkolich.github.io/repo/com/kolich/kolich-httpclient4-closure/3.0">3.0</a>.
+The latest stable version of this library is <a href="http://markkolich.github.io/repo/com/kolich/kolich-httpclient4-closure/3.1">3.1</a>.
 
 ## Resolvers
 
@@ -34,7 +34,7 @@ If you wish to use this artifact, you can easily add it to your existing Maven o
 ```scala
 resolvers += "Kolich repo" at "http://markkolich.github.io/repo"
 
-val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "3.0" % "compile"
+val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "3.1" % "compile"
 ```
 
 ### Maven
@@ -50,7 +50,7 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "3.
 <dependency>
   <groupId>com.kolich</groupId>
   <artifactId>kolich-httpclient4-closure</artifactId>
-  <version>3.0</version>
+  <version>3.1</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -518,7 +518,7 @@ In IntelliJ, navigate to your checkout directory, and open this project as an "E
 
 ## Licensing
 
-Copyright (c) 2014 <a href="http://mark.koli.ch">Mark S. Kolich</a>
+Copyright (c) 2015 <a href="http://mark.koli.ch">Mark S. Kolich</a>
 
 All code in this artifact is freely available for use and redistribution under the <a href="http://opensource.org/comment/991">MIT License</a>.
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014 Mark S. Kolich
+ * Copyright (c) 2015 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -31,11 +31,11 @@ object Dependencies {
   
   // Internal dependencies
 
-  private val kolichCommon = "com.kolich" % "kolich-common" % "0.2" % "compile"
+  private val kolichCommon = "com.kolich" % "kolich-common" % "0.3" % "compile"
 
   // External dependencies
   
-  private val httpClient = "org.apache.httpcomponents" % "httpclient" % "4.3.3" % "compile"
+  private val httpClient = "org.apache.httpcomponents" % "httpclient" % "4.3.6" % "compile"
 
   val deps = Seq(
     // Internal.
@@ -59,13 +59,13 @@ object HttpClient4Closure extends Build {
   import Resolvers._
 
   private val aName = "kolich-httpclient4-closure"
-  private val aVer = "3.0"
+  private val aVer = "3.1"
   private val aOrg = "com.kolich"
 
   lazy val httpClient4Closure: Project = Project(
     aName,
     new File("."),
-    settings = Defaults.defaultSettings ++ Seq(resolvers := depResolvers) ++ Seq(
+    settings = Defaults.coreDefaultSettings ++ Seq(resolvers := depResolvers) ++ Seq(
       version := aVer,
       organization := aOrg,
       scalaVersion := "2.10.2",
