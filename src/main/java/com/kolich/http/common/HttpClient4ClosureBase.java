@@ -39,8 +39,7 @@ import java.net.URI;
 import static java.net.URI.create;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 
-public abstract class HttpClient4ClosureBase<T>
-    extends ClosureRequestTimeoutable {
+public abstract class HttpClient4ClosureBase<T> extends ClosureRequestTimeoutable {
 
 	public T head(final String url) {
 		return head(create(url));

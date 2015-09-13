@@ -44,8 +44,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.kolich.http.common.response.ResponseUtils.consumeResponseQuietly;
 import static java.lang.System.currentTimeMillis;
 
-public abstract class HttpClient4Closure<F,S>
-	extends HttpClient4ClosureBase<Either<F,S>> {
+public abstract class HttpClient4Closure<F,S> extends HttpClient4ClosureBase<Either<F,S>> {
 
     /**
      * The underlying {@link HttpClient} doing all the work.
@@ -63,28 +62,22 @@ public abstract class HttpClient4Closure<F,S>
 		// Any failures/exceptions encountered during request execution
 		// (in a call to execute) are wrapped up as a Left() and are dealt
 		// with in the failure path below.
-		final Either<HttpFailure,HttpSuccess> response = execute(request,
-            context);
+		final Either<HttpFailure,HttpSuccess> response = execute(request, context);
         final boolean success = response.success();
 		try {
 			if(success) {
-				result = Right.right(success(((Right<HttpFailure,HttpSuccess>)
-					response).right_));
+				result = Right.right(success(((Right<HttpFailure,HttpSuccess>)response).right_));
 			} else {
-				result = Left.left(failure(((Left<HttpFailure,HttpSuccess>)
-					response).left_));
+				result = Left.left(failure(((Left<HttpFailure,HttpSuccess>)response).left_));
 			}
 		} catch (Exception e) {
-			// Wrap up any failures/exceptions that might have occurred
-			// while processing the response.
+			// Wrap up any failures/exceptions that might have occurred while processing the response.
 			result = Left.left(failure(new HttpFailure(e)));
 		} finally {
 			if(success) {
-                consumeResponseQuietly(((Right<HttpFailure, HttpSuccess>)
-                    response).right_.getResponse());
+                consumeResponseQuietly(((Right<HttpFailure, HttpSuccess>)response).right_.getResponse());
 			} else {
-                consumeResponseQuietly(((Left<HttpFailure, HttpSuccess>)
-                    response).left_.getResponse());
+                consumeResponseQuietly(((Left<HttpFailure, HttpSuccess>)response).left_.getResponse());
 			}
 		}
 		return result;
@@ -156,8 +149,7 @@ public abstract class HttpClient4Closure<F,S>
     }
 
     public final HttpClient4Closure<F,S> timeout(final long requestTimeoutMs) {
-        checkState(requestTimeoutMs >= 0L, "Request timeout in milliseconds " +
-            "must be >= 0L.");
+        checkState(requestTimeoutMs >= 0L, "Request timeout in milliseconds must be >= 0L.");
         requestTimeoutMs_ = requestTimeoutMs;
         return this;
     }

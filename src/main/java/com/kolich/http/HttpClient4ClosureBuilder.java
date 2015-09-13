@@ -41,8 +41,7 @@ import static java.lang.Runtime.getRuntime;
 
 public final class HttpClient4ClosureBuilder {
 
-    private static final int AVAILABLE_CORES =
-        getRuntime().availableProcessors();
+    private static final int AVAILABLE_CORES = getRuntime().availableProcessors();
 
     // A timeout value of zero is interpreted as an infinite timeout.
     private static final int DEFAULT_INFINITE_TIMEOUT = 0;
@@ -84,7 +83,7 @@ public final class HttpClient4ClosureBuilder {
 
     private String userAgent_ = null;
 
-    private boolean staleConnectionCheckEnabled_ = true;
+    private int validateAfterInactivityMs_ = -1;
     private boolean disableContentCompression_ = true;
     private boolean disableAutomaticRetries_ = true;
     private boolean disableAuthCaching_ = true;
@@ -104,15 +103,13 @@ public final class HttpClient4ClosureBuilder {
     }
 
     public HttpClient4ClosureBuilder setMaxTotalConnections(final int maxTotalConnections) {
-        checkArgument(maxTotalConnections > 0, "Max total connections " +
-            "must be greater than zero.");
+        checkArgument(maxTotalConnections > 0, "Max total connections must be greater than zero.");
         maxTotalConnections_ = maxTotalConnections;
         return this;
     }
 
     public HttpClient4ClosureBuilder setMaxConnectionsPerRoute(final int maxConnectionsPerRoute) {
-        checkArgument(maxConnectionsPerRoute >= 1, "Max connections per route" +
-            "must be positive.");
+        checkArgument(maxConnectionsPerRoute >= 1, "Max connections per route must be positive.");
         maxConnectionsPerRoute_ = maxConnectionsPerRoute;
         return this;
     }
@@ -122,8 +119,8 @@ public final class HttpClient4ClosureBuilder {
         return this;
     }
 
-    public HttpClient4ClosureBuilder setStaleConnectionCheckEnabled(final boolean staleConnectionCheckEnabled) {
-        staleConnectionCheckEnabled_ = staleConnectionCheckEnabled;
+    public HttpClient4ClosureBuilder setValidateAfterInactivityMs(final int validateAfterInactivityMs) {
+        validateAfterInactivityMs_ = validateAfterInactivityMs;
         return this;
     }
 
@@ -148,28 +145,22 @@ public final class HttpClient4ClosureBuilder {
     }
 
     /**
-     * Creates a new {@link HttpClient} global {@link RequestConfig} object.
-     * The {@link RequestConfig} object is where request specific settings
-     * like socket and connection timeouts live.
+     * Creates a new {@link HttpClient} global {@link RequestConfig} object. The {@link RequestConfig} object
+     * is where request specific settings like socket and connection timeouts live.
      */
     public RequestConfig getRequestConfig() {
         return RequestConfig.custom()
             .setSocketTimeout(socketTimeout_)
             .setConnectTimeout(connectTimeout_)
             .setConnectionRequestTimeout(connectTimeout_)
-            // When this is set to false, this apparently causes bugs
-            // with the PoolingHttpClientConnectionManager in 4.3.3. It's
-            // unclear to me why, but I'm leaving this 'true' although
-            // claims are made it adds 30ms of lag time to every request.
-            .setStaleConnectionCheckEnabled(staleConnectionCheckEnabled_)
             .build();
     }
 
     public HttpClientConnectionManager getConnectionManager() {
-        final PoolingHttpClientConnectionManager connectionManager =
-            new PoolingHttpClientConnectionManager();
+        final PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
         connectionManager.setDefaultMaxPerRoute(maxConnectionsPerRoute_);
         connectionManager.setMaxTotal(maxTotalConnections_);
+        connectionManager.setValidateAfterInactivity(validateAfterInactivityMs_);
         return connectionManager;
     }
 
@@ -193,8 +184,7 @@ public final class HttpClient4ClosureBuilder {
             builder.disableAuthCaching();
         }
         if(useProxySelector_) {
-            builder.setRoutePlanner(new SystemDefaultRoutePlanner(
-                ProxySelector.getDefault()));
+            builder.setRoutePlanner(new SystemDefaultRoutePlanner(ProxySelector.getDefault()));
         }
         return builder;
     }
@@ -204,9 +194,8 @@ public final class HttpClient4ClosureBuilder {
 	}
 			
 	/**
-	 * An inline class that provides a few static factory methods for beans
-     * and others who just want a dead simple way to get a working and
-     * reasonable {@link HttpClient} instance.
+	 * An inline class that provides a few static factory methods for beans and others who just want a dead
+     * simple way to get a working and reasonable {@link HttpClient} instance.
 	 */
 	public static final class Factory {
 		
