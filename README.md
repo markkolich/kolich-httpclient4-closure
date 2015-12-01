@@ -1,6 +1,6 @@
 # kolich-httpclient4-closure
 
-A Java 7+ wrapper around the **synchronous** Apache Commons HttpClient 4.
+A Java 8 wrapper around the **synchronous** Apache Commons HttpClient 4.
 
 For most applications, the synchronous `HttpClient` closure is acceptable &mdash; the thread making the request will block, waiting for the request to complete before continuing.  If you need a pure asynchronous solution, please see the [Async Http Client](https://github.com/AsyncHttpClient/async-http-client).
 
@@ -23,19 +23,11 @@ Many would argue that this library simply trades one set of "boiler plate" for a
 
 ## Latest Version
 
-The latest stable version of this library is <a href="http://markkolich.github.io/repo/com/kolich/kolich-httpclient4-closure/3.1">3.1</a>.
+See the <a href="https://github.com/markkolich/kolich-httpclient4-closure/releases">Releases</a> page for the latest version.
 
 ## Resolvers
 
-If you wish to use this artifact, you can easily add it to your existing Maven or SBT project using <a href="https://github.com/markkolich/markkolich.github.com#marks-maven2-repository">my GitHub hosted Maven2 repository</a>.
-
-### SBT
-
-```scala
-resolvers += "Kolich repo" at "http://markkolich.github.io/repo"
-
-val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "3.1" % "compile"
-```
+If you wish to use this artifact, you can easily add it to your existing Maven or Gradle project using <a href="https://github.com/markkolich/markkolich.github.com#marks-maven2-repository">my GitHub hosted Maven2 repository</a>.
 
 ### Maven
 
@@ -50,9 +42,15 @@ val kolichHttpClient4Closure = "com.kolich" % "kolich-httpclient4-closure" % "3.
 <dependency>
   <groupId>com.kolich</groupId>
   <artifactId>kolich-httpclient4-closure</artifactId>
-  <version>3.1</version>
+  <version>3.2</version>
   <scope>compile</scope>
 </dependency>
+```
+
+### Gradle
+
+```groovy
+compile 'com.kolich:kolich-httpclient4-closure:3.2'
 ```
 
 ## Functional Concepts
@@ -480,41 +478,15 @@ final List<YourType> lt = g.right();
 
 ## Building
 
-This Java library and its dependencies are built and managed using <a href="https://github.com/harrah/xsbt">SBT</a>.
+Clone or fork the repository.
 
-To clone and build kolich-httpclient4-closure, you must have <a href="http://www.scala-sbt.org/release/docs/Getting-Started/Setup">SBT installed and configured on your computer</a>.
+    #~> git clone https://github.com/markkolich/kolich-httpclient4-closure.git
 
-The kolich-httpclient4-closure SBT <a href="https://github.com/markkolich/kolich-httpclient4-closure/blob/master/project/Build.scala">Build.scala</a> file is highly customized to build and package this Java artifact.  It's written to manage all dependencies and versioning.
+To package the JAR, run `mvn package`:
 
-To build, clone the repository.
+    mvn package
 
-    #~> git clone git://github.com/markkolich/kolich-httpclient4-closure.git
-
-Run SBT from within kolich-httpclient4-closure.
-
-    #~> cd kolich-httpclient4-closure
-    #~/kolich-httpclient4-closure> sbt
-    ...
-    kolich-httpclient4-closure>
-
-You will see a `kolich-httpclient4-closure` SBT prompt once all dependencies are resolved and the project is loaded.
-
-In SBT, run `package` to compile and package the JAR.
-
-    kolich-httpclient4-closure> package
-    [info] Compiling 27 Java sources to ~/kolich-httpclient4-closure/target/classes...
-    [info] Packaging ~/kolich-httpclient4-closure/dist/kolich-httpclient4-closure.jar ...
-    [info] Done packaging.
-    [success] Total time: 4 s, completed
-
-Note the resulting JAR is placed into the `kolich-httpclient4-closure/dist` directory.
-
-Run `gen-idea` in SBT to create an IntelliJ IDEA project:
-
-    kolich-httpclient4-closure> gen-idea
-    ...
-
-In IntelliJ, navigate to your checkout directory, and open this project as an "Existing project".
+The resulting JAR is placed into the **dist** directory.
 
 ## Licensing
 
